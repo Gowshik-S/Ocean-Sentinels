@@ -15,6 +15,7 @@
     padding: 0;
 }
 
+
 body {
     font-family: var(--font-family);
     color: var(--text-dark);
@@ -275,7 +276,7 @@ body {
 }
 
 .footer-section h4 {
-    color: #FF6600;
+    color: #e0a800;
     margin-bottom: 1rem;
     font-size: 1.2rem;
     font-weight: 600;
@@ -303,7 +304,7 @@ body {
 }
 
 .footer-section ul li a:hover {
-    color: #FF6600;
+    color: #e0a800;
 }
 
 .footer-social {
@@ -319,7 +320,7 @@ body {
 }
 
 .footer-social a:hover {
-    color: #FF6600;
+    color: #e0a800;
 }
 
 .contact-info p {
@@ -331,7 +332,7 @@ body {
 }
 
 .contact-info i {
-    color: #FF6600;
+    color: #e0a800;
     width: 20px;
 }
 
@@ -352,7 +353,7 @@ body {
     align-items: center;
     gap: 1rem;
     font-weight: 600;
-    color: #FF6600;
+    color: #e0a800;
 }
 
 .govt-logos img {
@@ -381,7 +382,7 @@ body {
 }
 
 .footer-links a:hover {
-    color: #FF6600;
+    color: #e0a800;
 }
 
 .footer-bottom p {
@@ -698,7 +699,7 @@ body {
 
 .close-button:hover,
 .close-button:focus {
-    color: #FF6600;
+    color: #e0a800;
 }
 
 /* ======================= Authentication Modal Styles ======================= */
@@ -758,8 +759,8 @@ body {
 
 .auth-tab.active {
     background: white;
-    color: #FF6600;
-    border-bottom: 3px solid #FF6600;
+    color: #e0a800;
+    border-bottom: 3px solid#e0a800;
 }
 
 .auth-section {
@@ -792,7 +793,7 @@ body {
 }
 
 .form-group label i {
-    color: #FF6600;
+    color: #e0a800;
     width: 20px;
     text-align: center;
 }
@@ -814,7 +815,7 @@ body {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: #FF6600;
+    border-color: ;
     box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
 }
 
