@@ -1,0 +1,241 @@
+/* ======================= Government Website Styles ======================= */
+
+.govt-header {
+    background: linear-gradient(135deg, #FF6600, #FF8533);
+    color: white;
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #E55A00;
+}
+
+.govt-branding {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.govt-emblem {
+    width: 40px;
+    height: 40px;
+}
+
+.govt-info h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.govt-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.9;
+}
+
+.last-updated {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.govt-page-header {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-left: 4px solid #FF6600;
+    padding: 2rem 5%;
+}
+
+.breadcrumb {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+    color: #6c757d;
+}
+
+.breadcrumb a {
+    color: #FF6600;
+    text-decoration: none;
+}
+
+.breadcrumb a:hover {
+    text-decoration: underline;
+}
+
+.page-description {
+    font-size: 1.1rem;
+    color: #495057;
+    margin: 1rem 0 2rem 0;
+}
+
+.page-stats {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.stat-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    font-weight: 600;
+    color: #FF6600;
+}
+
+/* ======================= Analytics Page Specific Styles ======================= */
+
+.filters-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 1.5rem 5%;
+    background: linear-gradient(135deg, #fff, #f8f9fa);
+    border-bottom: 1px solid #dee2e6;
+    flex-wrap: wrap;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.filter-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.filter-item label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.filter-item input[type="date"],
+.filter-item select {
+    padding: 0.75rem;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    transition: border-color 0.3s ease;
+}
+
+.filter-item input[type="date"]:focus,
+.filter-item select:focus {
+    outline: none;
+    border-color: #FF6600;
+    box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+}
+
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 2rem;
+    padding: 2rem 5%;
+    background-color: #f8f9fa;
+}
+
+.kpi-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.kpi-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.kpi-card.primary { border-left: 4px solid #dc3545; }
+.kpi-card.success { border-left: 4px solid #28a745; }
+.kpi-card.warning { border-left: 4px solid #ffc107; }
+.kpi-card.info { border-left: 4px solid #17a2b8; }
+
+.kpi-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.kpi-header i {
+    font-size: 1.25rem;
+    width: 30px;
+    text-align: center;
+}
+
+.kpi-card.primary .kpi-header i { color: #dc3545; }
+.kpi-card.success .kpi-header i { color: #28a745; }
+.kpi-card.warning .kpi-header i { color: #ffc107; }
+.kpi-card.info .kpi-header i { color: #17a2b8; }
+
+.kpi-category {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.kpi-value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: #212529;
+    line-height: 1;
+    margin-bottom: 0.5rem;
+}
+
+.kpi-label {
+    font-size: 1rem;
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.kpi-trend {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.kpi-trend.positive { color: #28a745; }
+.kpi-trend.negative { color: #dc3545; }
+.kpi-trend.neutral { color: #6c757d; }
+
+.charts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem 5%;
+}
+
+.chart-container {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+.chart-container h3 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: var(--text-dark);
+}
+
+.map-placeholder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    min-height: 300px;
+    background-color: #e9ecef;
+    border-radius: 8px;
+    color: #6c757d;
+}
+
+.map-placeholder i {
+    font-size: 5rem;
+    margin-top: 1rem;
+}

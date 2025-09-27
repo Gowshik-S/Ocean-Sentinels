@@ -1,0 +1,1237 @@
+/* ======================= General Setup & Variables ======================= */
+:root {
+    --primary-color: #005A9C; /* Deep Blue */
+    --secondary-color: #FFFFFF; /* White */
+    --accent-color: #FFC107; /* Warning Yellow/Gold */
+    --text-dark: #212529;
+    --text-light: #f8f9fa;
+    --section-bg: #f8f9fa;
+    --font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--font-family);
+    color: var(--text-dark);
+    line-height: 1.6;
+    padding-top: 80px; /* Account for fixed header height */
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 2rem;
+    font-size: 2.5rem;
+    color: var(--primary-color);
+}
+
+/* ======================= Header & Navigation ======================= */
+.main-header {
+    background-color: var(--secondary-color);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 5%;
+    min-height: 60px; /* Ensures consistent header height */
+    max-width: 100%;
+}
+
+.nav-logo {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+.nav-menu {
+    list-style: none;
+    display: flex;
+    gap: 2rem;
+    flex-shrink: 0; /* Prevents menu from shrinking too much */
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: var(--text-dark);
+    font-weight: 500;
+    white-space: nowrap; /* Prevents text from wrapping */
+}
+
+.nav-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0; /* Prevents the buttons from shrinking */
+}
+
+/* ======================= Buttons & Links ======================= */
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn--primary {
+    background-color: var(--accent-color);
+    color: var(--text-dark);
+}
+
+.btn--primary:hover {
+    background-color: #e0a800;
+}
+
+.btn--secondary {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.btn--secondary:hover {
+    background-color: #004a80;
+}
+
+.btn--large {
+    font-size: 1.2rem;
+    padding: 1rem 2rem;
+}
+
+.link-cta {
+    color: var(--secondary-color);
+    text-decoration: underline;
+    margin-left: 1rem;
+}
+
+/* ======================= Hero Section ======================= */
+.hero-section {
+    min-height: 100vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1600x900/?indian-coastline,ocean-waves'); /* Placeholder Image */
+    /*  */
+    background-size: cover;
+    background-position: center;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--text-light);
+    padding: 2rem;
+}
+
+.hero-title {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.hero-subtitle {
+    font-size: 1.5rem;
+    max-width: 800px;
+    margin-bottom: 2rem;
+}
+
+/* ======================= Stats Bar Section ======================= */
+.stats-bar {
+    display: flex;
+    justify-content: space-around;
+    padding: 3rem 5%;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+}
+
+.stat-item {
+    text-align: center;
+}
+
+.stat-number {
+    display: block;
+    font-size: 3rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 1.1rem;
+}
+
+/* ======================= How It Works & Portals Sections ======================= */
+.how-it-works, .user-portals {
+    padding: 4rem 5%;
+}
+.user-portals{
+    background-color: var(--section-bg);
+}
+
+.steps-container, .portals-container {
+    display: flex;
+    justify-content: space-around;
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.step, .portal-card {
+    flex-basis: 30%;
+    text-align: center;
+    padding: 2rem;
+    border-radius: 10px;
+}
+.portal-card{
+     background-color: #fff;
+     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.step-icon {
+    font-size: 4rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+
+/* ======================= Report Hazard Section ======================= */
+.report-section {
+    padding: 4rem 5%;
+    background-color: #fff;
+}
+
+.report-form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: var(--section-bg);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.hazard-form .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.hazard-form label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.hazard-form input,
+.hazard-form select,
+.hazard-form textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    font-family: var(--font-family);
+    transition: border-color 0.3s ease;
+}
+
+.hazard-form input:focus,
+.hazard-form select:focus,
+.hazard-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.hazard-form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.hazard-form button[type="submit"] {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+/* ======================= Active Navigation States ======================= */
+.nav-menu a.active {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* ======================= Footer ======================= */
+.main-footer {
+    background: linear-gradient(135deg, #212529, #343a40);
+    color: var(--text-light);
+    padding: 3rem 5% 1rem 5%;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.footer-section h4 {
+    color: #FF6600;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.footer-section p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+    color: #adb5bd;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 0.5rem;
+}
+
+.footer-section ul li a {
+    color: #adb5bd;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+    color: #FF6600;
+}
+
+.footer-social {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.footer-social a {
+    color: #adb5bd;
+    font-size: 1.5rem;
+    transition: color 0.3s ease;
+}
+
+.footer-social a:hover {
+    color: #FF6600;
+}
+
+.contact-info p {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #adb5bd;
+}
+
+.contact-info i {
+    color: #FF6600;
+    width: 20px;
+}
+
+.footer-logos {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 0;
+    border-top: 1px solid #495057;
+    border-bottom: 1px solid #495057;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.govt-logos {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-weight: 600;
+    color: #FF6600;
+}
+
+.govt-logos img {
+    width: 40px;
+    height: 40px;
+}
+
+.footer-certifications {
+    font-size: 0.9rem;
+    color: #adb5bd;
+}
+
+.footer-bottom {
+    text-align: center;
+}
+
+.footer-links {
+    margin-bottom: 1rem;
+}
+
+.footer-links a {
+    color: #adb5bd;
+    text-decoration: none;
+    margin: 0 0.5rem;
+    transition: color 0.3s ease;
+}
+
+.footer-links a:hover {
+    color: #FF6600;
+}
+
+.footer-bottom p {
+    margin-bottom: 0.5rem;
+    color: #adb5bd;
+}
+
+.footer-update {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+@media (max-width: 768px) {
+    .footer-logos {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .footer-content {
+        grid-template-columns: 1fr;
+    }
+}
+/* ======================= LATEST ALERTS MARQUEE ======================= */
+.latest-alerts {
+    background-color: var(--accent-color); /* Using the warning yellow color */
+    color: var(--text-dark);
+    display: flex;
+    align-items: center;
+    padding: 0.5rem 0; /* Reduced padding for a thinner bar */
+    overflow: hidden; /* This is crucial for the marquee effect */
+    border-bottom: 1px solid #e0a800;
+}
+
+.alert-label {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+    padding: 0.8rem 1.5rem;
+    font-weight: bold;
+    white-space: nowrap; /* Prevents the label text from wrapping */
+}
+
+.marquee-container {
+    flex-grow: 1; /* Allows the container to fill the remaining space */
+    overflow: hidden; /* Hides the content that is outside the container */
+}
+
+.marquee-content {
+    display: inline-block; /* Allows the content to be a single long line */
+    white-space: nowrap; /* Prevents the alerts from wrapping to the next line */
+    /* Animation properties */
+    animation: scroll-left 30s linear infinite;
+}
+
+.marquee-content:hover {
+    animation-play-state: paused; /* Pauses the scroll on hover so users can read/click */
+}
+
+.marquee-content span {
+    display: inline-block;
+}
+
+.marquee-content a {
+    color: var(--text-dark);
+    text-decoration: none;
+    margin: 0 1.5rem; /* Space between each alert item */
+    padding: 0.5rem 0;
+    display: inline-block;
+}
+
+.marquee-content a:hover {
+    text-decoration: underline;
+}
+
+/* The Keyframes Animation for Scrolling */
+@keyframes scroll-left {
+    from {
+        transform: translateX(0%);
+    }
+    to {
+        transform: translateX(-50%); /* Moves the content left by half its width (for the duplicated list) */
+    }
+}
+
+/* ======================= Responsive Design ======================= */
+@media (max-width: 768px) {
+    .navbar {
+        flex-wrap: nowrap;
+        padding: 0.5rem 3%;
+    }
+    
+    .nav-menu {
+        gap: 1rem;
+    }
+    
+    .nav-actions {
+        gap: 0.5rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        font-size: 0.9rem;
+    }
+}
+
+/* ======================= Reports Page Styles ======================= */
+
+/* Add some padding to the top to account for the fixed header */
+.page-container {
+    padding-top: 80px; 
+}
+
+.page-header {
+    background-color: var(--section-bg);
+    padding: 2rem 5%;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.page-header h1 {
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.filter-controls {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.filter-controls input,
+.filter-controls select {
+    padding: 0.75rem;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
+
+.reports-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+    padding: 3rem 5%;
+}
+
+.report-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.card-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.card-header h3 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.card-body {
+    padding: 1.5rem;
+    flex-grow: 1;
+}
+
+.card-body p {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.card-body p i {
+    color: var(--primary-color);
+}
+
+.card-actions {
+    background-color: var(--section-bg);
+    padding: 1rem 1.5rem;
+    text-align: right;
+}
+
+/* Status Badge Styles */
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #fff;
+}
+
+.status-badge--pending {
+    background-color: #dc3545; /* Red */
+}
+
+.status-badge--active {
+    background-color: var(--accent-color); /* Yellow from your theme */
+    color: var(--text-dark);
+}
+
+.status-badge--resolved {
+    background-color: #28a745; /* Green */
+}
+/* ======================= My Reports Page (Public User) ======================= */
+
+/* Style for the welcome message in the header */
+.welcome-user {
+    font-weight: 500;
+    margin-right: 1.5rem;
+}
+
+/* Container for the user's personal stats on the dashboard */
+.user-stats {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    margin-top: 1.5rem;
+    background-color: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    display: inline-block; /* Makes the background only as wide as the content */
+}
+
+/* Re-using stat-item styles from the homepage, but with a darker text color */
+.user-stats .stat-item {
+    text-align: center;
+    color: var(--text-dark);
+    display: inline-block;
+    padding: 0 2rem;
+}
+.user-stats .stat-item:first-child {
+    border-right: 1px solid #ddd;
+}
+
+/* Styles for the 'empty state' message when a user has no reports */
+.empty-state {
+    grid-column: 1 / -1; /* Makes this element span the full grid width */
+    text-align: center;
+    padding: 4rem 2rem;
+    background-color: var(--section-bg);
+    border-radius: 10px;
+}
+.empty-icon {
+    font-size: 5rem;
+    color: #ccc;
+    margin-bottom: 1.5rem;
+}
+.empty-state h2 {
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+}
+.empty-state p {
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+/* ======================= Enhanced Modal Styles ======================= */
+
+/* Base Modal Styles */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 2% auto;
+    padding: 0;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 95vh;
+    overflow-y: auto;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1;
+    transition: color 0.3s ease;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #FF6600;
+}
+
+/* ======================= Authentication Modal Styles ======================= */
+
+.auth-modal-content {
+    max-width: 600px;
+}
+
+.auth-header {
+    background: linear-gradient(135deg, #FF6600, #FF8533);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    border-radius: 15px 15px 0 0;
+}
+
+.auth-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.auth-logo i {
+    font-size: 2.5rem;
+}
+
+.auth-logo h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.auth-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1rem;
+}
+
+.auth-tabs {
+    display: flex;
+    background-color: #f8f9fa;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 1rem 2rem;
+    border: none;
+    background: none;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #6c757d;
+}
+
+.auth-tab.active {
+    background: white;
+    color: #FF6600;
+    border-bottom: 3px solid #FF6600;
+}
+
+.auth-section {
+    display: none;
+    padding: 2rem;
+}
+
+.auth-section.active {
+    display: block;
+}
+
+.auth-section h3 {
+    text-align: center;
+    color: #212529;
+    margin-bottom: 2rem;
+    font-size: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.form-group label i {
+    color: #FF6600;
+    width: 20px;
+    text-align: center;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: var(--font-family);
+    transition: all 0.3s ease;
+    background-color: #fff;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #FF6600;
+    box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 38px;
+    cursor: pointer;
+    color: #6c757d;
+    transition: color 0.3s ease;
+}
+
+.password-toggle:hover {
+    color: #FF6600;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+    color: #495057;
+}
+
+.checkbox-label input[type="checkbox"] {
+    display: none;
+}
+
+.checkmark {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #dee2e6;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+    background-color: #FF6600;
+    border-color: #FF6600;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+    content: "✓";
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.forgot-password {
+    color: #FF6600;
+    text-decoration: none;
+    font-size: 0.9rem;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.auth-btn {
+    width: 100%;
+    margin-top: 1rem;
+}
+
+.demo-credentials {
+    margin-top: 2rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #dee2e6;
+}
+
+.demo-credentials p {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.demo-credentials code {
+    background: #e9ecef;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-family: monospace;
+    color: #FF6600;
+}
+
+/* ======================= Registration Type Cards ======================= */
+
+.registration-types {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.reg-type-card {
+    padding: 1.5rem;
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.reg-type-card.active {
+    border-color: #FF6600;
+    background-color: rgba(255, 102, 0, 0.05);
+}
+
+.reg-type-card.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.reg-type-icon {
+    font-size: 2rem;
+    color: #FF6600;
+    margin-bottom: 1rem;
+}
+
+.reg-type-card h4 {
+    margin: 0 0 0.5rem 0;
+    color: #212529;
+    font-size: 1.1rem;
+}
+
+.reg-type-card p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.disabled-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: #dc3545;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.disabled-overlay i {
+    display: block;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+/* ======================= Report Modal Styles ======================= */
+
+.report-modal-content {
+    max-width: 700px;
+}
+
+.report-header {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+    padding: 2rem;
+    text-align: center;
+    border-radius: 15px 15px 0 0;
+}
+
+.report-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.report-logo i {
+    font-size: 2.5rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 50%, 100% { transform: scale(1); }
+    25% { transform: scale(1.05); }
+}
+
+.report-logo h2 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.report-header p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1rem;
+}
+
+.hazard-form {
+    padding: 2rem;
+}
+
+.help-text {
+    font-size: 0.85rem;
+    color: #6c757d;
+    margin-top: 0.5rem;
+    margin-bottom: 0;
+}
+
+.btn--small {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    margin-top: 0.5rem;
+}
+
+.urgency-level {
+    margin-bottom: 2rem;
+}
+
+.urgency-level label {
+    display: block;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    color: #495057;
+}
+
+.urgency-options {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.radio-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.radio-label:hover {
+    border-color: #adb5bd;
+}
+
+.radio-label input[type="radio"] {
+    display: none;
+}
+
+.radio-custom {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    border: 2px solid #dee2e6;
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.radio-custom.low {
+    border-color: #ffc107;
+}
+
+.radio-custom.medium {
+    border-color: #fd7e14;
+}
+
+.radio-custom.high {
+    border-color: #dc3545;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom.low {
+    background-color: #ffc107;
+    border-color: #ffc107;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom.medium {
+    background-color: #fd7e14;
+    border-color: #fd7e14;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom.high {
+    background-color: #dc3545;
+    border-color: #dc3545;
+}
+
+.radio-label input[type="radio"]:checked + .radio-custom::after {
+    content: '';
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: white;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+}
+
+.report-submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    border: none;
+    font-weight: 600;
+}
+
+.report-submit-btn:hover {
+    background: linear-gradient(135deg, #c82333, #dc3545);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+/* ======================= Mobile Responsive ======================= */
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+        max-height: 90vh;
+    }
+    
+    .auth-modal-content,
+    .report-modal-content {
+        max-width: none;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .registration-types {
+        grid-template-columns: 1fr;
+    }
+    
+    .urgency-options {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .auth-header,
+    .report-header {
+        padding: 1.5rem;
+    }
+    
+    .auth-section,
+    .hazard-form {
+        padding: 1.5rem;
+    }
+}
+
+/* ======================= Success Notification ======================= */
+.success-notification {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    z-index: 3000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.notification-content {
+    background: white;
+    padding: 3rem;
+    border-radius: 15px;
+    text-align: center;
+    max-width: 500px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.notification-content i {
+    font-size: 4rem;
+    color: #28a745;
+    margin-bottom: 1rem;
+}
+
+.notification-content h3 {
+    color: #212529;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.notification-content p {
+    margin-bottom: 1rem;
+    color: #495057;
+}
+
+.notification-content p:last-of-type {
+    margin-bottom: 2rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
