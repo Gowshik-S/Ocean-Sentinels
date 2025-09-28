@@ -118,31 +118,169 @@ body {
     margin-left: 1rem;
 }
 
-/* ======================= Hero Section ======================= */
+/* ======================= Hero Section with Live Map ======================= */
 .hero-section {
     min-height: 100vh;
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1600x900/?indian-coastline,ocean-waves'); /* Placeholder Image */
-    /*  */
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1600x900/?indian-coastline,ocean-waves');
     background-size: cover;
     background-position: center;
     
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    text-align: center;
     color: var(--text-light);
-    padding: 2rem;
+    padding: 2rem 3%;
+    position: relative;
+}
+
+.hero-content {
+    flex: 1;
+    text-align: left;
+    max-width: 550px;
+    z-index: 2;
+    padding-right: 2rem;
 }
 
 .hero-title {
     font-size: 4rem;
     margin-bottom: 1rem;
+    line-height: 1.1;
 }
 
 .hero-subtitle {
     font-size: 1.5rem;
-    max-width: 800px;
     margin-bottom: 2rem;
+    max-width: 500px;
+}
+
+.hero-cta {
+    display: flex;
+    gap: 2rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ======================= Live Map Section ======================= */
+.live-map-section {
+    flex: 1;
+    max-width: 500px;
+    height: 400px;
+    position: relative;
+    z-index: 2;
+    margin-left: 12rem;
+    margin-right: 5rem;
+}
+
+.map-header {
+    position: absolute;
+    top: -20px;
+    left: 20px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 8px 20px;
+    border-radius: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.map-header h3 {
+    color: #2c3e50;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.large-map-container {
+    width: 100%;
+    height: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border: 3px solid white;
+    position: relative;
+    background: white;
+}
+
+.live-map {
+    width: 100%;
+    height: 100%;
+    border-radius: 17px;
+}
+
+.map-label {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    z-index: 10;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 8px 16px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-label span {
+    color: #2c3e50;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Mapbox Controls Styling */
+.mapboxgl-ctrl-geolocate {
+    background-color: #005A9C !important;
+}
+
+.mapboxgl-ctrl-geolocate .mapboxgl-ctrl-icon {
+    background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='white'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z'/%3E%3C/svg%3E") !important;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .hero-section {
+        flex-direction: column;
+        text-align: center;
+        padding: 2rem 3%;
+        gap: 3rem;
+    }
+    
+    .hero-content {
+        max-width: 100%;
+    }
+    
+    .live-map-section {
+        margin-left: 0;
+        max-width: 100%;
+        width: 100%;
+        max-width: 600px;
+    }
+    
+    .hero-title {
+        font-size: 3rem;
+    }
+    
+    .hero-cta {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .live-map-section {
+        height: 300px;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .map-header h3 {
+        font-size: 0.9rem;
+    }
 }
 
 /* ======================= Stats Bar Section ======================= */
@@ -709,7 +847,7 @@ body {
 }
 
 .auth-header {
-    background: linear-gradient(135deg, #FF6600, #FF8533);
+    background: linear-gradient(135deg, #e0a800, #FF8533);
     color: white;
     padding: 2rem;
     text-align: center;
@@ -815,8 +953,8 @@ body {
 .form-group select:focus,
 .form-group textarea:focus {
     outline: none;
-    border-color: ;
-    box-shadow: 0 0 0 3px rgba(255, 102, 0, 0.1);
+    border-color: #e0a800;
+    box-shadow: 0 0 0 3px rgba(224, 168, 0, 0.1);
 }
 
 .form-row {
@@ -835,7 +973,7 @@ body {
 }
 
 .password-toggle:hover {
-    color: #FF6600;
+    color: #e0a800;
 }
 
 .form-options {
@@ -872,8 +1010,8 @@ body {
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark {
-    background-color: #FF6600;
-    border-color: #FF6600;
+    background-color: #e0a800;
+    border-color: #e0a800;
 }
 
 .checkbox-label input[type="checkbox"]:checked + .checkmark::after {
@@ -884,7 +1022,7 @@ body {
 }
 
 .forgot-password {
-    color: #FF6600;
+    color: #e0a800;
     text-decoration: none;
     font-size: 0.9rem;
 }
@@ -917,7 +1055,7 @@ body {
     padding: 2px 6px;
     border-radius: 3px;
     font-family: monospace;
-    color: #FF6600;
+    color: #e0a800;
 }
 
 /* ======================= Registration Type Cards ======================= */
@@ -940,8 +1078,8 @@ body {
 }
 
 .reg-type-card.active {
-    border-color: #FF6600;
-    background-color: rgba(255, 102, 0, 0.05);
+    border-color: #e0a800;
+    background-color: rgba(224, 168, 0, 0.05);
 }
 
 .reg-type-card.disabled {
@@ -951,7 +1089,7 @@ body {
 
 .reg-type-icon {
     font-size: 2rem;
-    color: #FF6600;
+    color: #e0a800;
     margin-bottom: 1rem;
 }
 
@@ -991,7 +1129,7 @@ body {
 }
 
 .report-header {
-    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    background: linear-gradient(135deg,  #db172a, #980606);
     color: white;
     padding: 2rem;
     text-align: center;
@@ -1008,7 +1146,6 @@ body {
 
 .report-logo i {
     font-size: 2.5rem;
-    animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
@@ -1131,13 +1268,13 @@ body {
 
 .report-submit-btn {
     width: 100%;
-    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    background: linear-gradient(135deg,  #db172a, #980606);
     border: none;
     font-weight: 600;
 }
 
 .report-submit-btn:hover {
-    background: linear-gradient(135deg, #c82333, #dc3545);
+    background: linear-gradient(135deg,  #db172a, #980606);
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
 }
@@ -1235,4 +1372,329 @@ body {
     padding: 0.75rem;
     border: 1px solid #ccc;
     border-radius: 5px;
+}
+/* ======================= Hero Section with Curve ======================= */
+.hero-section {
+    min-height: 100vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1600x900/?indian-coastline,ocean-waves');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: var(--text-light);
+    padding: 2rem;
+    position: relative;
+}
+
+
+
+.stats-bar {
+    display: flex;
+    justify-content: space-around;
+    padding: 3rem 5%;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+}
+
+/* Alternative: If you want the curve to go into a white/light section instead */
+/* 
+.hero-section::after {
+    background: #ffffff; 
+    clip-path: ellipse(100% 100% at 50% 0%);
+}
+
+.stats-bar {
+    background-color: #ffffff;
+    color: var(--text-dark);
+}
+*/
+
+/* Mobile responsive adjustments for the curve */
+@media (max-width: 768px) {
+    .hero-section::after {
+        height: 50px; /* Smaller curve on mobile */
+    }
+    
+    .hero-title {
+        font-size: 2.5rem; /* Adjust hero title for mobile */
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem; /* Adjust subtitle for mobile */
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-section::after {
+        height: 30px; /* Even smaller curve on very small screens */
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+}
+/* ======================= Hero Section Layout Fix ======================= */
+
+.hero-section {
+    min-height: 100vh;
+    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1600x900/?indian-coastline,ocean-waves');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: flex-start; /* Changed from center to flex-start */
+    align-items: center;
+    text-align: left; /* Changed from center to left */
+    color: var(--text-light);
+    padding: 2rem 5%;
+    position: relative;
+    margin-bottom: 0;
+}
+
+.hero-content {
+    max-width: 600px; /* Reduced from 800px */
+    z-index: 2;
+    position: relative;
+    margin-left: 0; /* Align to left */
+}
+
+.hero-title {
+    font-size: 3.2rem; /* Slightly reduced */
+    margin-bottom: 1rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.hero-subtitle {
+    font-size: 1.3rem; /* Slightly reduced */
+    margin-bottom: 2rem;
+    font-weight: 300;
+    line-height: 1.5;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-start; /* Changed from center to flex-start */
+    flex-wrap: wrap;
+}
+
+/* ======================= Compact Info Panel ======================= */
+
+.hero-info-panel {
+    position: absolute;
+    top: 50%;
+    right: 40px;
+    transform: translateY(-50%); /* Center vertically */
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 15px; /* Reduced gap */
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 12px; /* Reduced from 16px */
+    padding: 16px; /* Reduced from 20px */
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.1); /* Softer shadow */
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    width: 240px; /* Reduced from 300px */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-1px); /* Reduced hover effect */
+    box-shadow: 0 8px 28px rgba(0, 0, 0, 0.12);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px; /* Reduced from 8px */
+    margin-bottom: 12px; /* Reduced from 16px */
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 0.85rem; /* Reduced from 0.95rem */
+}
+
+.card-header i {
+    color: #005A9C;
+    font-size: 0.95rem; /* Reduced from 1.1rem */
+}
+
+/* Compact Map Card */
+.mini-map-container {
+    height: 120px; /* Reduced from 160px */
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 8px; /* Reduced from 12px */
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #dee2e6;
+}
+
+.location-dot {
+    width: 10px; /* Reduced from 12px */
+    height: 10px;
+    background: #005A9C;
+    border-radius: 50%;
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.3); /* Reduced from 4px */
+    animation: pulse 2s infinite;
+}
+
+.radius-circle {
+    position: absolute;
+    width: 60px; /* Reduced from 80px */
+    height: 60px;
+    border: 2px dashed #005A9C;
+    border-radius: 50%;
+    opacity: 0.4;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.radius-circle::after {
+    content: '50km';
+    position: absolute;
+    bottom: -20px; /* Adjusted */
+    right: -8px;
+    font-size: 0.7rem; /* Reduced */
+    color: #6c757d;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 1px 4px; /* Reduced */
+    border-radius: 3px;
+    font-weight: 500;
+}
+
+/* Compact Weather Card */
+.weather-content {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* Reduced from 16px */
+}
+
+.weather-today {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px; /* Reduced from 16px */
+    background: linear-gradient(135deg, #005A9C 0%, #007bff 100%);
+    border-radius: 8px; /* Reduced from 12px */
+    color: white;
+}
+
+.temp-main {
+    font-size: 1.8rem; /* Reduced from 2.2rem */
+    font-weight: 700;
+    line-height: 1;
+}
+
+.weather-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px; /* Reduced from 6px */
+    font-size: 0.75rem; /* Reduced from 0.85rem */
+    opacity: 0.9;
+}
+
+.weather-details span {
+    display: flex;
+    align-items: center;
+    gap: 4px; /* Reduced from 6px */
+}
+
+.weather-details i {
+    width: 12px; /* Reduced from 14px */
+    font-size: 0.7rem; /* Reduced from 0.8rem */
+}
+
+.forecast-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px; /* Reduced from 8px 12px */
+    background: #f8f9fa;
+    border-radius: 6px; /* Reduced from 8px */
+    font-size: 0.8rem; /* Reduced from 0.9rem */
+    color: #495057;
+}
+
+/* Updated Mobile Responsive */
+@media (max-width: 1200px) {
+    .hero-info-panel {
+        right: 20px;
+        width: 220px; /* Even smaller on medium screens */
+    }
+    
+    .info-card {
+        width: 220px;
+        padding: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-section {
+        text-align: center;
+        justify-content: center;
+        padding: 2rem 3%;
+    }
+    
+    .hero-content {
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .hero-actions {
+        justify-content: center;
+    }
+    
+    .hero-info-panel {
+        position: static;
+        transform: none;
+        margin: 2rem auto 0;
+        width: 100%;
+        max-width: 300px;
+        align-items: center;
+    }
+    
+    .info-card {
+        width: 100%;
+    }
+    
+    .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .info-card {
+        padding: 12px;
+    }
+    
+    .temp-main {
+        font-size: 1.5rem;
+    }
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.3); }
+    50% { box-shadow: 0 0 0 6px rgba(0, 90, 156, 0.1); }
+    100% { box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.3); }
 }

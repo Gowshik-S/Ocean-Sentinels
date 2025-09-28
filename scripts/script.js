@@ -361,3 +361,35 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- INITIALIZE THE PAGE ---
     checkLoginState();
 });
+// Add this to your JavaScript file
+function initMiniMap() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            // Using Leaflet.js for the mini map
+            const map = L.map('mini-map', {
+                zoomControl: false,
+                scrollWheelZoom: false,
+                dragging: false
+            }).setView([lat, lng], 10);
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+            
+            // Add user location marker
+            L.marker([lat, lng]).addTo(map);
+            
+            // Add 50km radius circle
+            L.circle([lat, lng], {
+                color: '#005A9C',
+                fillColor: '#005A9C',
+                fillOpacity: 0.1,
+                radius: 50000 // 50km in meters
+            }).addTo(map);
+        });
+    }
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', initMiniMap);
