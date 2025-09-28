@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Guard - India's Coastal Safety Network</title>
+    
+    <link rel="stylesheet" href="../styles/styles.css">
+    
+    <!-- Mapbox CSS -->
+    <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <nav class="navbar">
+            <a href="#" class="nav-logo">Ocean Guard</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="analytics.html">Analytics</a></li>
+                <li><a href="reports.html">Incident Reports</a></li>
+                <li><a href="my-reports.html">My Reports</a></li>
+                <li><a href="#main-footer">About Us</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="#" class="btn btn--secondary" id="login-btn">Login</a>
+                <a href="#" class="btn btn--primary" id="report-hazard-btn">Report Hazard</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="latest-alerts">
+        <div class="alert-label">Latest Updates</div>
+        <div class="marquee-container">
+            <div class="marquee-content">
+                <span>
+                    <a href="#"><strong>Goa Coast:</strong> High wave warning issued until 25 Sep 2025. Fishermen advised to exercise caution.</a>
+                    <a href="#"><strong>Tamil Nadu:</strong> Strong current advisory for the Gulf of Mannar region. Click for details.</a>
+                    <a href="#"><strong>Andaman Islands:</strong> Low-pressure system forming. Potential for heavy rainfall. Monitor updates.</a>
+                </span>
+                <span> <a href="#"><strong>Goa Coast:</strong> High wave warning issued until 25 Sep 2025. Fishermen advised to exercise caution.</a>
+                    <a href="#"><strong>Tamil Nadu:</strong> Strong current advisory for the Gulf of Mannar region. Click for details.</a>
+                    <a href="#"><strong>Andaman Islands:</strong> Low-pressure system forming. Potential for heavy rainfall. Monitor updates.</a>
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <main>
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1 class="hero-title">Ocean Guard: Your Shield on the Shoreline.</h1>
+                <p class="hero-subtitle">Report real-time ocean hazards, alert rescue teams, and help protect our coastal communities.</p>
+                <div class="hero-cta">
+                    <a href="#report-hazard" class="btn btn--primary btn--large">REPORT A HAZARD NOW</a>
+                    <a href="#" class="link-cta">View the Live Map →</a>
+                </div>
+            </div>
+            
+            <!-- Large Live Map Section -->
+            <div class="live-map-section">
+                <div class="map-header">
+                    <h3>LIVE</h3>
+                </div>
+                <div class="large-map-container">
+                    <div id="live-map" class="live-map">
+                        <!-- Mapbox map will load here -->
+                    </div>
+                    <div class="map-label">
+                        <span>MAP</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-bar">
+            <div class="stat-item">
+                <span class="stat-number">1,234</span>
+                <span class="stat-label">Total Reports Filed</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">56</span>
+                <span class="stat-label">Active Incidents</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">78</span>
+                <span class="stat-label">Rescue Teams Registered</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">7,516 km</span>
+                <span class="stat-label">Coastline Watched</span>
+            </div>
+        </section>
+
+        <section class="how-it-works">
+            <h2 class="section-title">From Report to Rescue in 3 Simple Steps</h2>
+            <div class="steps-container">
+                <div class="step">
+                    <i class="fas fa-mobile-alt step-icon"></i>
+                    <h3>1. Spot & Report</h3>
+                    <p>See a hazard? Anonymously submit a report with a photo in seconds.</p>
+                </div>
+                <div class="step">
+                    <i class="fas fa-shield-alt step-icon"></i>
+                    <h3>2. Verify & Alert</h3>
+                    <p>Our experts and AI verify the report and instantly alert nearby rescue teams.</p>
+                </div>
+                <div class="step">
+                    <i class="fas fa-life-ring step-icon"></i>
+                    <h3>3. Respond & Resolve</h3>
+                    <p>Rescue teams are dispatched, and the incident status is updated on our live map.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="user-portals">
+             <h2 class="section-title">A Platform for Everyone</h2>
+             <div class="portals-container">
+                 <div class="portal-card">
+                     <h3>For Citizens</h3>
+                     <p>Become a Guardian of the Coast. Your reports save lives. Create an optional account to track your submissions.</p><br><br>
+                     <a href="#" class="btn btn--secondary" id="citizen-login-btn">Citizen Login / Register</a>
+                 </div>
+                 <div class="portal-card">
+                     <h3>For Professionals</h3>
+                     <p>Join the coordinated response network. Get verified, real-time alerts and manage operations from a central dashboard.</p><br>
+                     <a href="reports.html" class="btn btn--secondary">Official Portal Login</a>
+                 </div>
+             </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Ocean Guard</h4>
+                <p>A citizen-centric coastal safety platform under the Digital India initiative, ensuring comprehensive coastal security through community participation and advanced monitoring systems.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Government Departments</h4>
+                <ul>    
+                    <li><a href="#">Ministry of Earth Sciences</a></li>
+                    <li><a href="#">Indian National Centre for Ocean Information Services (INCOIS)</a></li>
+                    <li><a href="#">Indian Coast Guard</a></li>
+                    <li><a href="#">National Disaster Response Force</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">Emergency Contacts</a></li>
+                    <li><a href="#">Weather Updates</a></li>
+                    <li><a href="#">Safety Guidelines</a></li>
+                    <li><a href="#">Training Programs</a></li>
+                    <li><a href="#">Coastal Management</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Information</h4>
+                <div class="contact-info">
+                    <p><i class="fas fa-phone"></i> Emergency: 1078</p>
+                    <p><i class="fas fa-phone"></i> Helpline: 1800-123-4567</p>
+                    <p><i class="fas fa-envelope"></i> support@oceanguard.gov.in</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Ministry of Earth Sciences, New Delhi - 110003</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-logos">
+            <div class="govt-logos">
+                <img src="gov_of_india.png" alt="Government of India">
+                <span>Government of India</span>
+            </div>
+            <div class="footer-certifications">
+                <span>ISO 27001 Certified</span> | <span>STQC Empaneled</span> | <span>Digital India Initiative</span>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a> |
+                <a href="#">Terms of Service</a> |
+                <a href="#">Accessibility</a> |
+                <a href="#">RTI</a> |
+                <a href="#">Sitemap</a> |
+                <a href="#">Help</a>
+            </div>
+            <p>&copy; 2025 Ocean Guard, Ministry of Earth Sciences, Government of India. All rights reserved.</p>
+            <p class="footer-update">Website last updated: 27 Sep 2025 | Best viewed in Chrome, Firefox, Safari</p>
+        </div>
+    </footer>
+
+    <!-- Enhanced Login/Register Modal -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content auth-modal-content">
+            <span class="close-button">&times;</span>
+            
+            <!-- Modal Header -->
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-shield-alt"></i>
+                    <h2>Ocean Guard Portal</h2>
+                </div>
+                <p>Secure access to India's coastal safety network</p>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Login</button>
+                <button class="auth-tab" data-tab="register">Register</button>
+            </div>
+
+            <!-- Login Section -->
+            <div id="login-section" class="auth-section active">
+                <h3>Sign In to Your Account</h3>
+                <form id="login-form">
+                    <div class="form-group">
+                        <label for="login-username">
+                            <i class="fas fa-user"></i> Username or Email
+                        </label>
+                        <input type="text" id="login-username" name="username" required placeholder="Enter your username">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">
+                            <i class="fas fa-lock"></i> Password
+                        </label>
+                        <input type="password" id="login-password" name="password" required placeholder="Enter your password">
+                        <div class="password-toggle">
+                            <i class="fas fa-eye" id="toggle-login-password"></i>
+                        </div>
+                    </div>
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="remember-me">
+                            <span class="checkmark"></span>
+                            Remember me
+                        </label>
+                        <a href="#" class="forgot-password">Forgot Password?</a>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--large auth-btn">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                </form>
+                <div class="demo-credentials">
+                    <p><strong>Demo Credentials:</strong></p>
+                    <p>👤 Citizen: <code>user</code> or <code>citizen</code></p>
+                    <p>🏛️ Authority: <code>admin</code> or <code>rescue</code></p>
+                </div>
+            </div>
+
+            <!-- Registration Section -->
+            <div id="register-section" class="auth-section">
+                <h3>Create New Account</h3>
+                
+                <!-- Registration Type Selection -->
+                <div class="registration-types">
+                    <div class="reg-type-card active" data-type="public">
+                        <div class="reg-type-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h4>Public Registration</h4>
+                        <p>For citizens and general public</p>
+                    </div>
+                    <div class="reg-type-card disabled" data-type="authority">
+                        <div class="reg-type-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>Authority Registration</h4>
+                        <p>Contact administrator for access</p>
+                        <div class="disabled-overlay">
+                            <i class="fas fa-lock"></i>
+                            <span>By Invitation Only</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Public Registration Form -->
+                <form id="register-form" class="public-registration">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg-firstname">
+                                <i class="fas fa-user"></i> First Name
+                            </label>
+                            <input type="text" id="reg-firstname" name="firstname" required placeholder="Enter first name">
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-lastname">
+                                <i class="fas fa-user"></i> Last Name
+                            </label>
+                            <input type="text" id="reg-lastname" name="lastname" required placeholder="Enter last name">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">
+                            <i class="fas fa-envelope"></i> Email Address
+                        </label>
+                        <input type="email" id="reg-email" name="email" required placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-phone">
+                            <i class="fas fa-phone"></i> Phone Number
+                        </label>
+                        <input type="tel" id="reg-phone" name="phone" required placeholder="Enter your phone number">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-location">
+                            <i class="fas fa-map-marker-alt"></i> Location
+                        </label>
+                        <select id="reg-location" name="location" required>
+                            <option value="">Select your coastal region</option>
+                            <option value="west-coast">West Coast (Maharashtra, Goa, Karnataka, Kerala)</option>
+                            <option value="east-coast">East Coast (West Bengal, Odisha, Andhra Pradesh, Tamil Nadu)</option>
+                            <option value="andaman">Andaman & Nicobar Islands</option>
+                            <option value="lakshadweep">Lakshadweep</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="reg-password">
+                                <i class="fas fa-lock"></i> Password
+                            </label>
+                            <input type="password" id="reg-password" name="password" required placeholder="Create password">
+                            <div class="password-toggle">
+                                <i class="fas fa-eye" id="toggle-reg-password"></i>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reg-confirm-password">
+                                <i class="fas fa-lock"></i> Confirm Password
+                            </label>
+                            <input type="password" id="reg-confirm-password" name="confirm-password" required placeholder="Confirm password">
+                        </div>
+                    </div>
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="agree-terms" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                        </label>
+                    </div>
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="newsletter">
+                            <span class="checkmark"></span>
+                            Subscribe to safety alerts and updates
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--large auth-btn">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Report Hazard Modal -->
+    <div id="report-modal" class="modal">
+        <div class="modal-content report-modal-content">
+            <span class="close-button" id="close-report-modal">&times;</span>
+            
+            <!-- Report Modal Header -->
+            <div class="report-header">
+                <div class="report-logo">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <h2>Report Ocean Hazard</h2>
+                </div>
+                <p>Help us keep our coasts safe by reporting hazards immediately</p>
+            </div>
+
+            <!-- Report Form -->
+            <form id="hazard-report-modal-form" class="hazard-form">
+                <div class="form-group">
+                    <label for="modal-hazard-type">
+                        <i class="fas fa-exclamation-circle"></i> Hazard Type *
+                    </label>
+                    <select id="modal-hazard-type" name="hazard-type" required>
+                        <option value="">Select hazard type</option>
+                        <option value="high-waves">🌊 High Waves</option>
+                        <option value="flooding">🌊 Coastal Flooding</option>
+                        <option value="tsunami">🌊 Tsunami Sighting</option>
+                        <option value="lost-vessel">🚢 Lost Fishing Boat</option>
+                        <option value="debris">🗑️ Marine Debris</option>
+                        <option value="oil-spill">⚫ Oil Spill</option>
+                        <option value="other">❓ Other Emergency</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modal-location">
+                        <i class="fas fa-map-marker-alt"></i> Location *
+                    </label>
+                    <input type="text" id="modal-location" name="location" placeholder="Enter exact location or coordinates" required>
+                    <button type="button" class="btn btn--secondary btn--small" id="get-location">
+                        <i class="fas fa-crosshairs"></i> Use My Location
+                    </button>
+                </div>
+                <div class="form-group">
+                    <label for="modal-description">
+                        <i class="fas fa-align-left"></i> Description *
+                    </label>
+                    <textarea id="modal-description" name="description" placeholder="Describe the hazard in detail - what you see, how severe it is, any immediate dangers" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="modal-photo">
+                        <i class="fas fa-camera"></i> Photo Evidence (Optional)
+                    </label>
+                    <input type="file" id="modal-photo" name="photo" accept="image/*">
+                    <p class="help-text">Photos help authorities assess the situation quickly</p>
+                </div>
+                <div class="form-group">
+                    <label for="modal-contact">
+                        <i class="fas fa-phone"></i> Contact Information (Optional)
+                    </label>
+                    <input type="tel" id="modal-contact" name="contact" placeholder="Phone number for follow-up if needed">
+                </div>
+                <div class="urgency-level">
+                    <label>Urgency Level:</label>
+                    <div class="urgency-options">
+                        <label class="radio-label">
+                            <input type="radio" name="urgency" value="low" checked>
+                            <span>🟡 Low</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="urgency" value="medium">
+                            <span>🟠 Medium</span>
+                        </label>
+                        <label class="radio-label">
+                            <input type="radio" name="urgency" value="high">
+                            <span>🔴 High</span>
+                        </label>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn--primary btn--large report-submit-btn">
+                    <i class="fas fa-paper-plane"></i> Submit Report
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- Mapbox JavaScript -->
+    <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
+    
+    <script src="../scripts/script.js" defer></script>
+    
+    <!-- Mapbox Map Initialization -->
+    <script>
+    // Initialize Mapbox map
+    document.addEventListener('DOMContentLoaded', function() {
+        // Use a public token for demo (replace with your own)
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+        
+        const map = new mapboxgl.Map({
+            container: 'live-map',
+            style: 'mapbox://styles/mapbox/streets-v11',
+            center: [77.2090, 28.6139], // Default to Delhi, India
+            zoom: 10
+        });
+        
+        // Add user location control
+        map.addControl(new mapboxgl.GeolocateControl({
+            positionOptions: {
+                enableHighAccuracy: true
+            },
+            trackUserLocation: true,
+            showUserHeading: true
+        }));
+        
+        // Add navigation controls
+        map.addControl(new mapboxgl.NavigationControl());
+        
+        // Try to get user's location and center map
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const userLng = position.coords.longitude;
+                    const userLat = position.coords.latitude;
+                    
+                    map.setCenter([userLng, userLat]);
+                    
+                    // Add a marker for user's location
+                    new mapboxgl.Marker({ color: '#005A9C' })
+                        .setLngLat([userLng, userLat])
+                        .setPopup(new mapboxgl.Popup().setHTML('<h4>Your Location</h4><p>Ocean Guard is monitoring this area</p>'))
+                        .addTo(map);
+                        
+                    // Add a circle to show monitoring radius (50km)
+                    map.on('load', function() {
+                        map.addSource('radius', {
+                            'type': 'geojson',
+                            'data': {
+                                'type': 'Feature',
+                                'geometry': {
+                                    'type': 'Point',
+                                    'coordinates': [userLng, userLat]
+                                }
+                            }
+                        });
+                        
+                        map.addLayer({
+                            'id': 'radius',
+                            'type': 'circle',
+                            'source': 'radius',
+                            'paint': {
+                                'circle-radius': {
+                                    'stops': [
+                                        [0, 0],
+                                        [20, 50000]
+                                    ],
+                                    'base': 2
+                                },
+                                'circle-color': '#005A9C',
+                                'circle-opacity': 0.1,
+                                'circle-stroke-color': '#005A9C',
+                                'circle-stroke-width': 2,
+                                'circle-stroke-opacity': 0.3
+                            }
+                        });
+                    });
+                },
+                (error) => {
+                    console.log('Geolocation error:', error);
+                }
+            );
+        }
+    });
+    </script>
+
+</body>
+</html>

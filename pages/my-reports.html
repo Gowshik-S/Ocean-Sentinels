@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reports - Ocean Guard</title>
+    
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../styles/report-enhancements.css">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+
+    <header class="main-header">
+        <nav class="navbar">
+            <a href="index.html" class="nav-logo">Ocean Guard</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="analytics.html">Analytics</a></li>
+                <li><a href="reports.html">Incident Reports</a></li>
+                <li><a href="my-reports.html" class="active">My Reports</a></li>
+                <li><a href="#">About Us</a></li>
+            </ul>
+            <div class="nav-actions">
+                <span class="welcome-user">Welcome, Gowshik S.</span>
+                <a href="index.html#report-hazard" class="btn btn--primary">New Report</a>
+                <a href="index.html" class="btn btn--secondary" id="logout-btn">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="page-container">
+        <section class="page-header">
+            <h1>My Submitted Reports</h1>
+            <p>Thank you for being an active Ocean Guard. Here is the status of all your reports.</p>
+            <div class="user-stats">
+                <div class="stat-item">
+                    <span class="stat-number">5</span>
+                    <span class="stat-label">Total Reports</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number">3</span>
+                    <span class="stat-label">Reports Resolved</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="reports-grid">
+
+            <div class="report-card">
+                <div class="card-header">
+                    <h3>High Wave Sighting</h3>
+                    <span class="status-badge status-badge--resolved">Resolved</span>
+                </div>
+                <div class="card-body">
+                    <p class="location"><i class="fas fa-map-marker-alt"></i> Marina Beach, Chennai</p>
+                    <p class="timestamp"><i class="fas fa-clock"></i> You reported this on: 27 Sep 2025, 12:45 AM</p>
+                </div>
+                <div class="card-actions">
+                    <a href="#" class="btn btn--secondary">View Details</a>
+                </div>
+            </div>
+
+            <div class="report-card">
+                <div class="card-header">
+                    <h3>Coastal Flooding</h3>
+                    <span class="status-badge status-badge--active">Active</span>
+                </div>
+                <div class="card-body">
+                    <p class="location"><i class="fas fa-map-marker-alt"></i> Panjim, Goa</p>
+                    <p class="timestamp"><i class="fas fa-clock"></i> You reported this on: 26 Sep 2025, 11:30 PM</p>
+                </div>
+                <div class="card-actions">
+                    <a href="#" class="btn btn--secondary">View Details</a>
+                </div>
+            </div>
+
+            </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Ocean Guard</h4>
+                <p>A citizen-centric coastal safety platform under the Digital India initiative, ensuring comprehensive coastal security through community participation and advanced monitoring systems.</p>
+                <div class="footer-social">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-youtube"></i></a>
+                </div>
+            </div>
+            <div class="footer-section">
+                <h4>Government Departments</h4>
+                <ul>
+                    <li><a href="#">Ministry of Earth Sciences</a></li>
+                    <li><a href="#">Indian National Centre for Ocean Information Services (INCOIS)</a></li>
+                    <li><a href="#">Indian Coast Guard</a></li>
+                    <li><a href="#">National Disaster Response Force</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="#">Emergency Contacts</a></li>
+                    <li><a href="#">Weather Updates</a></li>
+                    <li><a href="#">Safety Guidelines</a></li>
+                    <li><a href="#">Training Programs</a></li>
+                    <li><a href="#">Coastal Management</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Contact Information</h4>
+                <div class="contact-info">
+                    <p><i class="fas fa-phone"></i> Emergency: 1078</p>
+                    <p><i class="fas fa-phone"></i> Helpline: 1800-123-4567</p>
+                    <p><i class="fas fa-envelope"></i> support@oceanguard.gov.in</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Ministry of Earth Sciences, New Delhi - 110003</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-logos">
+            <div class="govt-logos">
+                <img src="gov_of_india.png" alt="Government of India">
+                <span>Government of India</span>
+            </div>
+            <div class="footer-certifications">
+                <span>ISO 27001 Certified</span> | <span>STQC Empaneled</span> | <span>Digital India Initiative</span>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-links">
+                <a href="#">Privacy Policy</a> |
+                <a href="#">Terms of Service</a> |
+                <a href="#">Accessibility</a> |
+                <a href="#">RTI</a> |
+                <a href="#">Sitemap</a> |
+                <a href="#">Help</a>
+            </div>
+            <p>&copy; 2025 Ocean Guard, Ministry of Earth Sciences, Government of India. All rights reserved.</p>
+            <p class="footer-update">Website last updated: 27 Sep 2025 | Best viewed in Chrome, Firefox, Safari</p>
+        </div>
+    </footer>
+
+</body>
+</html>
