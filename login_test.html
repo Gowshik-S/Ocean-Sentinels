@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Test - Ocean Guard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .demo-info {
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background: rgba(0,0,0,0.2);
+            white-space: pre-wrap;
+        }
+        .success {
+            border-left: 4px solid #28a745;
+        }
+        .error {
+            border-left: 4px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Login Test - Ocean Guard</h1>
+        
+        <div class="demo-info">
+            <h3>🎭 Demo Accounts (No Password Required):</h3>
+            <p><strong>Citizens:</strong> Type "user" or "citizen" as username</p>
+            <p><strong>Admin:</strong> Type "admin" or "rescue" as username</p>
+            <p><em>Leave password blank for demo accounts</em></p>
+        </div>
+        
+        <form id="login-form">
+            <div class="form-group">
+                <label for="login-username">Username or Email:</label>
+                <input type="text" id="login-username" name="username" placeholder="Try: user, citizen, admin, rescue, or your email">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password:</label>
+                <input type="password" id="login-password" name="password" placeholder="Leave blank for demo accounts">
+            </div>
+            <button type="submit">🚀 Login</button>
+        </form>
+        
+        <button onclick="clearStorage()">🗑️ Clear All Storage</button>
+        <button onclick="checkStorage()">📊 Check Current Auth</button>
+        
+        <div id="results"></div>
+    </div>
+
+    <script src="../scripts/api-client.js"></script>
+    <script>
+        function showResult(message, isSuccess = true) {
+            const resultsDiv = document.getElementById('results');
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `result ${isSuccess ? 'success' : 'error'}`;
+            resultDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>\n${message}`;
+            resultsDiv.insertBefore(resultDiv, resultsDiv.firstChild);
+        }
+        
+        function clearStorage() {
+            localStorage.clear();
+            sessionStorage.clear();
+            showResult('✅ All storage cleared');
+        }
+        
+        function checkStorage() {
+            const user = localStorage.getItem('oceanGuardUser');
+            const token = localStorage.getItem('oceanGuardToken');
+            const sessionUser = sessionStorage.getItem('oceanGuardUser');
+            
+            if (user || token || sessionUser) {
+                showResult(`📊 Current Auth Status:
+localStorage User: ${user}
+localStorage Token: ${token ? token.substring(0, 30) + '...' : 'None'}
+sessionStorage User: ${sessionUser}`);
+            } else {
+                showResult('📊 No authentication data found');
+            }
+        }
+        
+        // Enhanced login form handling
+        document.getElementById('login-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            
+            const formData = new FormData(event.target);
+            const username = formData.get('username') || document.getElementById('login-username').value || '';
+            const password = formData.get('password') || document.getElementById('login-password').value || '';
+            
+            showResult(`🔐 Login attempt for: "${username}"`);
+            
+            // Check for demo/mock login first (case insensitive)
+            const lowerUsername = username.toLowerCase().trim();
+            
+            if (lowerUsername === 'user' || lowerUsername === 'citizen') {
+                const user = { 
+                    name: 'Demo Citizen', 
+                    role: 'public',
+                    email: 'demo@citizen.com',
+                    id: 999 
+                };
+                
+                // Store in both storages for compatibility
+                sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                
+                const mockToken = `mock-token-${user.role}-${Date.now()}`;
+                localStorage.setItem('oceanGuardToken', mockToken);
+                
+                showResult(`✅ Demo citizen login successful!
+User: ${user.name}
+Role: ${user.role}
+Token: ${mockToken}
+
+Redirecting to my-reports.html...`);
+                
+                setTimeout(() => {
+                    window.location.href = '../pages/my-reports.html';
+                }, 2000);
+                return;
+                
+            } else if (lowerUsername === 'admin' || lowerUsername === 'rescue') {
+                const user = { 
+                    name: 'Demo Admin', 
+                    role: 'admin',
+                    email: 'admin@ocean.gov.in',
+                    id: 1 
+                };
+                
+                sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                
+                const mockToken = `mock-token-${user.role}-${Date.now()}`;
+                localStorage.setItem('oceanGuardToken', mockToken);
+                
+                showResult(`✅ Demo admin login successful!
+User: ${user.name}
+Role: ${user.role}
+Token: ${mockToken}
+
+Redirecting to reports.html...`);
+                
+                setTimeout(() => {
+                    window.location.href = '../pages/reports.html';
+                }, 2000);
+                return;
+            }
+            
+            // Real API login for registered users
+            if (!username || !password) {
+                showResult(`❌ Please enter both username and password for API login.
+
+For demo access:
+• "user" or "citizen" for public access
+• "admin" or "rescue" for professional access
+(Demo accounts don't require a password)`, false);
+                return;
+            }
+            
+            try {
+                const api = new OceanHazardAPI();
+                showResult(`🔄 Attempting real API login for: ${username}`);
+                
+                const response = await api.login(username, password);
+                
+                // Store real user data
+                const user = {
+                    id: response.user.id,
+                    name: `${response.user.first_name} ${response.user.last_name}`,
+                    email: response.user.email,
+                    role: response.user.role,
+                    loginDate: new Date().toISOString()
+                };
+                
+                // Store in both storages
+                sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardToken', response.access_token);
+                
+                showResult(`✅ Real API login successful!
+User: ${user.name}
+Email: ${user.email}
+Role: ${user.role}
+Token: ${response.access_token.substring(0, 30)}...
+
+Redirecting...`);
+                
+                // Redirect based on role
+                setTimeout(() => {
+                    if (user.role === 'admin' || user.role === 'rescue_team' || user.role === 'authority') {
+                        window.location.href = '../pages/reports.html';
+                    } else {
+                        window.location.href = '../pages/my-reports.html';
+                    }
+                }, 2000);
+                
+            } catch (error) {
+                showResult(`❌ Real API login failed: ${error.message}
+
+For demo access:
+• "user" or "citizen" for public access  
+• "admin" or "rescue" for professional access
+(Demo accounts don't require a password)`, false);
+            }
+        });
+        
+        // Check current auth status on load
+        window.addEventListener('load', () => {
+            checkStorage();
+        });
+    </script>
+</body>
+</html>

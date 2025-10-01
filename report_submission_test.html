@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Report Submission Fix Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+        .test-form {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input, textarea, button {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 5px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        select, input, textarea {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .radio-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 Report Submission Fix Test</h1>
+        <p>Testing the fixed incident submission with correct data format</p>
+
+        <div class="test-form">
+            <h3>🚨 Test Incident Report</h3>
+            <form id="test-report-form">
+                <div class="form-group">
+                    <label for="hazard-type">Hazard Type:</label>
+                    <select id="hazard-type" name="hazard-type" required>
+                        <option value="">Select hazard type</option>
+                        <option value="high-waves">🌊 High Waves</option>
+                        <option value="flooding">🌊 Coastal Flooding</option>
+                        <option value="tsunami">🌊 Tsunami Sighting</option>
+                        <option value="lost-vessel">🚢 Lost Fishing Boat</option>
+                        <option value="debris">🗑️ Marine Debris</option>
+                        <option value="oil-spill">⚫ Oil Spill</option>
+                        <option value="other">❓ Other Emergency</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="location">Location:</label>
+                    <input type="text" id="location" name="location" placeholder="Enter location" value="Test Location - Mumbai" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea id="description" name="description" placeholder="Describe the incident" required>Test incident report from fix verification</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="contact">Contact Info:</label>
+                    <input type="text" id="contact" name="contact" placeholder="Your contact info" value="test@example.com">
+                </div>
+                
+                <div class="form-group">
+                    <label>Urgency Level:</label>
+                    <div class="radio-group">
+                        <div class="radio-item">
+                            <input type="radio" id="low" name="urgency" value="low" checked>
+                            <label for="low">Low</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="medium" name="urgency" value="medium">
+                            <label for="medium">Medium</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="high" name="urgency" value="high">
+                            <label for="high">High</label>
+                        </div>
+                        <div class="radio-item">
+                            <input type="radio" id="critical" name="urgency" value="critical">
+                            <label for="critical">Critical</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit">🚀 Submit Test Report</button>
+            </form>
+            
+            <button onclick="testWithoutLogin()">🔒 Test Without Login (Should Fail)</button>
+            <button onclick="loginThenTest()">🔑 Login Then Test</button>
+        </div>
+
+        <div id="status-area"></div>
+    </div>
+
+    <script src="../scripts/api-client.js?v=2.1"></script>
+    <script>
+        function showStatus(message, type = 'success') {
+            const statusArea = document.getElementById('status-area');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong><br>${message}`;
+            statusArea.insertBefore(statusDiv, statusArea.firstChild);
+        }
+
+        async function loginThenTest() {
+            showStatus('🔐 Logging in with demo_citizen...', 'success');
+            
+            try {
+                const api = new OceanHazardAPI();
+                const response = await api.login('demo_citizen', 'citizen123');
+                
+                showStatus(`✅ Login successful! User: ${response.user.first_name} ${response.user.last_name}`, 'success');
+                
+                // Store auth data
+                localStorage.setItem('oceanGuardToken', response.access_token);
+                localStorage.setItem('oceanGuardUser', JSON.stringify(response.user));
+                
+            } catch (error) {
+                showStatus(`❌ Login failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWithoutLogin() {
+            showStatus('🔒 Testing incident creation without authentication...', 'error');
+            
+            const testData = {
+                hazard_type: 'high-waves',
+                location: 'Test Location',
+                description: 'Test incident without auth',
+                urgency: 'medium'
+            };
+            
+            try {
+                const api = new OceanHazardAPI();
+                // Clear any existing auth
+                api.token = null;
+                localStorage.removeItem('oceanGuardToken');
+                
+                const response = await api.createIncident(testData);
+                showStatus('⚠️ Unexpected success - should have failed!', 'error');
+                
+            } catch (error) {
+                showStatus(`✅ Correctly rejected unauthorized request: ${error.message}`, 'success');
+            }
+        }
+
+        document.getElementById('test-report-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const urgency = document.querySelector('input[name="urgency"]:checked').value;
+            
+            const reportData = {
+                hazard_type: formData.get('hazard-type'),
+                location: formData.get('location'),
+                latitude: 19.0760,  // Mumbai coordinates
+                longitude: 72.8777,
+                description: formData.get('description'),
+                contact_info: formData.get('contact'),
+                urgency: urgency.toLowerCase()  // Using the FIX: lowercase
+            };
+            
+            showStatus(`🔄 Submitting incident report...`, 'success');
+            showStatus(`📋 Data being sent:<br><pre>${JSON.stringify(reportData, null, 2)}</pre>`, 'success');
+            
+            try {
+                const api = new OceanHazardAPI();
+                const response = await api.createIncident(reportData);
+                
+                showStatus(`✅ Incident created successfully!<br>Reference ID: ${response.reference_id}<br>ID: ${response.id}`, 'success');
+                
+            } catch (error) {
+                let errorMessage = 'Unknown error';
+                if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.response && error.response.data) {
+                    errorMessage = error.response.data.detail || 'Server error';
+                } else {
+                    errorMessage = 'Network connection error';
+                }
+                
+                showStatus(`❌ Incident creation failed: ${errorMessage}`, 'error');
+                
+                if (error.message && error.message.includes('401')) {
+                    showStatus('💡 Try clicking "Login Then Test" first!', 'error');
+                }
+            }
+        });
+
+        // Check auth status on load
+        window.addEventListener('load', () => {
+            const token = localStorage.getItem('oceanGuardToken');
+            const user = localStorage.getItem('oceanGuardUser');
+            
+            if (token && user) {
+                const userData = JSON.parse(user);
+                showStatus(`ℹ️ Already logged in as: ${userData.first_name} ${userData.last_name}`, 'success');
+            } else {
+                showStatus('ℹ️ Not logged in - click "Login Then Test" to authenticate', 'error');
+            }
+        });
+    </script>
+</body>
+</html>

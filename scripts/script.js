@@ -1,3 +1,10 @@
+/**
+ * Ocean Guard - Main JavaScript
+ * Enhanced Login & Registration System
+ * Version: 2.1 - Updated Sep 30, 2025
+ * Features: Demo accounts + Real database authentication
+ */
+
 // Wait for the entire HTML document to be loaded before running the script
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -190,7 +197,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (navActions && (window.location.pathname.includes('index.html') || window.location.pathname === '/')) {
                 navActions.innerHTML = `
                     <span class="welcome-user">Welcome, ${user.name}</span>
-                    <a href="reports.html" class="btn btn--primary">Admin Dashboard</a>
+                    <a href="admin-dashboard.html" class="btn btn--primary">Admin Dashboard</a>
                     <a href="#" id="logout-button" class="btn btn--secondary">Logout</a>
                 `;
                 
@@ -206,34 +213,119 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Login form submission
     if (loginForm) {
-        loginForm.addEventListener('submit', (event) => {
+        loginForm.addEventListener('submit', async (event) => {
             event.preventDefault();
-            const username = document.getElementById('login-username').value;
-
-            let user = null;
-            let redirectTo = '';
-
-            if (username.toLowerCase() === 'user' || username.toLowerCase() === 'citizen') {
-                user = { name: 'Gowshik S.', role: 'public' };
-                redirectTo = 'my-reports.html';
-            } else if (username.toLowerCase() === 'admin' || username.toLowerCase() === 'rescue') {
-                user = { name: 'Admin', role: 'admin' };
-                redirectTo = 'reports.html';
-            }
-
-            if (user) {
+            
+            // Get form data from multiple sources to ensure we get the values
+            const formData = new FormData(loginForm);
+            const username = formData.get('username') || 
+                           document.getElementById('login-username')?.value || '';
+            const password = formData.get('password') || 
+                           document.getElementById('login-password')?.value || '';
+            
+            console.log('🔐 Login attempt:', { username, hasPassword: !!password });
+            
+            // Check for demo/mock login first (case insensitive)
+            const lowerUsername = username.toLowerCase().trim();
+            
+            if (lowerUsername === 'user' || lowerUsername === 'citizen') {
+                const user = { 
+                    name: 'Demo Citizen', 
+                    role: 'public',
+                    email: 'demo@citizen.com',
+                    id: 999 
+                };
+                
+                // Store in both storages for compatibility
                 sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
-                alert('Login successful! Redirecting...');
-                window.location.href = redirectTo;
-            } else {
-                alert('Login failed. Please use "user"/"citizen" for public access or "admin"/"rescue" for professional access.');
+                localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                
+                const mockToken = `mock-token-${user.role}-${Date.now()}`;
+                localStorage.setItem('oceanGuardToken', mockToken);
+                
+                alert('Demo login successful! You can now view sample reports.');
+                window.location.href = 'my-reports.html';
+                return;
+            } else if (lowerUsername === 'admin' || lowerUsername === 'rescue') {
+                const user = { 
+                    name: 'Demo Admin', 
+                    role: 'admin',
+                    email: 'admin@ocean.gov.in',
+                    id: 1 
+                };
+                
+                sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                
+                const mockToken = `mock-token-${user.role}-${Date.now()}`;
+                localStorage.setItem('oceanGuardToken', mockToken);
+                
+                alert('Demo admin login successful!');
+                window.location.href = 'reports.html';
+                return;
+            }
+            
+            // Real API login for registered users
+            if (!username || !password) {
+                alert('Please enter both username and password for database users.\n\nQuick Demo Access (no password needed):\n• Username: "user" or "citizen" - Public access\n• Username: "admin" or "rescue" - Admin access\n\nOr use database accounts:\n• demo_citizen / citizen123\n• demo_admin / admin123');
+                return;
+            }
+            
+            try {
+                const api = new OceanHazardAPI();
+                console.log('🔐 Attempting real API login for:', username);
+                
+                const response = await api.login(username, password);
+                console.log('✅ Real login successful:', response);
+                
+                // Store real user data
+                const user = {
+                    id: response.user.id,
+                    name: `${response.user.first_name} ${response.user.last_name}`,
+                    email: response.user.email,
+                    role: response.user.role,
+                    loginDate: new Date().toISOString()
+                };
+                
+                // Store in both storages
+                sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardToken', response.access_token);
+                
+                alert('Login successful! Welcome back.');
+                
+                // Redirect based on role
+                if (user.role === 'admin' || user.role === 'rescue_team' || user.role === 'authority') {
+                    window.location.href = 'reports.html';
+                } else {
+                    window.location.href = 'my-reports.html';
+                }
+                
+            } catch (error) {
+                console.error('❌ Login failed:', error);
+                let errorMsg = `Login failed: ${error.message}\n\n`;
+                
+                if (error.message.includes('401') || error.message.includes('Invalid credentials')) {
+                    errorMsg += 'Try these options:\n\n';
+                    errorMsg += '🎭 Quick Demo (no password):\n';
+                    errorMsg += '• Username: "user" or "citizen"\n';
+                    errorMsg += '• Username: "admin" or "rescue"\n\n';
+                    errorMsg += '🔑 Database Accounts:\n';
+                    errorMsg += '• demo_citizen / citizen123\n';
+                    errorMsg += '• demo_admin / admin123\n';
+                    errorMsg += '• demo_rescue / rescue123';
+                } else {
+                    errorMsg += 'Please check your connection and try again.';
+                }
+                
+                alert(errorMsg);
             }
         });
     }
 
     // Registration form submission
     if (registerForm) {
-        registerForm.addEventListener('submit', (event) => {
+        registerForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             
             const formData = new FormData(registerForm);
@@ -250,75 +342,192 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
+            // Prepare user data for API
             const userData = {
-                name: `${formData.get('firstname')} ${formData.get('lastname')}`,
+                username: formData.get('email'), // Use email as username
                 email: formData.get('email'),
+                password: password,
+                first_name: formData.get('firstname'),
+                last_name: formData.get('lastname'),
                 phone: formData.get('phone'),
-                location: formData.get('location'),
-                role: 'public',
-                registrationDate: new Date().toISOString()
+                location: formData.get('location')
             };
             
-            // In a real app, this would go to a server
-            sessionStorage.setItem('oceanGuardUser', JSON.stringify(userData));
-            alert('Registration successful! Welcome to Ocean Guard!');
-            window.location.href = 'my-reports.html';
+            try {
+                // Use API client to register user in database
+                const api = new OceanHazardAPI();
+                console.log('🌊 Attempting registration with API:', userData);
+                
+                const response = await api.register(userData);
+                console.log('✅ Registration successful:', response);
+                
+                // After registration, login to get token
+                console.log('🔐 Logging in to get authentication token...');
+                const loginResponse = await api.login(userData.username, userData.password);
+                console.log('✅ Login successful:', loginResponse);
+                
+                // Store user data in both sessionStorage and localStorage for compatibility
+                const user = {
+                    name: `${userData.first_name} ${userData.last_name}`,
+                    email: userData.email,
+                    phone: userData.phone,
+                    location: userData.location,
+                    role: 'public',
+                    registrationDate: new Date().toISOString(),
+                    id: response.id
+                };
+                
+                // Store in sessionStorage for main page compatibility
+                sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                
+                // Store in localStorage for API client and other pages
+                localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardToken', loginResponse.access_token);
+                alert('Registration successful! Welcome to Ocean Guard! Your account has been saved to the database.');
+                window.location.href = 'my-reports.html';
+                
+            } catch (error) {
+                console.error('❌ Registration failed:', error);
+                
+                // Provide specific error messages
+                let errorMessage = error.message;
+                if (errorMessage.includes('Username already registered')) {
+                    errorMessage = 'This email is already registered. Please use a different email or try logging in.';
+                } else if (errorMessage.includes('Email already registered')) {
+                    errorMessage = 'This email is already registered. Please use a different email or try logging in.';
+                } else if (errorMessage.includes('Network error')) {
+                    errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+                }
+                
+                alert(`Registration failed: ${errorMessage}`);
+            }
         });
     }
 
     // Report form submission
     if (reportForm) {
-        reportForm.addEventListener('submit', (event) => {
+        reportForm.addEventListener('submit', async (event) => {
             event.preventDefault();
             
             const referenceId = generateReferenceId();
             const formData = new FormData(reportForm);
             const urgency = document.querySelector('input[name="urgency"]:checked').value;
             
+            // Get current location if available
+            let location = formData.get('location');
+            let latitude = null;
+            let longitude = null;
+            
+            try {
+                const currentLocation = await getCurrentLocation();
+                if (currentLocation) {
+                    const [lat, lng] = currentLocation.split(', ');
+                    latitude = parseFloat(lat);
+                    longitude = parseFloat(lng);
+                    if (!location) {
+                        location = currentLocation;
+                    }
+                }
+            } catch (error) {
+                console.log('Location not available:', error);
+            }
+            
             const reportData = {
-                referenceId: referenceId,
-                hazardType: formData.get('hazard-type'),
-                location: formData.get('location'),
+                hazard_type: formData.get('hazard-type'),
+                location: location || 'Unknown Location',
+                latitude: latitude,
+                longitude: longitude,
                 description: formData.get('description'),
-                contact: formData.get('contact'),
-                urgency: urgency,
-                timestamp: new Date().toISOString(),
-                status: 'pending'
+                contact_info: formData.get('contact'),
+                urgency: urgency.toLowerCase()  // Backend expects lowercase enum values
             };
 
-            // Store the report
-            let reports = JSON.parse(localStorage.getItem('hazardReports') || '[]');
-            reports.unshift(reportData); // Add to beginning of array
-            localStorage.setItem('hazardReports', JSON.stringify(reports));
+            try {
+                // Use API client to submit report to database
+                const api = new OceanHazardAPI();
+                console.log('🌊 Submitting incident report:', reportData);
+                
+                const response = await api.createIncident(reportData);
+                console.log('✅ Incident created successfully:', response);
+                
+                // Also store locally for offline access
+                const localReportData = {
+                    referenceId: response.reference_id || referenceId,
+                    ...reportData,
+                    timestamp: new Date().toISOString(),
+                    status: 'pending',
+                    id: response.id
+                };
+                
+                let reports = JSON.parse(localStorage.getItem('hazardReports') || '[]');
+                reports.unshift(localReportData);
+                localStorage.setItem('hazardReports', JSON.stringify(reports));
 
-            // Show success message with reference ID
-            closeModal(reportModal);
-            
-            // Create and show success notification
-            const notification = document.createElement('div');
-            notification.className = 'success-notification';
-            notification.innerHTML = `
-                <div class="notification-content">
-                    <i class="fas fa-check-circle"></i>
-                    <h3>Report Submitted Successfully!</h3>
-                    <p>Your hazard report has been submitted to the authorities.</p>
-                    <p><strong>Reference ID: ${referenceId}</strong></p>
-                    <p>Please save this reference ID for tracking your report.</p>
-                    <button class="btn btn--primary" onclick="this.parentElement.parentElement.remove()">Close</button>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            // Clear the form
-            reportForm.reset();
-            
-            // Check if user is logged in to redirect appropriately
-            const user = JSON.parse(sessionStorage.getItem('oceanGuardUser'));
-            if (user && user.role === 'public') {
-                setTimeout(() => {
-                    window.location.href = 'my-reports.html';
-                }, 3000);
+                // Show success message with reference ID
+                closeModal(reportModal);
+                
+                // Create and show success notification
+                const notification = document.createElement('div');
+                notification.className = 'success-notification';
+                notification.innerHTML = `
+                    <div class="notification-content">
+                        <i class="fas fa-check-circle"></i>
+                        <h3>Report Submitted Successfully!</h3>
+                        <p>Your hazard report has been submitted to the authorities and saved to the database.</p>
+                        <p><strong>Reference ID: ${response.reference_id || referenceId}</strong></p>
+                        <p>Please save this reference ID for tracking your report.</p>
+                        <button class="btn btn--primary" onclick="this.parentElement.parentElement.remove()">Close</button>
+                    </div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Clear the form
+                reportForm.reset();
+                
+                // Check if user is logged in to redirect appropriately
+                const user = JSON.parse(sessionStorage.getItem('oceanGuardUser'));
+                if (user && user.role === 'public') {
+                    setTimeout(() => {
+                        window.location.href = 'my-reports.html';
+                    }, 3000);
+                }
+                
+            } catch (error) {
+                console.error('❌ Failed to submit incident:', error);
+                
+                // Better error message handling
+                let errorMessage = 'Unknown error occurred';
+                if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.response && error.response.data) {
+                    errorMessage = error.response.data.detail || error.response.data.message || 'Server error';
+                } else if (typeof error === 'string') {
+                    errorMessage = error;
+                } else if (error.toString && error.toString() !== '[object Object]') {
+                    errorMessage = error.toString();
+                } else {
+                    // Network/connection issues
+                    errorMessage = 'Unable to connect to server. Please check your internet connection.';
+                }
+                
+                // Fallback to local storage if API fails
+                const fallbackReportData = {
+                    referenceId: referenceId,
+                    ...reportData,
+                    timestamp: new Date().toISOString(),
+                    status: 'pending'
+                };
+                
+                let reports = JSON.parse(localStorage.getItem('hazardReports') || '[]');
+                reports.unshift(fallbackReportData);
+                localStorage.setItem('hazardReports', JSON.stringify(reports));
+                
+                alert(`Report submission failed: ${errorMessage}.\n\nYour report has been saved locally with ID: ${referenceId} and will be submitted when connection is restored.`);
+                
+                // Still show success for local storage
+                closeModal(reportModal);
+                reportForm.reset();
             }
         });
     }
@@ -327,7 +536,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function logout(e) {
         e.preventDefault();
+        // Clear both storage types
         sessionStorage.removeItem('oceanGuardUser');
+        localStorage.removeItem('oceanGuardUser');
+        localStorage.removeItem('oceanGuardToken');
+        
         alert('You have been logged out.');
         window.location.href = 'index.html';
     }
@@ -352,8 +565,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (currentPage === 'reports.html') {
         const user = JSON.parse(sessionStorage.getItem('oceanGuardUser'));
+        if (!user || !['admin', 'authority', 'rescue_team'].includes(user.role)) {
+            alert('⚠️ Access denied: This page is for authorized personnel only.');
+            window.location.href = 'index.html';
+        }
+    }
+
+    if (currentPage === 'admin-dashboard.html') {
+        const user = JSON.parse(sessionStorage.getItem('oceanGuardUser'));
         if (!user || user.role !== 'admin') {
-            alert('Access Denied. This is a professional portal. Please log in with admin credentials.');
+            alert('⚠️ Access denied: This page is for administrators only.');
             window.location.href = 'index.html';
         }
     }

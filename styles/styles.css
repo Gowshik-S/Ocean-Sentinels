@@ -1373,22 +1373,6 @@ body {
     border: 1px solid #ccc;
     border-radius: 5px;
 }
-/* ======================= Hero Section with Curve ======================= */
-.hero-section {
-    min-height: 100vh;
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1600x900/?indian-coastline,ocean-waves');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    color: var(--text-light);
-    padding: 2rem;
-    position: relative;
-}
-
-
 
 .stats-bar {
     display: flex;
@@ -1396,60 +1380,6 @@ body {
     padding: 3rem 5%;
     background-color: var(--primary-color);
     color: var(--text-light);
-}
-
-/* Alternative: If you want the curve to go into a white/light section instead */
-/* 
-.hero-section::after {
-    background: #ffffff; 
-    clip-path: ellipse(100% 100% at 50% 0%);
-}
-
-.stats-bar {
-    background-color: #ffffff;
-    color: var(--text-dark);
-}
-*/
-
-/* Mobile responsive adjustments for the curve */
-@media (max-width: 768px) {
-    .hero-section::after {
-        height: 50px; /* Smaller curve on mobile */
-    }
-    
-    .hero-title {
-        font-size: 2.5rem; /* Adjust hero title for mobile */
-    }
-    
-    .hero-subtitle {
-        font-size: 1.2rem; /* Adjust subtitle for mobile */
-    }
-}
-
-@media (max-width: 480px) {
-    .hero-section::after {
-        height: 30px; /* Even smaller curve on very small screens */
-    }
-    
-    .hero-title {
-        font-size: 2rem;
-    }
-}
-/* ======================= Hero Section Layout Fix ======================= */
-
-.hero-section {
-    min-height: 100vh;
-    background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://source.unsplash.com/1600x900/?indian-coastline,ocean-waves');
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    justify-content: flex-start; /* Changed from center to flex-start */
-    align-items: center;
-    text-align: left; /* Changed from center to left */
-    color: var(--text-light);
-    padding: 2rem 5%;
-    position: relative;
-    margin-bottom: 0;
 }
 
 .hero-content {

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Debug - Ocean Guard</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 800px; 
+            margin: 20px auto; 
+            padding: 20px; 
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .test-btn:hover { background: #138496; }
+        .test-btn:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .result { 
+            margin: 15px 0; 
+            padding: 15px; 
+            border-radius: 5px; 
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        .step { margin: 20px 0; padding: 15px; background: #f8f9fa; border-left: 4px solid #FF6600; }
+        .step h3 { margin-top: 0; color: #FF6600; }
+        
+        .debug-info {
+            background: #343a40;
+            color: #ffffff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Authentication Debugging Tool</h1>
+        <p>This tool helps diagnose authentication issues in the Ocean Guard application.</p>
+        
+        <div class="step">
+            <h3>Step 1: Test Basic Login</h3>
+            <button class="test-btn" onclick="testLogin('user', 'user')">Test Login (user/user)</button>
+            <button class="test-btn" onclick="testLogin('admin', 'admin')">Test Login (admin/admin)</button>
+            <button class="test-btn" onclick="testLogin('wrong', 'credentials')">Test Wrong Credentials</button>
+            <div id="loginResult"></div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 2: Test /api/auth/me Endpoint</h3>
+            <button class="test-btn" onclick="testCurrentUser()">Test Current User (with token)</button>
+            <button class="test-btn" onclick="testCurrentUserNoToken()">Test Current User (no token)</button>
+            <div id="currentUserResult"></div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 3: Test Full Flow</h3>
+            <button class="test-btn" onclick="testFullFlow()">Test Login → Get User → Get Reports</button>
+            <div id="fullFlowResult"></div>
+        </div>
+        
+        <div class="step">
+            <h3>Step 4: Check Local Storage</h3>
+            <button class="test-btn" onclick="checkLocalStorage()">Check Stored Auth Data</button>
+            <button class="test-btn" onclick="clearLocalStorage()">Clear Local Storage</button>
+            <div id="localStorageResult"></div>
+        </div>
+        
+        <div class="debug-info" id="debugInfo">
+            <strong>Debug Log:</strong><br>
+            Ready to test...
+        </div>
+    </div>
+
+    <script src="scripts/api-client.js"></script>
+    <script>
+        const api = new OceanHazardAPI('http://127.0.0.1:8002/api');
+        let debugLog = [];
+        
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            debugLog.push(`[${timestamp}] ${message}`);
+            document.getElementById('debugInfo').innerHTML = 
+                '<strong>Debug Log:</strong><br>' + debugLog.slice(-20).join('<br>');
+        }
+        
+        function showResult(containerId, message, type = 'info') {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+        
+        // Test 1: Basic Login
+        async function testLogin(username, password) {
+            try {
+                log(`Testing login with ${username}/${password}`);
+                showResult('loginResult', 'Testing login...', 'info');
+                
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('password', password);
+                
+                const response = await fetch('http://127.0.0.1:8002/api/auth/login', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                log(`Login response status: ${response.status}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Login successful: ${JSON.stringify(data.user)}`);
+                    
+                    // Store the token for further tests
+                    localStorage.setItem('oceanGuardToken', data.access_token);
+                    localStorage.setItem('oceanGuardUser', JSON.stringify(data.user));
+                    
+                    showResult('loginResult', 
+                        `✅ Login Successful!
+Token: ${data.access_token}
+User: ${JSON.stringify(data.user, null, 2)}`, 'success');
+                } else {
+                    const error = await response.json();
+                    log(`Login failed: ${error.detail}`);
+                    showResult('loginResult', `❌ Login Failed: ${error.detail}`, 'error');
+                }
+            } catch (error) {
+                log(`Login error: ${error.message}`);
+                showResult('loginResult', `❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test 2: Current User with Token
+        async function testCurrentUser() {
+            try {
+                log('Testing /api/auth/me with token');
+                showResult('currentUserResult', 'Testing current user endpoint...', 'info');
+                
+                const token = localStorage.getItem('oceanGuardToken');
+                if (!token) {
+                    showResult('currentUserResult', '❌ No token found. Please login first.', 'error');
+                    return;
+                }
+                
+                const response = await fetch('http://127.0.0.1:8002/api/auth/me', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log(`Current user response status: ${response.status}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Current user success: ${JSON.stringify(data)}`);
+                    showResult('currentUserResult', 
+                        `✅ Current User Success!
+${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    const error = await response.json();
+                    log(`Current user failed: ${error.detail}`);
+                    showResult('currentUserResult', `❌ Current User Failed: ${error.detail}`, 'error');
+                }
+            } catch (error) {
+                log(`Current user error: ${error.message}`);
+                showResult('currentUserResult', `❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test 2b: Current User without Token
+        async function testCurrentUserNoToken() {
+            try {
+                log('Testing /api/auth/me without token');
+                showResult('currentUserResult', 'Testing current user endpoint without token...', 'info');
+                
+                const response = await fetch('http://127.0.0.1:8002/api/auth/me');
+                
+                log(`Current user (no token) response status: ${response.status}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Current user (no token) success: ${JSON.stringify(data)}`);
+                    showResult('currentUserResult', 
+                        `✅ Current User (No Token) Success!
+${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    const error = await response.json();
+                    log(`Current user (no token) failed: ${error.detail}`);
+                    showResult('currentUserResult', `❌ Current User Failed: ${error.detail}`, 'error');
+                }
+            } catch (error) {
+                log(`Current user (no token) error: ${error.message}`);
+                showResult('currentUserResult', `❌ Network Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test 3: Full Flow
+        async function testFullFlow() {
+            try {
+                log('Testing full authentication flow');
+                showResult('fullFlowResult', 'Testing full flow...', 'info');
+                
+                let results = '';
+                
+                // Step 1: Login
+                const loginResult = await api.login('user', 'user');
+                results += `✅ Login Success: ${loginResult.user.full_name}\n`;
+                log(`Full flow - Login: ${loginResult.access_token}`);
+                
+                // Step 2: Get Current User
+                const userResult = await api.getCurrentUser();
+                results += `✅ Current User: ${userResult.full_name}\n`;
+                log(`Full flow - Current user: ${JSON.stringify(userResult)}`);
+                
+                // Step 3: Get Reports
+                const reportsResult = await api.getIncidents();
+                results += `✅ Reports: ${reportsResult.incidents.length} reports loaded\n`;
+                log(`Full flow - Reports: ${reportsResult.incidents.length} reports`);
+                
+                results += `\nTotal Reports: ${reportsResult.total}`;
+                showResult('fullFlowResult', results, 'success');
+                
+            } catch (error) {
+                log(`Full flow error: ${error.message}`);
+                showResult('fullFlowResult', `❌ Full Flow Error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Test 4: Local Storage
+        function checkLocalStorage() {
+            const token = localStorage.getItem('oceanGuardToken');
+            const user = localStorage.getItem('oceanGuardUser');
+            
+            let result = 'Local Storage Contents:\n';
+            result += `Token: ${token || 'Not found'}\n`;
+            result += `User: ${user || 'Not found'}`;
+            
+            if (user) {
+                try {
+                    const parsedUser = JSON.parse(user);
+                    result += `\n\nParsed User:\n${JSON.stringify(parsedUser, null, 2)}`;
+                } catch (e) {
+                    result += `\n\nError parsing user: ${e.message}`;
+                }
+            }
+            
+            showResult('localStorageResult', result, 'info');
+            log('Local storage checked');
+        }
+        
+        function clearLocalStorage() {
+            localStorage.removeItem('oceanGuardToken');
+            localStorage.removeItem('oceanGuardUser');
+            showResult('localStorageResult', '✅ Local storage cleared', 'success');
+            log('Local storage cleared');
+        }
+        
+        // Initialize
+        log('Authentication debugging tool loaded');
+        checkLocalStorage();
+    </script>
+</body>
+</html>

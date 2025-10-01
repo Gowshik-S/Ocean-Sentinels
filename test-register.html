@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Registration - Ocean Guard</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 50px auto; 
+            padding: 20px; 
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .form-group { 
+            margin-bottom: 15px; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 5px; 
+            font-weight: bold; 
+            color: #333;
+        }
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button { 
+            background: #FF6600; 
+            color: white; 
+            padding: 12px 24px; 
+            border: none; 
+            border-radius: 5px; 
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover { 
+            background: #e55a00; 
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .result { 
+            margin-top: 20px; 
+            padding: 15px; 
+            border-radius: 5px; 
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .test-methods {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e9ecef;
+            border-radius: 8px;
+        }
+        .test-btn {
+            background: #17a2b8;
+            margin: 5px;
+            padding: 8px 16px;
+            font-size: 14px;
+            width: auto;
+        }
+        .test-btn:hover {
+            background: #138496;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 Test Registration - Ocean Guard</h1>
+        <p>Test the registration functionality with different methods.</p>
+        
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" value="testuser" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" value="test@example.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" value="password123" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="first_name">First Name:</label>
+                <input type="text" id="first_name" value="Test" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="last_name">Last Name:</label>
+                <input type="text" id="last_name" value="User" required>
+            </div>
+            
+            <button type="submit" id="submitBtn">Register (JSON)</button>
+        </form>
+
+        <div class="test-methods">
+            <h3>Alternative Test Methods:</h3>
+            <button class="test-btn" onclick="testFormData()">Test with Form Data</button>
+            <button class="test-btn" onclick="testExistingUser()">Test Existing Username (should fail)</button>
+            <button class="test-btn" onclick="testMissingFields()">Test Missing Fields (should fail)</button>
+            <button class="test-btn" onclick="testAPIClient()">Test API Client Method</button>
+        </div>
+        
+        <div id="result" class="result" style="display: none;"></div>
+        
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="test-login.html">← Back to Login Test</a> |
+            <a href="pages/my-reports.html">Go to My Reports</a>
+        </div>
+    </div>
+
+    <script src="scripts/api-client.js"></script>
+    <script>
+        const api = new OceanHazardAPI('http://127.0.0.1:8002/api');
+        
+        function showResult(message, isSuccess = true) {
+            const result = document.getElementById('result');
+            result.style.display = 'block';
+            result.className = `result ${isSuccess ? 'success' : 'error'}`;
+            result.innerHTML = message;
+        }
+
+        function getFormData() {
+            return {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                password: document.getElementById('password').value,
+                first_name: document.getElementById('first_name').value,
+                last_name: document.getElementById('last_name').value
+            };
+        }
+
+        // Test JSON registration (default form submission)
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Registering...';
+            
+            try {
+                const userData = getFormData();
+                showResult('<p>Testing JSON registration...</p>');
+                
+                const response = await fetch('http://127.0.0.1:8002/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult(`
+                        <h3>✅ Registration Successful (JSON)!</h3>
+                        <p><strong>Message:</strong> ${data.message}</p>
+                        <p><strong>User ID:</strong> ${data.user.id}</p>
+                        <p><strong>Username:</strong> ${data.user.username}</p>
+                        <p><strong>Email:</strong> ${data.user.email}</p>
+                        <p><strong>Name:</strong> ${data.user.first_name} ${data.user.last_name}</p>
+                        <p><strong>Role:</strong> ${data.user.role}</p>
+                    `, true);
+                } else {
+                    const error = await response.json();
+                    showResult(`<p>❌ Registration failed: ${error.detail}</p>`, false);
+                }
+            } catch (error) {
+                showResult(`<p>❌ Network Error: ${error.message}</p>`, false);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Register (JSON)';
+            }
+        });
+
+        // Test Form Data registration
+        async function testFormData() {
+            try {
+                showResult('<p>Testing Form Data registration...</p>');
+                const userData = getFormData();
+                
+                const formData = new FormData();
+                Object.keys(userData).forEach(key => {
+                    formData.append(key, userData[key]);
+                });
+
+                const response = await fetch('http://127.0.0.1:8002/api/auth/register-form', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult(`
+                        <h3>✅ Registration Successful (Form Data)!</h3>
+                        <p><strong>Message:</strong> ${data.message}</p>
+                        <p><strong>Username:</strong> ${data.user.username}</p>
+                        <p><strong>Email:</strong> ${data.user.email}</p>
+                    `, true);
+                } else {
+                    const error = await response.json();
+                    showResult(`<p>❌ Form Data Registration failed: ${error.detail}</p>`, false);
+                }
+            } catch (error) {
+                showResult(`<p>❌ Form Data Error: ${error.message}</p>`, false);
+            }
+        }
+
+        // Test with existing username (should fail)
+        async function testExistingUser() {
+            try {
+                showResult('<p>Testing existing username (should fail)...</p>');
+                
+                const response = await fetch('http://127.0.0.1:8002/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: 'user', // This should already exist
+                        email: 'test@example.com',
+                        password: 'password123',
+                        first_name: 'Test',
+                        last_name: 'User'
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    showResult(`<h3>✅ Expected Error Caught!</h3><p>${error.detail}</p>`, true);
+                } else {
+                    showResult('<p>❌ Should have failed with existing username!</p>', false);
+                }
+            } catch (error) {
+                showResult(`<p>❌ Network Error: ${error.message}</p>`, false);
+            }
+        }
+
+        // Test with missing fields (should fail)
+        async function testMissingFields() {
+            try {
+                showResult('<p>Testing missing fields (should fail)...</p>');
+                
+                const response = await fetch('http://127.0.0.1:8002/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: '', // Missing username
+                        email: 'test@example.com',
+                        password: 'password123'
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    showResult(`<h3>✅ Expected Validation Error Caught!</h3><p>${error.detail}</p>`, true);
+                } else {
+                    showResult('<p>❌ Should have failed with missing fields!</p>', false);
+                }
+            } catch (error) {
+                showResult(`<p>❌ Network Error: ${error.message}</p>`, false);
+            }
+        }
+
+        // Test using the API Client
+        async function testAPIClient() {
+            try {
+                showResult('<p>Testing API Client registration...</p>');
+                const userData = getFormData();
+                // Change username slightly to avoid conflicts
+                userData.username = userData.username + '_client';
+                
+                const result = await api.register(userData);
+                showResult(`
+                    <h3>✅ API Client Registration Successful!</h3>
+                    <p><strong>Message:</strong> ${result.message}</p>
+                    <p><strong>Username:</strong> ${result.user.username}</p>
+                    <p><strong>Email:</strong> ${result.user.email}</p>
+                `, true);
+            } catch (error) {
+                showResult(`<p>❌ API Client Error: ${error.message}</p>`, false);
+            }
+        }
+    </script>
+</body>
+</html>

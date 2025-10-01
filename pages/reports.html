@@ -6,15 +6,214 @@
     <title>Incident Reports - Ocean Guard</title>
     
     <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../styles/report-enhancements.css">
     
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+        <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../styles/report-enhancements.css">
+    <link rel="stylesheet" href="../styles/reports-dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <style>
+        /* Use same CSS variables as index page */
+        :root {
+            --primary-color: #005A9C; /* Deep Blue */
+            --secondary-color: #FFFFFF; /* White */
+            --accent-color: #FFC107; /* Warning Yellow/Gold */
+            --text-dark: #212529;
+            --text-light: #f8f9fa;
+            --section-bg: #f8f9fa;
+            --font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+        }
+        
+        .role-based-header {
+            background: var(--section-bg, #f8f9fa);
+            color: var(--text-dark, #212529);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .role-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: var(--primary-color, #005A9C);
+            color: var(--secondary-color, #FFFFFF);
+            border-radius: 20px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        /* Match index page body styling */
+        body {
+            background-color: var(--secondary-color, #FFFFFF);
+            font-family: var(--font-family);
+            color: var(--text-dark);
+        }
+        
+        .page-container {
+            background-color: var(--secondary-color, #FFFFFF);
+            padding: 20px;
+        }
+        
+        .filters-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .filter-grid input, .filter-grid select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .reports-container {
+            min-height: 400px;
+        }
+        
+        .loading-state {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #7f8c8d;
+        }
+        
+        .error-state {
+            text-align: center;
+            padding: 50px;
+            color: #e74c3c;
+            background: #fdf2f2;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .report-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .report-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .report-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 0;
+        }
+        
+        .report-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #7f8c8d;
+            font-size: 14px;
+        }
+        
+        .report-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-action {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        
+        .btn-view {
+            background: var(--primary-color, #005A9C);
+            color: white;
+        }
+        
+        .btn-verify {
+            background: #28a745;
+            color: white;
+        }
+        
+        .btn-assign {
+            background: var(--accent-color, #FFC107);
+            color: var(--text-dark, #212529);
+        }
+        
+        .btn-action:hover {
+            opacity: 0.8;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        
+        .pagination button:hover:not(:disabled) {
+            background: var(--primary-color, #005A9C);
+            color: white;
+        }
+        
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    </style>
 </head>
 <body>
 
     <header class="main-header">
         <nav class="navbar">
             <a href="index.html" class="nav-logo">Ocean Guard</a>
-            <ul class="nav-menu">
+            <ul class="nav-menu" id="nav-menu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
                 <li><a href="reports.html" class="active">Incident Reports</a></li>
@@ -22,146 +221,131 @@
                 <li><a href="#">About Us</a></li>
             </ul>
             <div class="nav-actions">
-                <a href="index.html" class="btn btn--secondary">Switch to Citizen Portal</a>
-                <a href="index.html#report-hazard" class="btn btn--primary">Report Hazard</a>
+                <span class="welcome-user" id="welcome-message">Welcome, User</span>
+                <a href="index.html" class="btn btn--secondary" id="logout-btn">Logout</a>
             </div>
         </nav>
     </header>
 
     <main class="page-container">
-        <section class="page-header">
-            <h1>Incident Reports Dashboard</h1>
-            <p>Search, filter, and manage all incoming hazard reports.</p>
-            <div class="filter-controls">
-                <input type="search" placeholder="Search by location or ID...">
-                <select>
-                    <option>All Statuses</option>
-                    <option>Pending Verification</option>
-                    <option>Active</option>
-                    <option>Resolved</option>
+        <!-- Role-based header -->
+        <div class="role-based-header">
+            <h1 id="page-title">Incident Reports Dashboard</h1>
+            <p id="page-description">Manage and monitor all incident reports</p>
+            <div class="role-badge" id="role-badge">Loading...</div>
+        </div>
+
+        <!-- Filters Section -->
+        <div class="filters-section">
+            <h3>Filter & Search</h3>
+            <div class="filter-grid">
+                <input type="search" id="search-input" placeholder="Search by location, ID, or description...">
+                <select id="status-filter">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                    <option value="closed">Closed</option>
                 </select>
-                <select>
-                    <option>All Hazard Types</option>
-                    <option>High Waves</option>
-                    <option>Flooding</option>
-                    <option>Tsunami Sighting</option>
+                <select id="hazard-filter">
+                    <option value="">All Hazard Types</option>
+                    <option value="high-waves">High Waves</option>
+                    <option value="flooding">Flooding</option>
+                    <option value="tsunami">Tsunami</option>
+                    <option value="debris">Debris</option>
+                    <option value="other">Other</option>
+                </select>
+                <select id="urgency-filter">
+                    <option value="">All Urgency Levels</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
                 </select>
             </div>
-        </section>
-
-        <section class="reports-grid">
-
-            <div class="report-card">
-                <div class="card-header">
-                    <h3>High Wave Sighting</h3>
-                    <span class="status-badge status-badge--pending">Pending Verification</span>
-                </div>
-                <div class="card-body">
-                    <p class="location"><i class="fas fa-map-marker-alt"></i> Marina Beach, Chennai</p>
-                    <p class="timestamp"><i class="fas fa-clock"></i> Reported: 27 Sep 2025, 12:45 AM</p>
-                    <p class="ai-score"><i class="fas fa-robot"></i> AI Confidence: 75%</p>
-                </div>
-                <div class="card-actions">
-                    <a href="#" class="btn btn--secondary">View Details</a>
-                    </div>
-            </div>
-
-            <div class="report-card">
-                <div class="card-header">
-                    <h3>Coastal Flooding</h3>
-                    <span class="status-badge status-badge--active">Active</span>
-                </div>
-                <div class="card-body">
-                    <p class="location"><i class="fas fa-map-marker-alt"></i> Panjim, Goa</p>
-                    <p class="timestamp"><i class="fas fa-clock"></i> Reported: 26 Sep 2025, 11:30 PM</p>
-                    <p class="ai-score"><i class="fas fa-robot"></i> AI Confidence: 92%</p>
-                </div>
-                <div class="card-actions">
-                    <a href="#" class="btn btn--secondary">View Details</a>
-                </div>
-            </div>
-
-            <div class="report-card">
-                <div class="card-header">
-                    <h3>Lost Fishing Boat</h3>
-                    <span class="status-badge status-badge--resolved">Resolved</span>
-                </div>
-                <div class="card-body">
-                    <p class="location"><i class="fas fa-map-marker-alt"></i> Vypin, Kochi</p>
-                    <p class="timestamp"><i class="fas fa-clock"></i> Reported: 26 Sep 2025, 08:00 PM</p>
-                    <p class="ai-score"><i class="fas fa-robot"></i> AI Confidence: 88%</p>
-                </div>
-                <div class="card-actions">
-                    <a href="#" class="btn btn--secondary">View Details</a>
-                </div>
-            </div>
-
-        </section>
-    </main>
-
-    <footer class="main-footer">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>Ocean Guard</h4>
-                <p>A citizen-centric coastal safety platform under the Digital India initiative, ensuring comprehensive coastal security through community participation and advanced monitoring systems.</p>
-                <div class="footer-social">
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-instagram"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
-                </div>
-            </div>
-            <div class="footer-section">
-                <h4>Government Departments</h4>
-                <ul>
-                    <li><a href="#">Ministry of Earth Sciences</a></li>
-                    <li><a href="#">Indian National Centre for Ocean Information Services (INCOIS)</a></li>
-                    <li><a href="#">Indian Coast Guard</a></li>
-                    <li><a href="#">National Disaster Response Force</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="#">Emergency Contacts</a></li>
-                    <li><a href="#">Weather Updates</a></li>
-                    <li><a href="#">Safety Guidelines</a></li>
-                    <li><a href="#">Training Programs</a></li>
-                    <li><a href="#">Coastal Management</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>Contact Information</h4>
-                <div class="contact-info">
-                    <p><i class="fas fa-phone"></i> Emergency: 1078</p>
-                    <p><i class="fas fa-phone"></i> Helpline: 1800-123-4567</p>
-                    <p><i class="fas fa-envelope"></i> support@oceanguard.gov.in</p>
-                    <p><i class="fas fa-map-marker-alt"></i> Ministry of Earth Sciences, New Delhi - 110003</p>
-                </div>
+            <div style="margin-top: 15px;">
+                <button class="btn btn--primary" onclick="reportsManager.applyFilters()">
+                    <i class="fas fa-search"></i> Apply Filters
+                </button>
+                <button class="btn btn--secondary" onclick="reportsManager.clearFilters()">
+                    <i class="fas fa-times"></i> Clear
+                </button>
+                <button class="btn btn--success" onclick="reportsManager.refreshReports()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
             </div>
         </div>
-        <div class="footer-logos">
-            <div class="govt-logos">
-                <img src="gov_of_india.png" alt="Government of India">
-                <span>Government of India</span>
+
+        <!-- Reports Container -->
+        <div class="reports-container">
+            <div id="loading-state" class="loading-state">
+                <i class="fas fa-spinner fa-spin fa-2x"></i>
+                <p>Loading incident reports...</p>
             </div>
-            <div class="footer-certifications">
-                <span>ISO 27001 Certified</span> | <span>STQC Empaneled</span> | <span>Digital India Initiative</span>
+            
+            <div id="error-state" class="error-state" style="display: none;">
+                <i class="fas fa-exclamation-triangle fa-2x"></i>
+                <h3>Error Loading Reports</h3>
+                <p id="error-message">Unable to load incident reports. Please try again.</p>
+                <button class="btn btn--primary" onclick="reportsManager.refreshReports()">
+                    <i class="fas fa-retry"></i> Try Again
+                </button>
+            </div>
+            
+            <div id="empty-state" class="empty-state" style="display: none;">
+                <i class="fas fa-inbox fa-2x"></i>
+                <h3>No Reports Found</h3>
+                <p>No incident reports match your current filters.</p>
+            </div>
+            
+            <div id="reports-grid" class="reports-grid">
+                <!-- Dynamic reports will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="pagination" id="pagination" style="display: none;">
+            <button id="prev-btn" onclick="reportsManager.previousPage()">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <span id="page-info">Page 1 of 1</span>
+            <button id="next-btn" onclick="reportsManager.nextPage()">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <footer class="main-footer" id="main-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>Ocean Guard</h3>
+                <p>Professional incident management platform for coastal safety and emergency response coordination.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Professional Access</h3>
+                <ul>
+                    <li><a href="admin-dashboard.html">Admin Dashboard</a></li>
+                    <li><a href="analytics.html">Analytics</a></li>
+                    <li><a href="#emergency-contacts">Emergency Contacts</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Emergency Contacts</h3>
+                <p><strong>National Emergency:</strong> 112</p>
+                <p><strong>Coast Guard:</strong> 1554</p>
+                <p><strong>Disaster Management:</strong> 108</p>
             </div>
         </div>
         <div class="footer-bottom">
-            <div class="footer-links">
-                <a href="#">Privacy Policy</a> |
-                <a href="#">Terms of Service</a> |
-                <a href="#">Accessibility</a> |
-                <a href="#">RTI</a> |
-                <a href="#">Sitemap</a> |
-                <a href="#">Help</a>
-            </div>
-            <p>&copy; 2025 Ocean Guard, Ministry of Earth Sciences, Government of India. All rights reserved.</p>
-            <p class="footer-update">Website last updated: 27 Sep 2025 | Best viewed in Chrome, Firefox, Safari</p>
+            <p>&copy; 2025 Ocean Guard Professional Portal, Ministry of Earth Sciences, Government of India. All rights reserved.</p>
         </div>
     </footer>
+
+    <!-- Include API Client -->
+    <script src="../scripts/api-client.js"></script>
+    <!-- Include main script -->
+    <script src="../scripts/script.js"></script>
+    <!-- Include Reports Dashboard functionality -->
+    <script src="../scripts/reports-dashboard.js"></script>
 
 </body>
 </html>

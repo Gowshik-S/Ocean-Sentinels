@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Test - Ocean Hazard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 50px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        button { background: #007bff; color: white; padding: 15px 25px; border: none; border-radius: 5px; cursor: pointer; margin: 10px 5px; }
+        .result { margin: 20px 0; padding: 15px; border-radius: 5px; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        .storage-info { background: #f8f9fa; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>🔧 Authentication Fix Test</h2>
+        
+        <div class="storage-info">
+            <h4>Current Storage Status:</h4>
+            <div id="storageStatus"></div>
+        </div>
+        
+        <div>
+            <button onclick="loginMockUser()">Login Mock User</button>
+            <button onclick="testMyReports()">Test My Reports Access</button>
+            <button onclick="clearAuth()">Clear Auth</button>
+            <button onclick="checkStorage()">Check Storage</button>
+        </div>
+        
+        <div id="result"></div>
+    </div>
+
+    <script src="scripts/api-client.js"></script>
+    <script src="scripts/my-reports.js"></script>
+    <script>
+        function showResult(message, type = 'info') {
+            document.getElementById('result').innerHTML = `<div class="result ${type}">${message}</div>`;
+        }
+
+        function checkStorage() {
+            const sessionUser = sessionStorage.getItem('oceanGuardUser');
+            const localUser = localStorage.getItem('oceanGuardUser');
+            const localToken = localStorage.getItem('oceanGuardToken');
+            
+            const status = `
+                <strong>SessionStorage User:</strong> ${sessionUser ? '✅ Found' : '❌ Not found'}<br>
+                <strong>LocalStorage User:</strong> ${localUser ? '✅ Found' : '❌ Not found'}<br>
+                <strong>LocalStorage Token:</strong> ${localToken ? '✅ Found' : '❌ Not found'}<br>
+                <br>
+                ${sessionUser ? `<strong>Session User:</strong> ${JSON.parse(sessionUser).name}<br>` : ''}
+                ${localUser ? `<strong>Local User:</strong> ${JSON.parse(localUser).name}<br>` : ''}
+                ${localToken ? `<strong>Token:</strong> ${localToken.substring(0, 20)}...<br>` : ''}
+            `;
+            
+            document.getElementById('storageStatus').innerHTML = status;
+        }
+
+        function loginMockUser() {
+            const user = {
+                name: 'Test User',
+                email: 'test@example.com',
+                role: 'public',
+                id: 123
+            };
+            
+            const token = `mock-token-public-${Date.now()}`;
+            
+            // Store in both places
+            sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
+            localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+            localStorage.setItem('oceanGuardToken', token);
+            
+            showResult('✅ Mock user logged in successfully!', 'success');
+            checkStorage();
+        }
+
+        async function testMyReports() {
+            try {
+                showResult('⏳ Testing My Reports access...', 'info');
+                
+                const manager = new MyReportsManager();
+                await manager.checkAuthentication();
+                
+                showResult(`✅ My Reports access successful!<br>
+                           Current User: ${manager.currentUser.full_name}<br>
+                           Role: ${manager.currentUser.role}<br>
+                           🎉 No more "session expired" errors!`, 'success');
+                
+            } catch (error) {
+                showResult(`❌ My Reports access failed:<br>${error.message}`, 'error');
+            }
+            
+            checkStorage();
+        }
+
+        function clearAuth() {
+            sessionStorage.removeItem('oceanGuardUser');
+            localStorage.removeItem('oceanGuardUser');
+            localStorage.removeItem('oceanGuardToken');
+            
+            showResult('🗑️ All authentication data cleared', 'info');
+            checkStorage();
+        }
+
+        // Initial check
+        checkStorage();
+    </script>
+</body>
+</html>

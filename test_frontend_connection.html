@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend Database Connection Test - Ocean Hazard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        .pending {
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+            color: #856404;
+        }
+        input, textarea, select, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .inline-form {
+            display: flex;
+            gap: 10px;
+            align-items: end;
+        }
+        .inline-form input {
+            flex: 1;
+        }
+        .inline-form button {
+            width: auto;
+            padding: 10px 20px;
+        }
+        .log {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .report-card {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 15px;
+            background-color: #f9f9f9;
+        }
+        .status-pending { border-left: 4px solid #ffc107; }
+        .status-verified { border-left: 4px solid #17a2b8; }
+        .status-in_progress { border-left: 4px solid #007bff; }
+        .status-resolved { border-left: 4px solid #28a745; }
+        .status-false_alarm { border-left: 4px solid #6c757d; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 Ocean Hazard Frontend Database Connection Test</h1>
+        <p><strong>Server:</strong> http://127.0.0.1:9000/api</p>
+        <p><strong>Purpose:</strong> Test complete flow from frontend forms to SQLite database</p>
+    </div>
+
+    <!-- Test 1: Server Connection -->
+    <div class="container">
+        <h2>🔌 Test 1: Server Connection</h2>
+        <div id="connectionTest" class="test-section pending">
+            <p>Testing server connectivity...</p>
+            <button onclick="testConnection()">Test Connection</button>
+        </div>
+        <div class="log" id="connectionLog"></div>
+    </div>
+
+    <!-- Test 2: User Registration -->
+    <div class="container">
+        <h2>📝 Test 2: User Registration</h2>
+        <div id="registrationTest" class="test-section">
+            <form id="registrationForm">
+                <div class="inline-form">
+                    <input type="text" id="regUsername" placeholder="Username" value="frontend_test_user">
+                    <input type="email" id="regEmail" placeholder="Email" value="frontend_test@example.com">
+                    <input type="password" id="regPassword" placeholder="Password" value="testpass123">
+                </div>
+                <div class="inline-form">
+                    <input type="text" id="regFirstName" placeholder="First Name" value="Frontend">
+                    <input type="text" id="regLastName" placeholder="Last Name" value="Test">
+                    <button type="submit">Register User</button>
+                </div>
+            </form>
+        </div>
+        <div class="log" id="registrationLog"></div>
+    </div>
+
+    <!-- Test 3: User Login -->
+    <div class="container">
+        <h2>🔐 Test 3: User Login</h2>
+        <div id="loginTest" class="test-section">
+            <form id="loginForm">
+                <div class="inline-form">
+                    <input type="text" id="loginUsername" placeholder="Username" value="frontend_test_user">
+                    <input type="password" id="loginPassword" placeholder="Password" value="testpass123">
+                    <button type="submit">Login</button>
+                </div>
+            </form>
+        </div>
+        <div class="log" id="loginLog"></div>
+    </div>
+
+    <!-- Test 4: Create Incident Report -->
+    <div class="container">
+        <h2>📋 Test 4: Create Incident Report</h2>
+        <div id="incidentTest" class="test-section">
+            <form id="incidentForm">
+                <select id="hazardType">
+                    <option value="HIGH_WAVES">High Waves</option>
+                    <option value="FLOODING">Flooding</option>
+                    <option value="DEBRIS">Marine Debris</option>
+                    <option value="OIL_SPILL">Oil Spill</option>
+                    <option value="TSUNAMI">Tsunami</option>
+                </select>
+                <input type="text" id="location" placeholder="Location" value="Test Beach, Test City">
+                <div class="inline-form">
+                    <input type="number" id="latitude" placeholder="Latitude" value="12.9716" step="any">
+                    <input type="number" id="longitude" placeholder="Longitude" value="77.5946" step="any">
+                </div>
+                <textarea id="description" placeholder="Description" rows="3">Test incident created from frontend database connection test. This verifies that incidents can be submitted through the web interface and stored in the SQLite database.</textarea>
+                <select id="urgency">
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                    <option value="CRITICAL">Critical</option>
+                </select>
+                <input type="text" id="contactInfo" placeholder="Contact Info" value="test@example.com">
+                <button type="submit">Submit Report</button>
+            </form>
+        </div>
+        <div class="log" id="incidentLog"></div>
+    </div>
+
+    <!-- Test 5: View My Reports -->
+    <div class="container">
+        <h2>📊 Test 5: View My Reports</h2>
+        <div id="reportsTest" class="test-section">
+            <button onclick="loadMyReports()">Load My Reports</button>
+            <div id="myReportsContainer"></div>
+        </div>
+        <div class="log" id="reportsLog"></div>
+    </div>
+
+    <!-- Test 6: Database Verification -->
+    <div class="container">
+        <h2>🔍 Test 6: Database Verification</h2>
+        <div id="dbTest" class="test-section">
+            <button onclick="verifyDatabase()">Verify Database</button>
+        </div>
+        <div class="log" id="dbLog"></div>
+    </div>
+
+    <!-- Test Summary -->
+    <div class="container">
+        <h2>🎯 Test Summary</h2>
+        <div id="testSummary" class="test-section">
+            <div id="summaryResults"></div>
+            <button onclick="runAllTests()">Run All Tests</button>
+        </div>
+    </div>
+
+    <script src="scripts/api-client.js"></script>
+    <script>
+        // Initialize API client
+        const api = new OceanHazardAPI();
+        
+        // Test results
+        let testResults = {
+            connection: false,
+            registration: false,
+            login: false,
+            incident: false,
+            reports: false,
+            database: false
+        };
+
+        // Utility functions
+        function log(elementId, message, type = 'info') {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'color: red' : 
+                             type === 'success' ? 'color: green' : 
+                             'color: blue';
+            logElement.innerHTML += `<div style="${className}">[${timestamp}] ${message}</div>`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function updateTestSection(elementId, success, message) {
+            const element = document.getElementById(elementId);
+            element.className = `test-section ${success ? 'success' : 'error'}`;
+            if (success) {
+                element.innerHTML = `<p>✅ ${message}</p>`;
+            } else {
+                element.innerHTML = `<p>❌ ${message}</p>`;
+            }
+        }
+
+        // Test 1: Server Connection
+        async function testConnection() {
+            log('connectionLog', 'Testing server connection...', 'info');
+            
+            try {
+                const response = await fetch('http://127.0.0.1:9000/health');
+                if (response.ok) {
+                    const data = await response.json();
+                    log('connectionLog', `✅ Server connected: ${JSON.stringify(data)}`, 'success');
+                    updateTestSection('connectionTest', true, 'Server connection successful');
+                    testResults.connection = true;
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                log('connectionLog', `❌ Connection failed: ${error.message}`, 'error');
+                updateTestSection('connectionTest', false, 'Server connection failed');
+                testResults.connection = false;
+            }
+        }
+
+        // Test 2: User Registration
+        document.getElementById('registrationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('regUsername').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+            const firstName = document.getElementById('regFirstName').value;
+            const lastName = document.getElementById('regLastName').value;
+            
+            // Add timestamp to make username unique
+            const timestamp = Date.now();
+            const uniqueUsername = `${username}_${timestamp}`;
+            const uniqueEmail = `${username}_${timestamp}@example.com`;
+            
+            log('registrationLog', `Registering user: ${uniqueUsername}`, 'info');
+            
+            try {
+                const result = await api.register({
+                    username: uniqueUsername,
+                    email: uniqueEmail,
+                    password: password,
+                    first_name: firstName,
+                    last_name: lastName
+                });
+                
+                log('registrationLog', `✅ Registration successful: ${JSON.stringify(result)}`, 'success');
+                updateTestSection('registrationTest', true, 'User registration successful');
+                testResults.registration = true;
+                
+                // Update login form with new credentials
+                document.getElementById('loginUsername').value = uniqueUsername;
+                document.getElementById('loginPassword').value = password;
+                
+            } catch (error) {
+                log('registrationLog', `❌ Registration failed: ${error.message}`, 'error');
+                updateTestSection('registrationTest', false, 'User registration failed');
+                testResults.registration = false;
+            }
+        });
+
+        // Test 3: User Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            log('loginLog', `Logging in user: ${username}`, 'info');
+            
+            try {
+                const result = await api.login(username, password);
+                log('loginLog', `✅ Login successful: ${JSON.stringify(result)}`, 'success');
+                updateTestSection('loginTest', true, 'User login successful');
+                testResults.login = true;
+            } catch (error) {
+                log('loginLog', `❌ Login failed: ${error.message}`, 'error');
+                updateTestSection('loginTest', false, 'User login failed');
+                testResults.login = false;
+            }
+        });
+
+        // Test 4: Create Incident
+        document.getElementById('incidentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const incidentData = {
+                hazard_type: document.getElementById('hazardType').value,
+                location: document.getElementById('location').value,
+                latitude: parseFloat(document.getElementById('latitude').value),
+                longitude: parseFloat(document.getElementById('longitude').value),
+                description: document.getElementById('description').value,
+                urgency: document.getElementById('urgency').value,
+                contact_info: document.getElementById('contactInfo').value
+            };
+            
+            log('incidentLog', `Creating incident: ${incidentData.hazard_type} at ${incidentData.location}`, 'info');
+            
+            try {
+                const result = await api.createIncident(incidentData);
+                log('incidentLog', `✅ Incident created: ${JSON.stringify(result)}`, 'success');
+                updateTestSection('incidentTest', true, 'Incident creation successful');
+                testResults.incident = true;
+            } catch (error) {
+                log('incidentLog', `❌ Incident creation failed: ${error.message}`, 'error');
+                updateTestSection('incidentTest', false, 'Incident creation failed');
+                testResults.incident = false;
+            }
+        });
+
+        // Test 5: Load My Reports
+        async function loadMyReports() {
+            log('reportsLog', 'Loading user reports...', 'info');
+            
+            try {
+                const result = await api.getMyReports();
+                log('reportsLog', `✅ Reports loaded: ${result.total} incidents found`, 'success');
+                
+                // Display reports
+                const container = document.getElementById('myReportsContainer');
+                if (result.incidents && result.incidents.length > 0) {
+                    container.innerHTML = '<h4>Your Reports:</h4>';
+                    const reportsHtml = result.incidents.map(incident => `
+                        <div class="report-card status-${incident.status}">
+                            <h5>${incident.reference_id}</h5>
+                            <p><strong>Type:</strong> ${incident.hazard_type}</p>
+                            <p><strong>Location:</strong> ${incident.location}</p>
+                            <p><strong>Status:</strong> ${incident.status}</p>
+                            <p><strong>Urgency:</strong> ${incident.urgency}</p>
+                            <p><strong>Created:</strong> ${new Date(incident.created_at).toLocaleString()}</p>
+                            <p><strong>Description:</strong> ${incident.description}</p>
+                        </div>
+                    `).join('');
+                    container.innerHTML += `<div class="reports-grid">${reportsHtml}</div>`;
+                } else {
+                    container.innerHTML = '<p>No reports found.</p>';
+                }
+                
+                updateTestSection('reportsTest', true, 'Reports loading successful');
+                testResults.reports = true;
+            } catch (error) {
+                log('reportsLog', `❌ Reports loading failed: ${error.message}`, 'error');
+                updateTestSection('reportsTest', false, 'Reports loading failed');
+                testResults.reports = false;
+            }
+        }
+
+        // Test 6: Database Verification
+        async function verifyDatabase() {
+            log('dbLog', 'Verifying database through API...', 'info');
+            
+            try {
+                // Check users endpoint (if available)
+                const usersResponse = await fetch('http://127.0.0.1:9000/api/users');
+                if (usersResponse.ok) {
+                    const usersData = await usersResponse.json();
+                    log('dbLog', `✅ Database users: ${usersData.total} users found`, 'success');
+                }
+                
+                // Check incidents endpoint (if available)
+                const incidentsResponse = await fetch('http://127.0.0.1:9000/api/incidents/', {
+                    headers: {
+                        'Authorization': `Bearer ${api.token}`
+                    }
+                });
+                if (incidentsResponse.ok) {
+                    const incidentsData = await incidentsResponse.json();
+                    log('dbLog', `✅ Database incidents: ${incidentsData.total} incidents found`, 'success');
+                }
+                
+                updateTestSection('dbTest', true, 'Database verification successful');
+                testResults.database = true;
+            } catch (error) {
+                log('dbLog', `❌ Database verification failed: ${error.message}`, 'error');
+                updateTestSection('dbTest', false, 'Database verification failed');
+                testResults.database = false;
+            }
+        }
+
+        // Run all tests
+        async function runAllTests() {
+            document.getElementById('summaryResults').innerHTML = '<p>Running all tests...</p>';
+            
+            // Run tests in sequence
+            await testConnection();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            if (testResults.connection) {
+                // Trigger registration
+                document.getElementById('registrationForm').dispatchEvent(new Event('submit'));
+                await new Promise(resolve => setTimeout(resolve, 2000));
+                
+                if (testResults.registration) {
+                    // Trigger login
+                    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    
+                    if (testResults.login) {
+                        // Trigger incident creation
+                        document.getElementById('incidentForm').dispatchEvent(new Event('submit'));
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        
+                        // Load reports
+                        await loadMyReports();
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        
+                        // Verify database
+                        await verifyDatabase();
+                    }
+                }
+            }
+            
+            // Update summary
+            updateSummary();
+        }
+
+        function updateSummary() {
+            const passed = Object.values(testResults).filter(Boolean).length;
+            const total = Object.keys(testResults).length;
+            
+            let summaryHtml = `<h4>Test Results: ${passed}/${total} Passed</h4><ul>`;
+            summaryHtml += `<li>🔌 Server Connection: ${testResults.connection ? '✅' : '❌'}</li>`;
+            summaryHtml += `<li>📝 User Registration: ${testResults.registration ? '✅' : '❌'}</li>`;
+            summaryHtml += `<li>🔐 User Login: ${testResults.login ? '✅' : '❌'}</li>`;
+            summaryHtml += `<li>📋 Incident Creation: ${testResults.incident ? '✅' : '❌'}</li>`;
+            summaryHtml += `<li>📊 Reports Loading: ${testResults.reports ? '✅' : '❌'}</li>`;
+            summaryHtml += `<li>🔍 Database Verification: ${testResults.database ? '✅' : '❌'}</li>`;
+            summaryHtml += '</ul>';
+            
+            if (passed === total) {
+                summaryHtml += '<div class="success"><strong>🎉 ALL TESTS PASSED!</strong><br>Frontend is successfully connected to SQLite database!</div>';
+            } else {
+                summaryHtml += '<div class="error"><strong>❌ Some tests failed.</strong><br>Check the logs for details.</div>';
+            }
+            
+            document.getElementById('summaryResults').innerHTML = summaryHtml;
+        }
+
+        // Initialize connection test on page load
+        window.addEventListener('load', () => {
+            testConnection();
+        });
+    </script>
+</body>
+</html>

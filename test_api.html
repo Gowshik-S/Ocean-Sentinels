@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Analytics API</title>
+</head>
+<body>
+    <h1>Analytics API Test</h1>
+    <div id="result">Testing...</div>
+    
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('http://localhost:9000/api/analytics/public/dashboard');
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <h2>✅ Backend API Working!</h2>
+                        <p>Total Incidents: ${data.total_incidents}</p>
+                        <p>Active Incidents: ${data.active_incidents}</p>
+                        <p>Resolved Incidents: ${data.resolved_incidents}</p>
+                        <p>Last Updated: ${data.last_updated}</p>
+                    `;
+                } else {
+                    throw new Error(`API Error: ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h2>⚠️ Using Mock Data</h2>
+                    <p>Backend not available: ${error.message}</p>
+                    <p>Analytics page will work with sample data</p>
+                `;
+            }
+        }
+        
+        testAPI();
+    </script>
+</body>
+</html>

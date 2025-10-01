@@ -18,12 +18,11 @@
             <ul class="nav-menu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
-                <li><a href="reports.html">Incident Reports</a></li>
                 <li><a href="my-reports.html" class="active">My Reports</a></li>
                 <li><a href="#">About Us</a></li>
             </ul>
             <div class="nav-actions">
-                <span class="welcome-user">Welcome, Gowshik S.</span>
+                <span class="welcome-user" id="welcome-message">Welcome, User</span>
                 <a href="index.html#report-hazard" class="btn btn--primary">New Report</a>
                 <a href="index.html" class="btn btn--secondary" id="logout-btn">Logout</a>
             </div>
@@ -36,47 +35,37 @@
             <p>Thank you for being an active Ocean Guard. Here is the status of all your reports.</p>
             <div class="user-stats">
                 <div class="stat-item">
-                    <span class="stat-number">5</span>
+                    <span class="stat-number" id="total-reports">0</span>
                     <span class="stat-label">Total Reports</span>
                 </div>
                 <div class="stat-item">
-                    <span class="stat-number">3</span>
+                    <span class="stat-number" id="resolved-reports">0</span>
                     <span class="stat-label">Reports Resolved</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="active-reports">0</span>
+                    <span class="stat-label">Active Reports</span>
                 </div>
             </div>
         </section>
 
-        <section class="reports-grid">
-
-            <div class="report-card">
-                <div class="card-header">
-                    <h3>High Wave Sighting</h3>
-                    <span class="status-badge status-badge--resolved">Resolved</span>
-                </div>
-                <div class="card-body">
-                    <p class="location"><i class="fas fa-map-marker-alt"></i> Marina Beach, Chennai</p>
-                    <p class="timestamp"><i class="fas fa-clock"></i> You reported this on: 27 Sep 2025, 12:45 AM</p>
-                </div>
-                <div class="card-actions">
-                    <a href="#" class="btn btn--secondary">View Details</a>
-                </div>
+        <section class="reports-grid" id="reports-container">
+            <!-- Loading message -->
+            <div class="loading-message" id="loading-message">
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Loading your reports...</p>
             </div>
-
-            <div class="report-card">
-                <div class="card-header">
-                    <h3>Coastal Flooding</h3>
-                    <span class="status-badge status-badge--active">Active</span>
-                </div>
-                <div class="card-body">
-                    <p class="location"><i class="fas fa-map-marker-alt"></i> Panjim, Goa</p>
-                    <p class="timestamp"><i class="fas fa-clock"></i> You reported this on: 26 Sep 2025, 11:30 PM</p>
-                </div>
-                <div class="card-actions">
-                    <a href="#" class="btn btn--secondary">View Details</a>
-                </div>
+            
+            <!-- No reports message -->
+            <div class="no-reports-message" id="no-reports-message" style="display: none;">
+                <i class="fas fa-clipboard-list"></i>
+                <h3>No Reports Yet</h3>
+                <p>You haven't submitted any reports yet. Start by reporting a coastal hazard to help keep our waters safe.</p>
+                <a href="index.html#report-hazard" class="btn btn--primary">Submit Your First Report</a>
             </div>
-
-            </section>
+            
+            <!-- Dynamic reports will be loaded here -->
+        </section>
     </main>
 
     <footer class="main-footer">
@@ -142,6 +131,11 @@
             <p class="footer-update">Website last updated: 27 Sep 2025 | Best viewed in Chrome, Firefox, Safari</p>
         </div>
     </footer>
+
+    <!-- Include API Client -->
+    <script src="../scripts/api-client.js"></script>
+    <!-- Include My Reports specific functionality -->
+    <script src="../scripts/my-reports.js"></script>
 
 </body>
 </html>

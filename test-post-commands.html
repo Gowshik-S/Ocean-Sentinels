@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ocean Hazard POST Commands Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .endpoint-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .endpoint-section h3 {
+            color: #333;
+            margin-top: 0;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-login { background: #007bff; }
+        .btn-register { background: #28a745; }
+        .btn-incident { background: #ffc107; color: #333; }
+        .btn-admin { background: #dc3545; }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 5px;
+            background: #f8f9fa;
+            border-left: 4px solid #007bff;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .success {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .token-display {
+            background: #e7f3ff;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: monospace;
+            word-break: break-all;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 Ocean Hazard POST Commands Test Interface</h1>
+        <p>This page demonstrates all available POST endpoints in the Ocean Hazard API.</p>
+        
+        <!-- Token Display -->
+        <div id="token-section" style="display: none;">
+            <h3>🔑 Current Tokens</h3>
+            <div id="admin-token" class="token-display" style="display: none;">
+                <strong>Admin Token:</strong> <span id="admin-token-value"></span>
+            </div>
+            <div id="user-token" class="token-display" style="display: none;">
+                <strong>User Token:</strong> <span id="user-token-value"></span>
+            </div>
+        </div>
+        
+        <!-- 1. Login Form Data -->
+        <div class="endpoint-section">
+            <h3>1. POST /api/auth/login (Form Data)</h3>
+            <p><strong>Purpose:</strong> Login with form data (username/password as form fields)</p>
+            
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="login-username" value="admin" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="login-password" value="admin" placeholder="Enter password">
+            </div>
+            
+            <button class="btn btn-login" onclick="testLoginForm()">Test Login (Form)</button>
+            <div id="login-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- 2. Login JSON -->
+        <div class="endpoint-section">
+            <h3>2. POST /api/auth/login-json (JSON Data)</h3>
+            <p><strong>Purpose:</strong> Login with JSON data</p>
+            
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="login-json-username" value="user" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="login-json-password" value="user" placeholder="Enter password">
+            </div>
+            
+            <button class="btn btn-login" onclick="testLoginJSON()">Test Login (JSON)</button>
+            <div id="login-json-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- 3. Register JSON -->
+        <div class="endpoint-section">
+            <h3>3. POST /api/auth/register (JSON Registration)</h3>
+            <p><strong>Purpose:</strong> Register new user with JSON data</p>
+            
+            <div class="form-group">
+                <label>Username:</label>
+                <input type="text" id="reg-username" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="reg-email" placeholder="Enter email">
+            </div>
+            <div class="form-group">
+                <label>Password:</label>
+                <input type="password" id="reg-password" placeholder="Enter password">
+            </div>
+            <div class="form-group">
+                <label>First Name:</label>
+                <input type="text" id="reg-firstname" placeholder="Enter first name">
+            </div>
+            <div class="form-group">
+                <label>Last Name:</label>
+                <input type="text" id="reg-lastname" placeholder="Enter last name">
+            </div>
+            
+            <button class="btn btn-register" onclick="testRegisterJSON()">Test Register (JSON)</button>
+            <div id="register-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- 4. Create Incident -->
+        <div class="endpoint-section">
+            <h3>4. POST /api/incidents/ (Create Incident)</h3>
+            <p><strong>Purpose:</strong> Create new incident report (Requires user token)</p>
+            
+            <div class="form-group">
+                <label>Hazard Type:</label>
+                <select id="incident-hazard">
+                    <option value="HIGH_WAVES">High Waves</option>
+                    <option value="TSUNAMI">Tsunami</option>
+                    <option value="DEBRIS">Debris</option>
+                    <option value="FLOODING">Flooding</option>
+                    <option value="OTHER">Other</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Location:</label>
+                <input type="text" id="incident-location" value="Marina Beach, Chennai" placeholder="Enter location">
+            </div>
+            <div class="form-group">
+                <label>Latitude:</label>
+                <input type="number" id="incident-lat" value="13.0475" step="any" placeholder="Enter latitude">
+            </div>
+            <div class="form-group">
+                <label>Longitude:</label>
+                <input type="number" id="incident-lng" value="80.2824" step="any" placeholder="Enter longitude">
+            </div>
+            <div class="form-group">
+                <label>Description:</label>
+                <textarea id="incident-desc" placeholder="Enter incident description">Extremely high waves observed at Marina Beach. Dangerous for swimmers and fishermen.</textarea>
+            </div>
+            <div class="form-group">
+                <label>Urgency:</label>
+                <select id="incident-urgency">
+                    <option value="LOW">Low</option>
+                    <option value="MEDIUM">Medium</option>
+                    <option value="HIGH">High</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Contact Info:</label>
+                <input type="text" id="incident-contact" value="+91 9876543210" placeholder="Enter contact information">
+            </div>
+            
+            <button class="btn btn-incident" onclick="testCreateIncident()">Test Create Incident</button>
+            <div id="incident-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- 5. Add Rescue Team -->
+        <div class="endpoint-section">
+            <h3>5. POST /api/admin/teams/ (Add Rescue Team - Admin Only)</h3>
+            <p><strong>Purpose:</strong> Add new rescue team (Requires admin token)</p>
+            
+            <div class="form-group">
+                <label>Team Name:</label>
+                <input type="text" id="team-name" value="Chennai Coast Guard Team Alpha" placeholder="Enter team name">
+            </div>
+            <div class="form-group">
+                <label>Location:</label>
+                <input type="text" id="team-location" value="Chennai Port" placeholder="Enter team location">
+            </div>
+            <div class="form-group">
+                <label>Contact Number:</label>
+                <input type="text" id="team-contact" value="+91 44-25361234" placeholder="Enter contact number">
+            </div>
+            <div class="form-group">
+                <label>Team Leader:</label>
+                <input type="text" id="team-leader" value="Captain Rajesh Kumar" placeholder="Enter team leader name">
+            </div>
+            
+            <button class="btn btn-admin" onclick="testAddTeam()">Test Add Rescue Team</button>
+            <div id="team-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <!-- 6. Add Authority -->
+        <div class="endpoint-section">
+            <h3>6. POST /api/admin/authorities/ (Add Authority - Admin Only)</h3>
+            <p><strong>Purpose:</strong> Add new authority (Requires admin token)</p>
+            
+            <div class="form-group">
+                <label>Authority Name:</label>
+                <input type="text" id="auth-name" value="Dr. Priya Sharma" placeholder="Enter authority name">
+            </div>
+            <div class="form-group">
+                <label>Position:</label>
+                <input type="text" id="auth-position" value="Regional Director" placeholder="Enter position">
+            </div>
+            <div class="form-group">
+                <label>Email:</label>
+                <input type="email" id="auth-email" value="priya.sharma@tamilnadu.gov.in" placeholder="Enter email">
+            </div>
+            <div class="form-group">
+                <label>Department:</label>
+                <input type="text" id="auth-department" value="Tamil Nadu State Disaster Management Authority" placeholder="Enter department">
+            </div>
+            
+            <button class="btn btn-admin" onclick="testAddAuthority()">Test Add Authority</button>
+            <div id="authority-result" class="result" style="display: none;"></div>
+        </div>
+    </div>
+    
+    <script>
+        let adminToken = '';
+        let userToken = '';
+        
+        function showResult(elementId, data, isError = false) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.className = `result ${isError ? 'error' : 'success'}`;
+            element.textContent = typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+        }
+        
+        function updateTokenDisplay() {
+            const tokenSection = document.getElementById('token-section');
+            const adminTokenDiv = document.getElementById('admin-token');
+            const userTokenDiv = document.getElementById('user-token');
+            
+            if (adminToken || userToken) {
+                tokenSection.style.display = 'block';
+            }
+            
+            if (adminToken) {
+                adminTokenDiv.style.display = 'block';
+                document.getElementById('admin-token-value').textContent = adminToken;
+            }
+            
+            if (userToken) {
+                userTokenDiv.style.display = 'block';
+                document.getElementById('user-token-value').textContent = userToken;
+            }
+        }
+        
+        async function testLoginForm() {
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const formData = new FormData();
+                formData.append('username', username);
+                formData.append('password', password);
+                
+                const response = await fetch('http://127.0.0.1:8002/api/auth/login', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    if (result.user && result.user.role === 'admin') {
+                        adminToken = result.access_token;
+                    } else {
+                        userToken = result.access_token;
+                    }
+                    updateTokenDisplay();
+                    showResult('login-result', result);
+                } else {
+                    showResult('login-result', result, true);
+                }
+            } catch (error) {
+                showResult('login-result', 'Error: ' + error.message, true);
+            }
+        }
+        
+        async function testLoginJSON() {
+            const username = document.getElementById('login-json-username').value;
+            const password = document.getElementById('login-json-password').value;
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8002/api/auth/login-json', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    if (result.user && result.user.role === 'admin') {
+                        adminToken = result.access_token;
+                    } else {
+                        userToken = result.access_token;
+                    }
+                    updateTokenDisplay();
+                    showResult('login-json-result', result);
+                } else {
+                    showResult('login-json-result', result, true);
+                }
+            } catch (error) {
+                showResult('login-json-result', 'Error: ' + error.message, true);
+            }
+        }
+        
+        async function testRegisterJSON() {
+            const timestamp = Date.now();
+            const userData = {
+                username: document.getElementById('reg-username').value || `user${timestamp}`,
+                email: document.getElementById('reg-email').value || `user${timestamp}@example.com`,
+                password: document.getElementById('reg-password').value || 'password123',
+                first_name: document.getElementById('reg-firstname').value || 'Test',
+                last_name: document.getElementById('reg-lastname').value || 'User'
+            };
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8002/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(userData)
+                });
+                
+                const result = await response.json();
+                showResult('register-result', result, !response.ok);
+            } catch (error) {
+                showResult('register-result', 'Error: ' + error.message, true);
+            }
+        }
+        
+        async function testCreateIncident() {
+            if (!userToken && !adminToken) {
+                showResult('incident-result', 'Error: Please login first to get a token', true);
+                return;
+            }
+            
+            const token = userToken || adminToken;
+            const incidentData = {
+                hazard_type: document.getElementById('incident-hazard').value,
+                location: document.getElementById('incident-location').value,
+                latitude: parseFloat(document.getElementById('incident-lat').value),
+                longitude: parseFloat(document.getElementById('incident-lng').value),
+                description: document.getElementById('incident-desc').value,
+                urgency: document.getElementById('incident-urgency').value,
+                contact_info: document.getElementById('incident-contact').value
+            };
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8002/api/incidents/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(incidentData)
+                });
+                
+                const result = await response.json();
+                showResult('incident-result', result, !response.ok);
+            } catch (error) {
+                showResult('incident-result', 'Error: ' + error.message, true);
+            }
+        }
+        
+        async function testAddTeam() {
+            if (!adminToken) {
+                showResult('team-result', 'Error: Admin token required. Please login as admin first.', true);
+                return;
+            }
+            
+            const teamData = {
+                id: Date.now(),
+                name: document.getElementById('team-name').value,
+                type: 'marine_rescue',
+                location: document.getElementById('team-location').value,
+                contact_number: document.getElementById('team-contact').value,
+                email: 'team@coastguard.gov.in',
+                leader: document.getElementById('team-leader').value,
+                members_count: 12,
+                equipment: ['rescue_boats', 'diving_gear', 'medical_kit'],
+                status: 'active'
+            };
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8002/api/admin/teams/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify(teamData)
+                });
+                
+                const result = await response.json();
+                showResult('team-result', result, !response.ok);
+            } catch (error) {
+                showResult('team-result', 'Error: ' + error.message, true);
+            }
+        }
+        
+        async function testAddAuthority() {
+            if (!adminToken) {
+                showResult('authority-result', 'Error: Admin token required. Please login as admin first.', true);
+                return;
+            }
+            
+            const authorityData = {
+                id: Date.now(),
+                name: document.getElementById('auth-name').value,
+                position: document.getElementById('auth-position').value,
+                email: document.getElementById('auth-email').value,
+                phone: '+91 44-28411234',
+                department: document.getElementById('auth-department').value,
+                level: 'state',
+                jurisdiction: 'State coastal disaster management',
+                status: 'active'
+            };
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8002/api/admin/authorities/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${adminToken}`
+                    },
+                    body: JSON.stringify(authorityData)
+                });
+                
+                const result = await response.json();
+                showResult('authority-result', result, !response.ok);
+            } catch (error) {
+                showResult('authority-result', 'Error: ' + error.message, true);
+            }
+        }
+    </script>
+</body>
+</html>

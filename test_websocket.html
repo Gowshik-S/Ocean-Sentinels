@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test - Ocean Hazard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        button:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        #log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 Ocean Hazard WebSocket Test</h1>
+        
+        <div class="test-section">
+            <h3>Connection Test</h3>
+            <p>Test WebSocket connection to: <code>ws://127.0.0.1:9000/api/ws/incidents</code></p>
+            <button id="connectBtn" onclick="testWebSocketConnection()">Connect WebSocket</button>
+            <button id="disconnectBtn" onclick="disconnectWebSocket()" disabled>Disconnect</button>
+            <button id="pingBtn" onclick="sendPing()" disabled>Send Ping</button>
+            <button id="clearBtn" onclick="clearLog()">Clear Log</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Connection Status</h3>
+            <p>Status: <span id="status">Disconnected</span></p>
+            <p>URL: <span id="wsUrl">ws://127.0.0.1:9000/api/ws/incidents</span></p>
+        </div>
+
+        <div class="test-section">
+            <h3>Log Output</h3>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        let websocket = null;
+        
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('log');
+            const timestamp = new Date().toISOString().split('T')[1].split('.')[0];
+            const logEntry = document.createElement('div');
+            logEntry.className = type;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            logElement.appendChild(logEntry);
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+        
+        function updateStatus(status) {
+            document.getElementById('status').textContent = status;
+        }
+        
+        function updateButtonStates(connected) {
+            document.getElementById('connectBtn').disabled = connected;
+            document.getElementById('disconnectBtn').disabled = !connected;
+            document.getElementById('pingBtn').disabled = !connected;
+        }
+        
+        function testWebSocketConnection() {
+            const wsUrl = 'ws://127.0.0.1:9000/api/ws/incidents';
+            log(`🔌 Attempting to connect to: ${wsUrl}`, 'info');
+            
+            try {
+                websocket = new WebSocket(wsUrl);
+                
+                websocket.onopen = (event) => {
+                    log('✅ WebSocket connection opened successfully!', 'success');
+                    updateStatus('Connected');
+                    updateButtonStates(true);
+                    
+                    // Send initial test message
+                    setTimeout(() => {
+                        sendPing();
+                    }, 1000);
+                };
+                
+                websocket.onmessage = (event) => {
+                    try {
+                        const data = JSON.parse(event.data);
+                        log(`📨 Received: ${JSON.stringify(data, null, 2)}`, 'success');
+                    } catch (e) {
+                        log(`📨 Received (raw): ${event.data}`, 'info');
+                    }
+                };
+                
+                websocket.onclose = (event) => {
+                    log(`🔌 Connection closed. Code: ${event.code}, Reason: ${event.reason || 'No reason provided'}`, 'info');
+                    updateStatus('Disconnected');
+                    updateButtonStates(false);
+                    websocket = null;
+                };
+                
+                websocket.onerror = (error) => {
+                    log(`❌ WebSocket error occurred: ${error}`, 'error');
+                    updateStatus('Error');
+                    updateButtonStates(false);
+                };
+                
+            } catch (error) {
+                log(`❌ Failed to create WebSocket: ${error.message}`, 'error');
+                updateStatus('Error');
+            }
+        }
+        
+        function disconnectWebSocket() {
+            if (websocket) {
+                log('🔚 Manually closing WebSocket connection', 'info');
+                websocket.close();
+            }
+        }
+        
+        function sendPing() {
+            if (websocket && websocket.readyState === WebSocket.OPEN) {
+                const pingMessage = {
+                    type: 'ping',
+                    timestamp: new Date().toISOString()
+                };
+                websocket.send(JSON.stringify(pingMessage));
+                log(`📤 Sent ping: ${JSON.stringify(pingMessage)}`, 'info');
+            } else {
+                log('❌ WebSocket is not connected', 'error');
+            }
+        }
+        
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+        
+        // Initial log
+        log('🧪 WebSocket Test Page Loaded', 'info');
+        log('🏠 Backend Server: http://127.0.0.1:9000', 'info');
+        log('🔌 WebSocket URL: ws://127.0.0.1:9000/api/ws/incidents', 'info');
+    </script>
+</body>
+</html>

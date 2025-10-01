@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Ocean blue background circle -->
+  <circle cx="16" cy="16" r="15" fill="#1e40af" stroke="#ffffff" stroke-width="1"/>
+  
+  <!-- Ocean waves -->
+  <path d="M6 16 Q11 12 16 16 Q21 20 26 16" stroke="#ffffff" stroke-width="2" fill="none"/>
+  <path d="M6 20 Q11 16 16 20 Q21 24 26 20" stroke="#ffffff" stroke-width="1.5" fill="none"/>
+  
+  <!-- Small wave accent -->
+  <path d="M8 12 Q12 10 16 12" stroke="#ffffff" stroke-width="1" fill="none"/>
+</svg>

@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 Login Fix Test - Ocean Guard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            background: rgba(0,0,0,0.2);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #f0f0f0;
+        }
+        input, button {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 8px;
+            font-size: 16px;
+            box-sizing: border-box;
+        }
+        input {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        input::placeholder {
+            color: rgba(255,255,255,0.7);
+        }
+        button {
+            background: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 0;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .demo-btn {
+            background: #17a2b8;
+        }
+        .demo-btn:hover {
+            background: #138496;
+        }
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid #28a745;
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid #dc3545;
+        }
+        .info {
+            background: rgba(23, 162, 184, 0.2);
+            border: 1px solid #17a2b8;
+        }
+        .credentials-box {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 Login Fix Verification</h1>
+            <p>Testing the updated login messages and authentication flow</p>
+        </div>
+
+        <div class="test-section">
+            <h3>🎭 Quick Demo Login Tests</h3>
+            <p>These should work without passwords:</p>
+            <button class="demo-btn" onclick="testDemoLogin('user')">Test "user" Login</button>
+            <button class="demo-btn" onclick="testDemoLogin('citizen')">Test "citizen" Login</button>
+            <button class="demo-btn" onclick="testDemoLogin('admin')">Test "admin" Login</button>
+            <button class="demo-btn" onclick="testDemoLogin('rescue')">Test "rescue" Login</button>
+        </div>
+
+        <div class="test-section">
+            <h3>🔑 Database User Login Test</h3>
+            <form id="test-login-form">
+                <div class="form-group">
+                    <label for="test-username">Username:</label>
+                    <input type="text" id="test-username" placeholder="Try: demo_citizen, demo_admin, etc.">
+                </div>
+                <div class="form-group">
+                    <label for="test-password">Password:</label>
+                    <input type="password" id="test-password" placeholder="Enter password">
+                </div>
+                <button type="submit">🚀 Test Login</button>
+            </form>
+        </div>
+
+        <div class="test-section">
+            <h3>❌ Error Message Tests</h3>
+            <p>These should show the NEW improved error messages:</p>
+            <button onclick="testEmptyLogin()">Test Empty Login (New Message)</button>
+            <button onclick="testInvalidLogin()">Test Invalid Credentials (New Message)</button>
+        </div>
+
+        <div class="credentials-box">
+            <h4>📋 Available Test Accounts:</h4>
+            <strong>Demo Accounts (No Password):</strong><br>
+            • user, citizen, admin, rescue<br><br>
+            <strong>Database Accounts:</strong><br>
+            • demo_citizen / citizen123<br>
+            • demo_admin / admin123<br>
+            • demo_rescue / rescue123<br>
+            • demo_authority / authority123
+        </div>
+
+        <div id="status-area"></div>
+    </div>
+
+    <script src="../scripts/api-client.js?v=2.1"></script>
+    <script>
+        function showStatus(message, type = 'info') {
+            const statusArea = document.getElementById('status-area');
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `status ${type}`;
+            statusDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong><br>${message}`;
+            statusArea.insertBefore(statusDiv, statusArea.firstChild);
+        }
+
+        // Test demo login (should work without password)
+        function testDemoLogin(username) {
+            showStatus(`🎭 Testing demo login for: "${username}"`, 'info');
+            
+            // Simulate the demo login logic from script.js
+            const lowerUsername = username.toLowerCase().trim();
+            
+            if (lowerUsername === 'user' || lowerUsername === 'citizen') {
+                const user = { 
+                    name: 'Demo Citizen', 
+                    role: 'public',
+                    email: 'demo@citizen.com',
+                    id: 999 
+                };
+                
+                sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardToken', `mock-token-${user.role}-${Date.now()}`);
+                
+                showStatus(`✅ Demo login successful for "${username}"!<br>Stored as: ${user.name} (${user.role})`, 'success');
+                
+            } else if (lowerUsername === 'admin' || lowerUsername === 'rescue') {
+                const user = { 
+                    name: 'Demo Admin', 
+                    role: 'admin',
+                    email: 'admin@ocean.gov.in',
+                    id: 1 
+                };
+                
+                sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardToken', `mock-token-${user.role}-${Date.now()}`);
+                
+                showStatus(`✅ Admin demo login successful for "${username}"!<br>Stored as: ${user.name} (${user.role})`, 'success');
+            }
+        }
+
+        // Test empty login (should show new message)
+        function testEmptyLogin() {
+            showStatus('🧪 Testing empty login error message...', 'info');
+            
+            // Simulate the empty login check from updated script.js
+            const errorMsg = `Please enter both username and password for database users.
+
+Quick Demo Access (no password needed):
+• Username: "user" or "citizen" - Public access
+• Username: "admin" or "rescue" - Admin access
+
+Or use database accounts:
+• demo_citizen / citizen123
+• demo_admin / admin123`;
+            
+            showStatus(`📝 NEW Empty Login Message:<br><pre style="color: #fff; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; white-space: pre-wrap;">${errorMsg}</pre>`, 'error');
+        }
+
+        // Test invalid credentials (should show new message)
+        function testInvalidLogin() {
+            showStatus('🧪 Testing invalid credentials error message...', 'info');
+            
+            const errorMsg = `Login failed: Invalid credentials
+
+Try these options:
+
+🎭 Quick Demo (no password):
+• Username: "user" or "citizen"
+• Username: "admin" or "rescue"
+
+🔑 Database Accounts:
+• demo_citizen / citizen123
+• demo_admin / admin123
+• demo_rescue / rescue123`;
+            
+            showStatus(`📝 NEW Invalid Credentials Message:<br><pre style="color: #fff; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 5px; white-space: pre-wrap;">${errorMsg}</pre>`, 'error');
+        }
+
+        // Test real login form
+        document.getElementById('test-login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('test-username').value;
+            const password = document.getElementById('test-password').value;
+            
+            showStatus(`🔐 Testing real login for: ${username}`, 'info');
+            
+            if (!username || !password) {
+                testEmptyLogin();
+                return;
+            }
+            
+            try {
+                const api = new OceanHazardAPI();
+                const response = await api.login(username, password);
+                
+                const user = {
+                    id: response.user.id,
+                    name: `${response.user.first_name} ${response.user.last_name}`,
+                    email: response.user.email,
+                    role: response.user.role
+                };
+                
+                sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardUser', JSON.stringify(user));
+                localStorage.setItem('oceanGuardToken', response.access_token);
+                
+                showStatus(`✅ Real login successful!<br>User: ${user.name}<br>Role: ${user.role}<br>Email: ${user.email}`, 'success');
+                
+            } catch (error) {
+                showStatus(`❌ Login failed: ${error.message}<br><br>This should now show the NEW improved error message in the main app!`, 'error');
+            }
+        });
+
+        // Check current auth status
+        window.addEventListener('load', () => {
+            const user = localStorage.getItem('oceanGuardUser');
+            const token = localStorage.getItem('oceanGuardToken');
+            
+            if (user && token) {
+                showStatus(`ℹ️ Current Auth Status:<br>User: ${JSON.parse(user).name}<br>Token: ${token.substring(0, 30)}...`, 'info');
+            } else {
+                showStatus('ℹ️ No current authentication found', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

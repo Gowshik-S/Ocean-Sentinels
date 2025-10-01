@@ -5,6 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ocean Guard - India's Coastal Safety Network</title>
     
+    <!-- Favicon to prevent 404 errors -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231e40af'/%3E%3Cpath d='M6 16 Q11 12 16 16 Q21 20 26 16' stroke='white' stroke-width='2' fill='none'/%3E%3Cpath d='M6 20 Q11 16 16 20 Q21 24 26 20' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E">
+    
     <link rel="stylesheet" href="../styles/styles.css">
     
     <!-- Mapbox CSS -->
@@ -20,9 +23,8 @@
             <ul class="nav-menu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
-                <li><a href="reports.html">Incident Reports</a></li>
                 <li><a href="my-reports.html">My Reports</a></li>
-                <li><a href="#main-footer">About Us</a></li>
+                <li><a href="#about-us">About Us</a></li>
             </ul>
             <div class="nav-actions">
                 <a href="#" class="btn btn--secondary" id="login-btn">Login</a>
@@ -74,6 +76,14 @@
                 </div>
             </div>
         </section>
+
+        <!-- TEMPORARY: API Test Button -->
+        <div style="text-align: center; padding: 20px; background: #f8f9fa;">
+            <button onclick="testRegistration()" style="background: #dc2626; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                🧪 Test Registration API
+            </button>
+            <div id="test-results" style="margin-top: 10px; font-family: monospace; background: #000; color: #0f0; padding: 10px; border-radius: 5px; text-align: left; max-height: 200px; overflow-y: auto;"></div>
+        </div>
 
         <section class="stats-bar">
             <div class="stat-item">
@@ -175,7 +185,7 @@
         </div>
         <div class="footer-logos">
             <div class="govt-logos">
-                <img src="gov_of_india.png" alt="Government of India">
+                <img src="../assets/images/gov_of_india.png" alt="Government of India">
                 <span>Government of India</span>
             </div>
             <div class="footer-certifications">
@@ -444,7 +454,9 @@
     <!-- Mapbox JavaScript -->
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
     
-    <script src="../scripts/script.js" defer></script>
+    <!-- API Client -->
+    <script src="../scripts/api-client.js?v=2.1" defer></script>
+    <script src="../scripts/script.js?v=2.1" defer></script>
     
     <!-- Mapbox Map Initialization -->
     <script>
