@@ -10,13 +10,14 @@ import json
 def test_existing_admin_login():
     """Test login with existing admin credentials"""
     test_credentials = [
+        {"username": "OceanAdmin", "password": "admin"},  # Our newly created admin
         {"username": "oceanadmin", "password": "admin"},
         {"username": "oceanadmin", "password": "Ocean@Admin2025"},
         {"username": "demo_admin", "password": "admin123"},
         {"username": "admin", "password": "admin"}
     ]
     
-    print("🔐 Testing existing admin credentials...")
+    print("🔐 Testing admin credentials (including new OceanAdmin)...")
     
     for creds in test_credentials:
         print(f"\n🧪 Testing: {creds['username']} / {creds['password']}")

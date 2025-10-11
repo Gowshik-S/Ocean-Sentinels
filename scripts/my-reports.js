@@ -152,7 +152,7 @@ class MyReportsManager {
 
     createReportCard(report) {
         const card = document.createElement('div');
-        card.className = 'report-card';
+        card.className = `report-card report-card--${report.urgency || 'medium'}`;
         card.setAttribute('data-report-id', report.id);
 
         const statusClass = this.getStatusClass(report.status);

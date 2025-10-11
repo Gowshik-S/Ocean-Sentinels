@@ -263,10 +263,10 @@
                     <i class="fas fa-exclamation-triangle"></i>
                     <span class="kpi-category">Active Incidents</span>
                 </div>
-                <div class="kpi-value">56</div>
+                <div class="kpi-value" id="kpi-active-incidents">0</div>
                 <div class="kpi-label">Currently Under Monitoring</div>
-                <div class="kpi-trend positive">
-                    <i class="fas fa-arrow-down"></i> 12% decrease from last week
+                <div class="kpi-trend" id="kpi-active-trend">
+                    <i class="fas fa-clock"></i> Live data
                 </div>
             </div>
             <div class="kpi-card success">
@@ -274,10 +274,10 @@
                     <i class="fas fa-file-alt"></i>
                     <span class="kpi-category">Total Reports</span>
                 </div>
-                <div class="kpi-value">1,234</div>
-                <div class="kpi-label">Reports Filed This Month</div>
-                <div class="kpi-trend positive">
-                    <i class="fas fa-arrow-up"></i> 8% increase from last month
+                <div class="kpi-value" id="kpi-total-reports">0</div>
+                <div class="kpi-label">Total Reports Filed</div>
+                <div class="kpi-trend" id="kpi-total-trend">
+                    <i class="fas fa-database"></i> From database
                 </div>
             </div>
             <div class="kpi-card warning">
@@ -285,47 +285,72 @@
                     <i class="fas fa-clock"></i>
                     <span class="kpi-category">Response Time</span>
                 </div>
-                <div class="kpi-value">6h 42m</div>
+                <div class="kpi-value" id="kpi-response-time">0h</div>
                 <div class="kpi-label">Average Response Time</div>
-                <div class="kpi-trend positive">
-                    <i class="fas fa-arrow-down"></i> 15 min improvement
+                <div class="kpi-trend" id="kpi-response-trend">
+                    <i class="fas fa-chart-line"></i> Calculated
                 </div>
             </div>
             <div class="kpi-card info">
                 <div class="kpi-header">
-                    <i class="fas fa-users"></i>
-                    <span class="kpi-category">Rescue Teams</span>
+                    <i class="fas fa-check-circle"></i>
+                    <span class="kpi-category">Resolved</span>
                 </div>
-                <div class="kpi-value">78</div>
-                <div class="kpi-label">Registered Teams Active</div>
-                <div class="kpi-trend neutral">
-                    <i class="fas fa-minus"></i> No change from last week
+                <div class="kpi-value" id="kpi-resolved-incidents">0</div>
+                <div class="kpi-label">Successfully Resolved</div>
+                <div class="kpi-trend" id="kpi-resolved-trend">
+                    <i class="fas fa-thumbs-up"></i> Real data
                 </div>
             </div>
         </section>
 
-        <!-- ======================= Charts Grid ======================= -->
-        <section class="charts-grid">
-            <div class="chart-container">
-                <h3>Incident Timeline (Last 30 Days)</h3>
-                <canvas id="incidentTimelineChart"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3>Hazard Distribution</h3>
-                <canvas id="hazardDistributionChart"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3>Response Efficiency by Hazard</h3>
-                <canvas id="responseEfficiencyChart"></canvas>
-            </div>
-            <div class="chart-container">
-                <h3>Geographic Incident Heatmap</h3>
-                <!-- For a real project, this would be a map like Leaflet or Mapbox. -->
-                <!-- For this MVP, we use a placeholder image. -->
-                <div class="map-placeholder">
-                    <p>Interactive Map Placeholder</p>
-                    <i class="fas fa-map-marked-alt"></i>
+        <!-- ======================= Recent Activity ======================= -->
+        <section class="activity-section">
+            <div class="section-header">
+                <h2>Recent Activity</h2>
+                <div class="activity-filters">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="pending">Pending</button>
+                    <button class="filter-btn" data-filter="resolved">Resolved</button>
                 </div>
+            </div>
+            <div id="recent-activity" class="activity-list">
+                <p>Loading recent activity...</p>
+            </div>
+        </section>
+
+        <!-- ======================= Incidents Table ======================= -->
+        <section class="incidents-table-section">
+            <div class="section-header">
+                <h2>Recent Incidents</h2>
+                <div class="table-controls">
+                    <select id="status-filter">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="verified">Verified</option>
+                        <option value="resolved">Resolved</option>
+                    </select>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table id="incidents-table" class="incidents-table">
+                    <thead>
+                        <tr>
+                            <th>Reference ID</th>
+                            <th>Type</th>
+                            <th>Location</th>
+                            <th>Status</th>
+                            <th>Urgency</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="7" class="loading-cell">Loading incidents...</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </section>
     </main>

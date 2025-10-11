@@ -230,14 +230,14 @@ class ReportsManager {
 
     createReportCard(report) {
         const card = document.createElement('div');
-        card.className = 'report-card';
+        card.className = `report-card report-card--${report.urgency || 'medium'}`;
         
         const statusClass = this.getStatusClass(report.status);
         const urgencyClass = this.getUrgencyClass(report.urgency);
         
         card.innerHTML = `
             <div class="report-header">
-                <h3 class="report-title">${report.title || 'Untitled Report'}</h3>
+                <h3 class="report-title">${report.hazard_type || 'Untitled Report'}</h3>
                 <span class="status-badge ${statusClass}">${this.formatStatus(report.status)}</span>
             </div>
             

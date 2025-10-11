@@ -433,15 +433,18 @@
                     <div class="urgency-options">
                         <label class="radio-label">
                             <input type="radio" name="urgency" value="low" checked>
-                            <span>🟡 Low</span>
+                            <div class="radio-custom low"></div>
+                            <span>Low</span>
                         </label>
                         <label class="radio-label">
                             <input type="radio" name="urgency" value="medium">
-                            <span>🟠 Medium</span>
+                            <div class="radio-custom medium"></div>
+                            <span>Medium</span>
                         </label>
                         <label class="radio-label">
                             <input type="radio" name="urgency" value="high">
-                            <span>🔴 High</span>
+                            <div class="radio-custom high"></div>
+                            <span>High</span>
                         </label>
                     </div>
                 </div>
@@ -461,9 +464,20 @@
     <!-- Mapbox Map Initialization -->
     <script>
     // Initialize Mapbox map
-    document.addEventListener('DOMContentLoaded', function() {
-        // Use a public token for demo (replace with your own)
-        mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+    document.addEventListener('DOMContentLoaded', async function() {
+        // Fetch Mapbox access token from backend
+        let accessToken;
+        try {
+            const response = await fetch('http://localhost:9000/api/config/mapbox-token');
+            const data = await response.json();
+            accessToken = data.token;
+        } catch (error) {
+            console.error('Failed to fetch Mapbox token:', error);
+            // Fallback to demo token if fetch fails
+            accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw';
+        }
+        
+        mapboxgl.accessToken = accessToken;
         
         const map = new mapboxgl.Map({
             container: 'live-map',

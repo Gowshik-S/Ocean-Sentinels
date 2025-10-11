@@ -59,6 +59,46 @@
     position: relative;
 }
 
+.report-card--low {
+    border-left: 4px solid #ffc107; /* Yellow */
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 193, 7, 0.05));
+}
+
+.report-card--medium {
+    border-left: 4px solid #fd7e14; /* Orange */
+    background: linear-gradient(135deg, rgba(253, 126, 20, 0.1), rgba(253, 126, 20, 0.05));
+}
+
+.report-card--high {
+    border-left: 4px solid rgba(220, 53, 69, 0.7); /* Red with reduced opacity */
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), rgba(220, 53, 69, 0.05));
+}
+
+/* Make the header/banner of each report card match the urgency color.
+   This targets the header inside a specific report card so it overrides
+   the global .report-header (modal) styles without changing the modal.
+*/
+.report-card--low .report-header {
+    background: linear-gradient(90deg, rgba(255,193,7,0.12), rgba(255,193,7,0.06));
+    color: rgba(74, 44, 0, 0.95);
+    border-radius: 8px 8px 0 0;
+    padding: 16px 20px;
+}
+
+.report-card--medium .report-header {
+    background: linear-gradient(90deg, rgba(253,126,20,0.12), rgba(253,126,20,0.06));
+    color: rgba(95, 45, 0, 0.95);
+    border-radius: 8px 8px 0 0;
+    padding: 16px 20px;
+}
+
+.report-card--high .report-header {
+    background: linear-gradient(90deg, rgba(220,53,69,0.12), rgba(220,53,69,0.06));
+    color: rgba(80, 10, 10, 0.95);
+    border-radius: 8px 8px 0 0;
+    padding: 16px 20px;
+}
+
 .report-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -201,7 +241,7 @@
 
 /* Utility Classes */
 .text-danger {
-    color: #dc3545 !important;
+    color: rgba(220, 53, 69, 0.8) !important; /* Reduced opacity red */
     font-weight: 600;
 }
 
@@ -212,6 +252,15 @@
 
 .text-success {
     color: #28a745 !important;
+    font-weight: 600;
+}
+
+/* Page Title */
+#page-title {
+    text-align: center;
+    margin: 30px 0;
+    color: #2c3e50;
+    font-size: 2em;
     font-weight: 600;
 }
 

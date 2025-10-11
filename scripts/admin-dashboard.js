@@ -29,26 +29,44 @@ class AdminDashboard {
     }
 
     async checkAdminAccess() {
+        console.log('🔍 Checking admin access...');
+        
         const token = localStorage.getItem('oceanGuardToken');
+        console.log('Token found:', token ? 'Yes' : 'No');
+        
         if (!token) {
+            console.log('❌ No authentication token found');
             throw new Error('No authentication token found');
         }
 
         try {
+            console.log('🔄 Fetching current user...');
             this.currentUser = await this.api.getCurrentUser();
+            console.log('✅ Current user retrieved:', this.currentUser);
+            console.log('User role type:', typeof this.currentUser.role, 'Value:', this.currentUser.role);
             
-            // Check if user has admin role
-            if (!this.currentUser || this.currentUser.role !== 'admin') {
+            // Check if user has admin role - database uses UPPERCASE, backend might return either
+            const userRole = this.currentUser.role;
+            const isAdmin = userRole === 'ADMIN' || userRole === 'admin' || userRole === 'Admin';
+            
+            console.log('Is admin check:', isAdmin, 'for role:', userRole);
+            
+            if (!this.currentUser || !isAdmin) {
+                console.log('❌ Access denied. User role:', userRole, 'Expected: ADMIN or admin');
                 throw new Error('Access denied: Admin privileges required');
             }
+            
+            console.log('✅ Admin access granted for role:', userRole);
             
             // Update welcome message
             const welcomeMessage = document.getElementById('welcome-message');
             if (welcomeMessage) {
-                welcomeMessage.textContent = `Welcome, ${this.currentUser.full_name || this.currentUser.username}`;
+                const fullName = `${this.currentUser.first_name || ''} ${this.currentUser.last_name || ''}`.trim();
+                welcomeMessage.textContent = `Welcome, ${fullName || this.currentUser.username}`;
             }
             
         } catch (error) {
+            console.error('❌ checkAdminAccess error:', error);
             throw new Error('Invalid token or insufficient privileges');
         }
     }
@@ -56,6 +74,82 @@ class AdminDashboard {
     showAccessDenied() {
         document.getElementById('admin-content').style.display = 'none';
         document.getElementById('access-denied').style.display = 'block';
+    }
+
+    showErrorNotification(message) {
+        console.error('Error notification:', message);
+        
+        // Create or update error notification
+        let errorDiv = document.getElementById('error-notification');
+        if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.id = 'error-notification';
+            errorDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #f8d7da;
+                color: #721c24;
+                padding: 15px;
+                border-radius: 4px;
+                border: 1px solid #f5c6cb;
+                max-width: 400px;
+                z-index: 9999;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            `;
+            document.body.appendChild(errorDiv);
+        }
+        
+        errorDiv.innerHTML = `
+            <strong>⚠️ Error:</strong><br>
+            ${message}
+            <button onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 18px; cursor: pointer;">×</button>
+        `;
+        
+        // Auto-remove after 10 seconds
+        setTimeout(() => {
+            if (errorDiv.parentElement) {
+                errorDiv.remove();
+            }
+        }, 10000);
+    }
+
+    showSuccessNotification(message) {
+        console.log('Success notification:', message);
+        
+        // Create or update success notification
+        let successDiv = document.getElementById('success-notification');
+        if (!successDiv) {
+            successDiv = document.createElement('div');
+            successDiv.id = 'success-notification';
+            successDiv.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: #d4edda;
+                color: #155724;
+                padding: 15px;
+                border-radius: 4px;
+                border: 1px solid #c3e6cb;
+                max-width: 400px;
+                z-index: 9999;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            `;
+            document.body.appendChild(successDiv);
+        }
+        
+        successDiv.innerHTML = `
+            <strong>✅ Success:</strong><br>
+            ${message}
+            <button onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 18px; cursor: pointer;">×</button>
+        `;
+        
+        // Auto-remove after 8 seconds
+        setTimeout(() => {
+            if (successDiv.parentElement) {
+                successDiv.remove();
+            }
+        }, 8000);
     }
 
     async loadData() {
@@ -66,39 +160,209 @@ class AdminDashboard {
 
     async loadTeams() {
         try {
-            // In a real system, this would be an API call
-            // For now, we'll use localStorage or mock data
-            const savedTeams = localStorage.getItem('rescueTeams');
-            this.teams = savedTeams ? JSON.parse(savedTeams) : this.getDefaultTeams();
+            console.log('📊 Loading teams from database...');
+            
+            // Get users data using the API client method (with fallback for browser cache)
+            let usersData = [];
+            try {
+                if (typeof this.api.getUsers === 'function') {
+                    usersData = await this.api.getUsers();
+                } else {
+                    console.warn('⚠️ getUsers method not found, using direct fetch (browser cache issue)');
+                    const response = await fetch(`${this.api.baseURL}/users/`, {
+                        headers: this.api.getHeaders()
+                    });
+                    if (response.ok) {
+                        usersData = await response.json();
+                    } else {
+                        throw new Error(`Users API failed: ${response.status} - ${response.statusText}`);
+                    }
+                }
+            } catch (fetchError) {
+                console.error('❌ Failed to fetch users:', fetchError.message);
+                throw fetchError;
+            }
+            
+            console.log(`Found ${usersData.length} total users in database`);
+            
+            const rescueTeamUsers = usersData.filter(user => 
+                user.role === 'RESCUE_TEAM' || user.role === 'rescue_team'
+            );
+            console.log(`Found ${rescueTeamUsers.length} rescue team users in database`);
+            
+            // Transform user data to team format
+            this.teams = rescueTeamUsers.map(user => ({
+                id: user.id,
+                name: `${user.first_name} ${user.last_name}`,
+                leader: `${user.first_name} ${user.last_name}`,
+                email: user.email,
+                phone: user.phone || 'Not provided',
+                location: user.location || 'Not specified',
+                type: "rescue-team",
+                status: user.is_active ? 'active' : 'inactive',
+                equipment: "Standard rescue equipment",
+                created_at: user.created_at
+            }));
             
             this.renderTeamsList();
+            
         } catch (error) {
-            console.error('Failed to load teams:', error);
-            this.teams = this.getDefaultTeams();
+            console.error('❌ Failed to load teams from database:', error);
+            this.teams = [];
             this.renderTeamsList();
+            
+            // Show an error message to user
+            const teamsList = document.getElementById('teams-list');
+            if (teamsList) {
+                teamsList.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #6c757d;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Unable to load rescue teams from database.</p>
+                        <p style="font-size: 14px;">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            this.showErrorNotification(`Failed to load teams: ${error.message}`);
         }
     }
 
     async loadAuthorities() {
         try {
-            const savedAuthorities = localStorage.getItem('authorities');
-            this.authorities = savedAuthorities ? JSON.parse(savedAuthorities) : this.getDefaultAuthorities();
+            console.log('📊 Loading authorities from database...');
+            
+            // Get users data using the API client method (with fallback for browser cache)
+            let usersData = [];
+            try {
+                if (typeof this.api.getUsers === 'function') {
+                    usersData = await this.api.getUsers();
+                } else {
+                    console.warn('⚠️ getUsers method not found, using direct fetch (browser cache issue)');
+                    const response = await fetch(`${this.api.baseURL}/users/`, {
+                        headers: this.api.getHeaders()
+                    });
+                    if (response.ok) {
+                        usersData = await response.json();
+                    } else {
+                        throw new Error(`Users API failed: ${response.status} - ${response.statusText}`);
+                    }
+                }
+            } catch (fetchError) {
+                console.error('❌ Failed to fetch users:', fetchError.message);
+                throw fetchError;
+            }
+            
+            console.log(`Found ${usersData.length} total users in database`);
+            
+            const authorityUsers = usersData.filter(user => 
+                user.role === 'AUTHORITY' || user.role === 'authority'
+            );
+            console.log(`Found ${authorityUsers.length} authority users in database`);
+            
+            // Transform user data to authority format
+            this.authorities = authorityUsers.map(user => ({
+                id: user.id,
+                name: `${user.first_name} ${user.last_name}`,
+                position: "Authority Officer",
+                email: user.email,
+                phone: user.phone || 'Not provided',
+                department: "Ocean Guard Authority",
+                level: "state",
+                status: user.is_active ? 'active' : 'inactive',
+                jurisdiction: user.location || 'Regional operations',
+                created_at: user.created_at
+            }));
             
             this.renderAuthoritiesList();
+            
         } catch (error) {
-            console.error('Failed to load authorities:', error);
-            this.authorities = this.getDefaultAuthorities();
+            console.error('❌ Failed to load authorities from database:', error);
+            this.authorities = [];
             this.renderAuthoritiesList();
+            
+            // Show an error message to user
+            const authoritiesList = document.getElementById('authorities-list');
+            if (authoritiesList) {
+                authoritiesList.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: #6c757d;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Unable to load authorities from database.</p>
+                        <p style="font-size: 14px;">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+            
+            this.showErrorNotification(`Failed to load authorities: ${error.message}`);
         }
     }
 
     async loadStatistics() {
-        const activeTeams = this.teams.filter(team => team.status === 'active' || team.status === 'on-duty').length;
-        
-        document.getElementById('total-teams').textContent = this.teams.length;
-        document.getElementById('active-teams').textContent = activeTeams;
-        document.getElementById('total-authorities').textContent = this.authorities.length;
-        document.getElementById('total-incidents').textContent = '12'; // This would come from API
+        try {
+            console.log('📊 Loading statistics from database...');
+            
+            // Get analytics data from backend using the correct API method
+            console.log('🔄 Fetching analytics data...');
+            const analyticsData = await this.api.getDashboardAnalytics();
+            console.log('✅ Analytics data received:', analyticsData);
+            
+            // Try to get users data using the cleaner API method (with fallback)
+            console.log('🔄 Fetching users data...');
+            let usersData = [];
+            
+            try {
+                if (typeof this.api.getUsers === 'function') {
+                    usersData = await this.api.getUsers();
+                } else {
+                    console.warn('⚠️ getUsers method not found, using direct fetch (browser cache issue)');
+                    const response = await fetch(`${this.api.baseURL}/users/`, {
+                        headers: this.api.getHeaders()
+                    });
+                    if (response.ok) {
+                        usersData = await response.json();
+                    } else {
+                        throw new Error(`Users API failed: ${response.status}`);
+                    }
+                }
+                console.log(`✅ Found ${usersData.length} total users in database`);
+            } catch (userError) {
+                console.warn('❌ Could not fetch users data:', userError.message);
+                usersData = [];
+            }
+            
+            // Filter users by role (handle both UPPERCASE and lowercase)
+            const rescueTeams = usersData.filter(user => 
+                user.role === 'RESCUE_TEAM' || user.role === 'rescue_team'
+            );
+            const authorities = usersData.filter(user => 
+                user.role === 'AUTHORITY' || user.role === 'authority'
+            );
+            const activeTeams = rescueTeams.filter(user => user.is_active);
+            
+            console.log(`Statistics: ${rescueTeams.length} rescue teams, ${activeTeams.length} active teams, ${authorities.length} authorities`);
+            
+            // Update statistics display with real data
+            document.getElementById('total-teams').textContent = rescueTeams.length;
+            document.getElementById('active-teams').textContent = activeTeams.length;
+            document.getElementById('total-authorities').textContent = authorities.length;
+            document.getElementById('total-incidents').textContent = analyticsData.total_incidents || 0;
+            
+            console.log('✅ Statistics updated with database data');
+            
+        } catch (error) {
+            console.error('❌ Failed to load statistics from database:', error);
+            console.error('Error details:', error.message);
+            console.error('Error stack:', error.stack);
+            
+            // Show specific error information
+            const errorMsg = error.message || 'Unknown error';
+            document.getElementById('total-teams').textContent = 'Error';
+            document.getElementById('active-teams').textContent = 'Error';
+            document.getElementById('total-authorities').textContent = 'Error';
+            document.getElementById('total-incidents').textContent = 'Error';
+            
+            // Show error notification to user
+            this.showErrorNotification(`Failed to load statistics: ${errorMsg}`);
+        }
     }
 
     getDefaultTeams() {
@@ -204,66 +468,74 @@ class AdminDashboard {
     }
 
     async addTeam() {
-        const formData = {
-            id: Date.now(), // Simple ID generation
-            name: document.getElementById('team-name').value,
-            leader: document.getElementById('team-leader').value,
-            email: document.getElementById('team-email').value,
-            phone: document.getElementById('team-phone').value,
-            location: document.getElementById('team-location').value,
-            type: document.getElementById('team-type').value,
-            status: document.getElementById('team-status').value,
-            equipment: document.getElementById('team-equipment').value,
-            created_at: new Date().toISOString()
-        };
-
         try {
-            this.teams.push(formData);
-            localStorage.setItem('rescueTeams', JSON.stringify(this.teams));
+            console.log('🔄 Adding new rescue team...');
             
+            // Get form data
+            const teamData = {
+                username: document.getElementById('team-email').value, // Use email as username
+                email: document.getElementById('team-email').value,
+                password: 'Ocean@123', // Default password - team can change it later
+                first_name: document.getElementById('team-name').value.split(' ')[0] || document.getElementById('team-name').value,
+                last_name: document.getElementById('team-name').value.split(' ').slice(1).join(' ') || '',
+                phone: document.getElementById('team-phone').value,
+                location: document.getElementById('team-location').value,
+                role: 'rescue_team' // Use lowercase as expected by backend enum
+            };
+
+            console.log('Team data to create:', teamData);
+
+            // Call API to create user
+            const response = await this.api.createUser(teamData);
+            console.log('✅ Rescue team created successfully:', response);
+
             // Reset form
             document.getElementById('add-team-form').reset();
             
-            // Refresh display
-            this.renderTeamsList();
-            this.loadStatistics();
+            // Reload data to show the new team
+            await this.loadTeams();
+            await this.loadStatistics();
             
-            alert('✅ Rescue team added successfully!');
+            this.showSuccessNotification('✅ Rescue team added successfully! Default password: Ocean@123');
         } catch (error) {
-            console.error('Failed to add team:', error);
-            alert('❌ Failed to add rescue team. Please try again.');
+            console.error('❌ Failed to add rescue team:', error);
+            this.showErrorNotification(`Failed to add rescue team: ${error.message}`);
         }
     }
 
     async addAuthority() {
-        const formData = {
-            id: Date.now(),
-            name: document.getElementById('authority-name').value,
-            position: document.getElementById('authority-position').value,
-            email: document.getElementById('authority-email').value,
-            phone: document.getElementById('authority-phone').value,
-            department: document.getElementById('authority-department').value,
-            level: document.getElementById('authority-level').value,
-            status: document.getElementById('authority-status').value,
-            jurisdiction: document.getElementById('authority-jurisdiction').value,
-            created_at: new Date().toISOString()
-        };
-
         try {
-            this.authorities.push(formData);
-            localStorage.setItem('authorities', JSON.stringify(this.authorities));
+            console.log('🔄 Adding new authority...');
             
+            // Get form data
+            const authorityData = {
+                username: document.getElementById('authority-email').value, // Use email as username
+                email: document.getElementById('authority-email').value,
+                password: 'Ocean@123', // Default password - authority can change it later
+                first_name: document.getElementById('authority-name').value.split(' ')[0] || document.getElementById('authority-name').value,
+                last_name: document.getElementById('authority-name').value.split(' ').slice(1).join(' ') || '',
+                phone: document.getElementById('authority-phone').value,
+                location: document.getElementById('authority-department').value, // Using department as location
+                role: 'authority' // Use lowercase as expected by backend enum
+            };
+
+            console.log('Authority data to create:', authorityData);
+
+            // Call API to create user
+            const response = await this.api.createUser(authorityData);
+            console.log('✅ Authority created successfully:', response);
+
             // Reset form
             document.getElementById('add-authority-form').reset();
             
-            // Refresh display
-            this.renderAuthoritiesList();
-            this.loadStatistics();
+            // Reload data to show the new authority
+            await this.loadAuthorities();
+            await this.loadStatistics();
             
-            alert('✅ Authority added successfully!');
+            this.showSuccessNotification('✅ Authority added successfully! Default password: Ocean@123');
         } catch (error) {
-            console.error('Failed to add authority:', error);
-            alert('❌ Failed to add authority. Please try again.');
+            console.error('❌ Failed to add authority:', error);
+            this.showErrorNotification(`Failed to add authority: ${error.message}`);
         }
     }
 

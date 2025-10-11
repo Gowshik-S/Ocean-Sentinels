@@ -11,32 +11,39 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <style>
+        body {
+            background: white;
+        }
+        
         .admin-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
+            background: white;
         }
         
         .admin-header {
-            background: linear-gradient(135deg, #2c3e50, #3498db);
+            background: #005A9C;
             color: white;
             padding: 30px;
             border-radius: 8px;
             margin-bottom: 30px;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
         }
         
         .admin-section {
             background: white;
+            border: 2px solid #F5F5F5;
             border-radius: 8px;
             padding: 25px;
             margin-bottom: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 90, 156, 0.1);
         }
         
         .admin-section h2 {
-            color: #2c3e50;
-            border-bottom: 3px solid #3498db;
+            color: #005A9C;
+            border-bottom: 3px solid #ffc107;
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
@@ -49,20 +56,22 @@
         }
         
         .admin-card {
-            background: #f8f9fa;
-            border: 1px solid #e9ecef;
+            background: white;
+            border: 2px solid #F5F5F5;
             border-radius: 8px;
             padding: 20px;
             transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 90, 156, 0.1);
         }
         
         .admin-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
+            border-color: #ffc107;
         }
         
         .admin-card h3 {
-            color: #2c3e50;
+            color: #005A9C;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -71,7 +80,7 @@
         
         .admin-card .icon {
             font-size: 24px;
-            color: #3498db;
+            color: #ffc107;
         }
         
         .admin-form {
@@ -81,9 +90,17 @@
         
         .admin-form input, .admin-form select, .admin-form textarea {
             padding: 12px;
-            border: 1px solid #ddd;
+            border: 2px solid #F5F5F5;
             border-radius: 4px;
             font-size: 14px;
+            background: white;
+            transition: border-color 0.2s;
+        }
+        
+        .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus {
+            outline: none;
+            border-color: #005A9C;
+            box-shadow: 0 0 5px rgba(0, 90, 156, 0.3);
         }
         
         .admin-form textarea {
@@ -92,34 +109,38 @@
         }
         
         .admin-btn {
-            background: #3498db;
+            background: #005A9C;
             color: white;
             border: none;
             padding: 12px 20px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 14px;
-            transition: background 0.2s;
+            transition: all 0.2s;
         }
         
         .admin-btn:hover {
-            background: #2980b9;
+            background: #ffc107;
+            color: #005A9C;
+            transform: translateY(-1px);
         }
         
         .admin-btn.danger {
-            background: #e74c3c;
+            background: #FF6B6B;
         }
         
         .admin-btn.danger:hover {
-            background: #c0392b;
+            background: #FF5252;
+            color: white;
         }
         
         .admin-btn.success {
-            background: #27ae60;
+            background: #4ECDC4;
         }
         
         .admin-btn.success:hover {
-            background: #229954;
+            background: #26D0CE;
+            color: white;
         }
         
         .team-list, .authority-list {
@@ -128,23 +149,29 @@
         
         .team-item, .authority-item {
             background: white;
-            border: 1px solid #ddd;
+            border: 2px solid #F5F5F5;
             border-radius: 4px;
             padding: 15px;
             margin-bottom: 10px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: all 0.2s;
+        }
+        
+        .team-item:hover, .authority-item:hover {
+            border-color: #ffc107;
+            box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
         }
         
         .team-info h4 {
             margin: 0 0 5px 0;
-            color: #2c3e50;
+            color: #005A9C;
         }
         
         .team-info p {
             margin: 0;
-            color: #7f8c8d;
+            color: #666;
             font-size: 14px;
         }
         
@@ -183,17 +210,25 @@
         }
         
         .stat-card {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: #005A9C;
             color: white;
             padding: 20px;
             border-radius: 8px;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
+            transition: transform 0.2s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
         }
         
         .stat-number {
             font-size: 36px;
             font-weight: bold;
             margin-bottom: 5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
         
         .stat-label {
@@ -204,14 +239,15 @@
         .access-denied {
             text-align: center;
             padding: 50px;
-            background: #f8d7da;
-            color: #721c24;
+            background: white;
+            color: #FF6B6B;
+            border: 2px solid #FF6B6B;
             border-radius: 8px;
             margin: 50px 0;
         }
         
         .access-denied h2 {
-            color: #721c24;
+            color: #FF6B6B;
         }
     </style>
 </head>

@@ -81,6 +81,11 @@ async def health_check():
         "timestamp": "2025-01-27T10:30:00Z"
     }
 
+# Mapbox token endpoint
+@app.get("/api/config/mapbox-token")
+async def get_mapbox_token():
+    return {"token": settings.MAPBOX_ACCESS_TOKEN}
+
 if __name__ == "__main__":
     uvicorn.run(
         "app.main:app",

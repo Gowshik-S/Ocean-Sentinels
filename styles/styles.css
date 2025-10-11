@@ -675,6 +675,18 @@ body {
     overflow: hidden;
 }
 
+.report-card--low {
+    border-left: 4px solid #ffc107; /* Yellow */
+}
+
+.report-card--medium {
+    border-left: 4px solid #fd7e14; /* Orange */
+}
+
+.report-card--high {
+    border-left: 4px solid rgba(220, 53, 69, 0.7); /* Red with reduced opacity */
+}
+
 .card-header {
     padding: 1rem 1.5rem;
     border-bottom: 1px solid #eee;
@@ -719,7 +731,7 @@ body {
 }
 
 .status-badge--pending {
-    background-color: #dc3545; /* Red */
+    background-color: rgba(220, 53, 69, 0.7); /* Red with reduced opacity */
 }
 
 .status-badge--active {

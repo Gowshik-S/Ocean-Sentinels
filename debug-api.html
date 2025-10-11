@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 20px auto; padding: 20px; }
+        .test-btn { background: #005A9C; color: white; padding: 10px 20px; border: none; border-radius: 4px; margin: 5px; cursor: pointer; }
+        .result { margin: 10px 0; padding: 15px; border-radius: 4px; font-family: monospace; white-space: pre-wrap; }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        .info { background: #d1ecf1; color: #0c5460; }
+    </style>
+</head>
+<body>
+    <h1>🔧 API Debug Test</h1>
+    <p>Test specific API endpoints to debug the admin dashboard data loading issue.</p>
+    
+    <button class="test-btn" onclick="testLogin()">1. Login as OceanAdmin</button>
+    <button class="test-btn" onclick="testAnalytics()">2. Test Analytics API</button>
+    <button class="test-btn" onclick="testUsers()">3. Test Users API</button>
+    <button class="test-btn" onclick="testAllAPIs()">4. Test All APIs</button>
+    
+    <div id="result"></div>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:9000';
+        let authToken = null;
+
+        function showResult(message, type = 'info') {
+            document.getElementById('result').className = `result ${type}`;
+            document.getElementById('result').innerHTML = message;
+        }
+
+        async function testLogin() {
+            try {
+                showResult('🔄 Testing login...', 'info');
+                
+                const response = await fetch(`${BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'username=OceanAdmin&password=admin'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    localStorage.setItem('oceanGuardToken', authToken);
+                    
+                    showResult(`✅ Login successful!
+Username: ${data.user.username}
+Role: ${data.user.role}
+Token: ${authToken.substring(0, 50)}...`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    showResult(`❌ Login failed: ${response.status}
+${errorText}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAnalytics() {
+            if (!authToken) {
+                showResult('❌ Please login first', 'error');
+                return;
+            }
+
+            try {
+                showResult('🔄 Testing analytics API...', 'info');
+                
+                const response = await fetch(`${BASE_URL}/api/analytics/dashboard`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult(`✅ Analytics API working!
+${JSON.stringify(data, null, 2)}`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    showResult(`❌ Analytics API failed: ${response.status}
+${errorText}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Analytics error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testUsers() {
+            if (!authToken) {
+                showResult('❌ Please login first', 'error');
+                return;
+            }
+
+            try {
+                showResult('🔄 Testing users API...', 'info');
+                
+                const response = await fetch(`${BASE_URL}/api/users/`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const roles = data.reduce((acc, user) => {
+                        acc[user.role] = (acc[user.role] || 0) + 1;
+                        return acc;
+                    }, {});
+                    
+                    showResult(`✅ Users API working!
+Total users: ${data.length}
+Users by role: ${JSON.stringify(roles, null, 2)}
+Sample user: ${JSON.stringify(data[0], null, 2)}`, 'success');
+                } else {
+                    const errorText = await response.text();
+                    showResult(`❌ Users API failed: ${response.status}
+${errorText}`, 'error');
+                }
+            } catch (error) {
+                showResult(`❌ Users error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAllAPIs() {
+            await testLogin();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testAnalytics();
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            await testUsers();
+        }
+
+        // Auto-check for existing token
+        window.onload = function() {
+            authToken = localStorage.getItem('oceanGuardToken');
+            if (authToken) {
+                showResult(`Token found in localStorage: ${authToken.substring(0, 50)}...
+You can proceed to test the APIs.`, 'info');
+            }
+        };
+    </script>
+</body>
+</html>

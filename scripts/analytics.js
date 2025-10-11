@@ -33,14 +33,15 @@ async function initializeAnalytics() {
  */
 async function loadAnalytics() {
     try {
-        console.log('📊 Loading analytics data...');
+        console.log('📊 Loading analytics data from database...');
         
-        // Try to fetch real data first
+        // Fetch real data from backend
         let dashboardData, timelineData;
         
         try {
-            // Attempt to fetch from backend
-            const dashboardResponse = await fetch('http://localhost:9000/api/analytics/public/dashboard', {
+            // Fetch dashboard analytics from real backend API
+            console.log('🔄 Fetching dashboard analytics...');
+            const dashboardResponse = await fetch('http://127.0.0.1:9000/api/analytics/public/dashboard', {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -49,53 +50,28 @@ async function loadAnalytics() {
             if (dashboardResponse.ok) {
                 dashboardData = await dashboardResponse.json();
                 console.log('✅ Real dashboard data loaded:', dashboardData);
+            } else {
+                throw new Error(`Dashboard API failed: ${dashboardResponse.status}`);
+            }
                 
-                // Try timeline data too
-                const timelineResponse = await fetch('http://localhost:9000/api/analytics/public/timeline?days=30', {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (timelineResponse.ok) {
-                    timelineData = await timelineResponse.json();
-                    console.log('✅ Real timeline data loaded:', timelineData);
+            // Fetch timeline data from real backend API
+            console.log('🔄 Fetching timeline analytics...');
+            const timelineResponse = await fetch('http://127.0.0.1:9000/api/analytics/public/timeline?days=30', {
+                headers: {
+                    'Content-Type': 'application/json'
                 }
+            });
+            
+            if (timelineResponse.ok) {
+                timelineData = await timelineResponse.json();
+                console.log('✅ Real timeline data loaded:', timelineData);
+            } else {
+                throw new Error(`Timeline API failed: ${timelineResponse.status}`);
             }
+            
         } catch (apiError) {
-            console.log('⚠️ Backend not available, using mock data:', apiError.message);
-        }
-        
-        // Use mock data as fallback
-        if (!dashboardData) {
-            console.log('📊 Using mock dashboard data');
-            dashboardData = {
-                total_incidents: 15,
-                active_incidents: 8,
-                resolved_incidents: 7,
-                incidents_by_type: {
-                    "Oil Spill": 5,
-                    "Tsunami Warning": 3,
-                    "Coastal Erosion": 4,
-                    "Marine Pollution": 2,
-                    "Weather Alert": 1
-                },
-                last_updated: new Date().toISOString()
-            };
-        }
-        
-        if (!timelineData) {
-            console.log('📈 Using mock timeline data');
-            timelineData = [];
-            // Generate last 7 days of sample data
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date();
-                date.setDate(date.getDate() - i);
-                timelineData.push({
-                    date: date.toISOString().split('T')[0],
-                    count: Math.floor(Math.random() * 5) + 1
-                });
-            }
+            console.error('❌ Backend API error:', apiError.message);
+            throw new Error(`Failed to fetch analytics data: ${apiError.message}`);
         }
 
         // Store analytics data globally
@@ -123,6 +99,7 @@ async function loadAnalytics() {
  */
 function updateOverviewCards(data) {
     try {
+        // Update top overview cards
         document.getElementById('total-incidents').textContent = data.total_incidents || 0;
         document.getElementById('active-incidents').textContent = data.active_incidents || 0;
         document.getElementById('resolved-incidents').textContent = data.resolved_incidents || 0;
@@ -131,7 +108,21 @@ function updateOverviewCards(data) {
         const avgResponseHours = Math.round((data.resolved_incidents || 0) * 2.5);
         document.getElementById('avg-response-time').textContent = `${avgResponseHours}h`;
         
-        console.log('✅ Overview cards updated');
+        // Update KPI cards with the same data
+        const kpiActiveElement = document.getElementById('kpi-active-incidents');
+        const kpiTotalElement = document.getElementById('kpi-total-reports');
+        const kpiResponseElement = document.getElementById('kpi-response-time');
+        const kpiResolvedElement = document.getElementById('kpi-resolved-incidents');
+        
+        if (kpiActiveElement) kpiActiveElement.textContent = data.active_incidents || 0;
+        if (kpiTotalElement) kpiTotalElement.textContent = data.total_incidents || 0;
+        if (kpiResponseElement) {
+            const responseTime = avgResponseHours > 0 ? `${avgResponseHours}h` : '0h';
+            kpiResponseElement.textContent = responseTime;
+        }
+        if (kpiResolvedElement) kpiResolvedElement.textContent = data.resolved_incidents || 0;
+        
+        console.log('✅ Overview cards and KPI cards updated');
     } catch (error) {
         console.error('❌ Error updating overview cards:', error);
     }
@@ -163,7 +154,9 @@ function createIncidentsTypeChart(data) {
     }
 
     const incidentTypes = data.incidents_by_type || {};
-    const labels = Object.keys(incidentTypes);
+    
+    // Convert enum keys to readable labels
+    const labels = Object.keys(incidentTypes).map(convertHazardTypeToLabel);
     const values = Object.values(incidentTypes);
     
     incidentsTypeChart = new Chart(ctx, {
@@ -328,27 +321,87 @@ async function loadRecentActivity() {
         const activityContainer = document.getElementById('recent-activity');
         if (!activityContainer) return;
         
-        // Mock recent activity data for now
-        const activities = [
-            {
-                type: 'pending',
-                text: 'New oil spill reported in Mumbai Harbor',
-                time: '5 minutes ago',
-                icon: 'fas fa-exclamation-circle'
-            },
-            {
-                type: 'resolved',
-                text: 'Tsunami warning system test completed',
-                time: '1 hour ago',
-                icon: 'fas fa-check-circle'
-            },
-            {
-                type: 'verified',
-                text: 'Coastal erosion assessment verified',
-                time: '3 hours ago',
-                icon: 'fas fa-clipboard-check'
+        console.log('🔄 Loading recent activity from database...');
+        
+        // Try to fetch recent incidents from API
+        let activities = [];
+        
+        try {
+            // Get recent incidents (first check if user is logged in for auth)
+            const token = localStorage.getItem('oceanGuardToken');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
             }
-        ];
+            
+            const response = await fetch('http://127.0.0.1:9000/api/incidents/?page=1&size=5', {
+                headers: headers
+            });
+            
+            if (response.ok) {
+                const incidentsData = await response.json();
+                console.log('✅ Recent incidents loaded:', incidentsData);
+                
+                // Transform incidents to activity format
+                activities = incidentsData.incidents?.slice(0, 3).map(incident => {
+                    const timeAgo = getTimeAgo(new Date(incident.created_at));
+                    const hazardType = convertHazardTypeToLabel(incident.hazard_type);
+                    let type, text, icon;
+                    
+                    switch (incident.status) {
+                        case 'PENDING':
+                            type = 'pending';
+                            text = `New ${hazardType} reported in ${incident.location}`;
+                            icon = 'fas fa-exclamation-circle';
+                            break;
+                        case 'RESOLVED':
+                            type = 'resolved';
+                            text = `${hazardType} incident resolved in ${incident.location}`;
+                            icon = 'fas fa-check-circle';
+                            break;
+                        case 'VERIFIED':
+                            type = 'verified';
+                            text = `${hazardType} incident verified in ${incident.location}`;
+                            icon = 'fas fa-clipboard-check';
+                            break;
+                        case 'IN_PROGRESS':
+                            type = 'in-progress';
+                            text = `Response team deployed to ${incident.location}`;
+                            icon = 'fas fa-spinner';
+                            break;
+                        default:
+                            type = 'pending';
+                            text = `${hazardType} reported in ${incident.location}`;
+                            icon = 'fas fa-info-circle';
+                    }
+                    
+                    return { type, text, time: timeAgo, icon };
+                }) || [];
+                
+            } else if (response.status === 401) {
+                // User not authenticated, show generic message
+                activities = [{
+                    type: 'info',
+                    text: 'Login to view recent incident activity',
+                    time: 'Now',
+                    icon: 'fas fa-info-circle'
+                }];
+            } else {
+                throw new Error(`Failed to fetch incidents: ${response.status}`);
+            }
+        } catch (apiError) {
+            console.warn('⚠️ Could not load recent activity:', apiError.message);
+            // Show fallback message
+            activities = [{
+                type: 'info',
+                text: 'Unable to load recent activity',
+                time: 'Now',
+                icon: 'fas fa-exclamation-triangle'
+            }];
+        }
 
         activityContainer.innerHTML = activities.map(activity => `
             <div class="activity-item">
@@ -375,41 +428,63 @@ async function loadIncidentsTable() {
         const tableBody = document.querySelector('#incidents-table tbody');
         if (!tableBody) return;
         
-        // Sample incidents data
-        const sampleIncidents = [
-            {
-                reference_id: 'OH-2024-001',
-                type: 'Oil Spill',
-                location: 'Mumbai Harbor',
-                status: 'Pending',
-                urgency: 'High',
-                created_at: '2024-01-15T10:30:00Z'
-            },
-            {
-                reference_id: 'OH-2024-002', 
-                type: 'Tsunami Warning',
-                location: 'Chennai Coast',
-                status: 'Resolved',
-                urgency: 'Critical',
-                created_at: '2024-01-14T08:15:00Z'
+        console.log('🔄 Loading incidents table from database...');
+        
+        // Show loading state
+        tableBody.innerHTML = '<tr><td colspan="7" class="loading-cell">Loading incidents...</td></tr>';
+        
+        try {
+            // Get recent incidents from API
+            const token = localStorage.getItem('oceanGuardToken');
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
             }
-        ];
+            
+            const response = await fetch('http://127.0.0.1:9000/api/incidents/?page=1&size=10', {
+                headers: headers
+            });
+            
+            if (response.ok) {
+                const incidentsData = await response.json();
+                console.log('✅ Incidents table data loaded:', incidentsData);
+                
+                const incidents = incidentsData.incidents || [];
+                
+                if (incidents.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="7" class="loading-cell">No incidents found</td></tr>';
+                    return;
+                }
 
-        tableBody.innerHTML = sampleIncidents.map(incident => `
-            <tr>
-                <td>${incident.reference_id}</td>
-                <td>${incident.type}</td>
-                <td>${incident.location}</td>
-                <td><span class="status-badge ${incident.status.toLowerCase()}">${incident.status}</span></td>
-                <td><span class="urgency-badge ${incident.urgency.toLowerCase()}">${incident.urgency}</span></td>
-                <td>${new Date(incident.created_at).toLocaleDateString()}</td>
-                <td>
-                    <button class="btn btn--small btn--secondary" onclick="viewIncident('${incident.reference_id}')">
-                        View
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+                tableBody.innerHTML = incidents.map(incident => `
+                    <tr>
+                        <td>${incident.reference_id}</td>
+                        <td>${convertHazardTypeToLabel(incident.hazard_type)}</td>
+                        <td>${incident.location}</td>
+                        <td><span class="status-badge ${incident.status.toLowerCase().replace('_', '-')}">${incident.status.replace('_', ' ')}</span></td>
+                        <td><span class="urgency-badge ${incident.urgency.toLowerCase()}">${incident.urgency.toUpperCase()}</span></td>
+                        <td>${new Date(incident.created_at).toLocaleDateString()}</td>
+                        <td>
+                            <button class="btn btn--small btn--secondary" onclick="viewIncident('${incident.reference_id}')">
+                                View
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+                
+            } else if (response.status === 401) {
+                // User not authenticated
+                tableBody.innerHTML = '<tr><td colspan="7" class="loading-cell">Login to view incidents data</td></tr>';
+            } else {
+                throw new Error(`Failed to fetch incidents: ${response.status}`);
+            }
+        } catch (apiError) {
+            console.warn('⚠️ Could not load incidents table:', apiError.message);
+            tableBody.innerHTML = '<tr><td colspan="7" class="loading-cell">Unable to load incidents data</td></tr>';
+        }
         
     } catch (error) {
         console.error('❌ Error loading incidents table:', error);
@@ -423,6 +498,39 @@ async function loadIncidentsTable() {
 /**
  * UI Helper Functions
  */
+
+function convertHazardTypeToLabel(type) {
+    const typeMap = {
+        'high-waves': 'High Waves',
+        'flooding': 'Flooding',
+        'tsunami': 'Tsunami',
+        'lost-vessel': 'Lost Vessel',
+        'debris': 'Debris',
+        'oil-spill': 'Oil Spill',
+        'other': 'Other'
+    };
+    return typeMap[type] || type.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+}
+
+function getTimeAgo(date) {
+    const now = new Date();
+    const timeDiff = now - date;
+    const seconds = Math.floor(timeDiff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) {
+        return `${days} day${days > 1 ? 's' : ''} ago`;
+    } else if (hours > 0) {
+        return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else if (minutes > 0) {
+        return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else {
+        return 'Just now';
+    }
+}
+
 function showLoading() {
     const loading = document.getElementById('loading-indicator');
     const content = document.getElementById('analytics-content');

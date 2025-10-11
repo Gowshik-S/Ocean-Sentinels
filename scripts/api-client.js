@@ -46,7 +46,17 @@ class OceanHazardAPI {
                 sessionStorage.removeItem('oceanGuardUser');
             }
             
-            throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+            // Better error message formatting for 422 validation errors
+            let errorMessage;
+            if (response.status === 422 && errorData.detail && Array.isArray(errorData.detail)) {
+                // Handle FastAPI validation errors
+                errorMessage = errorData.detail.map(err => `${err.loc?.join('.')}: ${err.msg}`).join(', ');
+            } else {
+                errorMessage = errorData.detail || errorData.message || `HTTP ${response.status}: ${response.statusText}`;
+            }
+            
+            console.error('API Error Response:', errorData);
+            throw new Error(errorMessage);
         }
         return await response.json();
     }
@@ -195,6 +205,25 @@ class OceanHazardAPI {
         const response = await fetch(`${this.baseURL}/incidents/${incidentId}/resolve`, {
             method: 'PUT',
             headers: this.getHeaders()
+        });
+
+        return await this.handleResponse(response);
+    }
+
+    // User management methods
+    async getUsers() {
+        const response = await fetch(`${this.baseURL}/users/`, {
+            headers: this.getHeaders()
+        });
+
+        return await this.handleResponse(response);
+    }
+
+    async createUser(userData) {
+        const response = await fetch(`${this.baseURL}/auth/register`, {
+            method: 'POST',
+            headers: this.getHeaders(),
+            body: JSON.stringify(userData)
         });
 
         return await this.handleResponse(response);

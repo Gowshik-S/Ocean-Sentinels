@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     MAPBOX_ACCESS_TOKEN: str = ""
     
     class Config:
-        env_file = "env.local"
+        env_file = ["backend/env.local", "env.local"]  # Try both paths
         case_sensitive = True
         extra = "ignore"  # Ignore extra fields from env file
 

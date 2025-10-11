@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-header {
+            text-align: center;
+            color: #005A9C;
+            margin-bottom: 30px;
+        }
+        .test-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 2px solid #f5f5f5;
+            border-radius: 8px;
+        }
+        .test-btn {
+            background: #005A9C;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.2s;
+        }
+        .test-btn:hover {
+            background: #ffc107;
+            color: #005A9C;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1 class="test-header">🌊 Admin Dashboard Testing</h1>
+        
+        <div class="test-section">
+            <h3>🔐 Authentication Test</h3>
+            <p>Test admin login with OceanAdmin credentials:</p>
+            <button class="test-btn" onclick="testAdminLogin()">Test Admin Login</button>
+            <div id="auth-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>📊 API Endpoints Test</h3>
+            <p>Test dashboard data endpoints:</p>
+            <button class="test-btn" onclick="testAnalyticsAPI()">Test Analytics API</button>
+            <button class="test-btn" onclick="testUsersAPI()">Test Users API</button>
+            <div id="api-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🎨 Dashboard Access</h3>
+            <p>Open the admin dashboard (requires login):</p>
+            <button class="test-btn" onclick="openAdminDashboard()">Open Admin Dashboard</button>
+            <button class="test-btn" onclick="openLoginPage()">Login First</button>
+            <div id="dashboard-result" class="result" style="display: none;"></div>
+        </div>
+        
+        <div class="test-section">
+            <h3>✅ Expected Results</h3>
+            <div class="info">
+                <strong>Color Scheme:</strong> White background, blue (#005A9C) and yellow (#ffc107) accents<br>
+                <strong>Data Source:</strong> All values should come from AWS RDS database<br>
+                <strong>No Gradients:</strong> Solid colors only, consistent with other pages<br>
+                <strong>Dynamic Data:</strong> Teams, authorities, and statistics from database
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const BASE_URL = 'http://127.0.0.1:9000';
+        let authToken = null;
+
+        async function testAdminLogin() {
+            const resultDiv = document.getElementById('auth-result');
+            resultDiv.style.display = 'block';
+            resultDiv.innerHTML = 'Testing login...';
+            
+            try {
+                const response = await fetch(`${BASE_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: 'username=OceanAdmin&password=admin'
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    authToken = data.access_token;
+                    localStorage.setItem('oceanGuardToken', authToken);
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ Admin login successful!<br>
+                        User: ${data.user.username} (${data.user.role})<br>
+                        Token saved to localStorage
+                    `;
+                } else {
+                    throw new Error(`Login failed: ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Login failed: ${error.message}`;
+            }
+        }
+
+        async function testAnalyticsAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.style.display = 'block';
+            
+            if (!authToken) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '❌ Please login first';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/api/analytics/dashboard`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ Analytics API working!<br>
+                        Total incidents: ${data.total_incidents}<br>
+                        Active incidents: ${data.active_incidents}<br>
+                        Resolved incidents: ${data.resolved_incidents}
+                    `;
+                } else {
+                    throw new Error(`API failed: ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Analytics API failed: ${error.message}`;
+            }
+        }
+
+        async function testUsersAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.style.display = 'block';
+            
+            if (!authToken) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = '❌ Please login first';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${BASE_URL}/api/users/`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    const rescueTeams = users.filter(u => u.role === 'RESCUE_TEAM');
+                    const authorities = users.filter(u => u.role === 'AUTHORITY');
+                    
+                    resultDiv.className = 'result success';
+                    resultDiv.innerHTML = `
+                        ✅ Users API working!<br>
+                        Total users: ${users.length}<br>
+                        Rescue teams: ${rescueTeams.length}<br>
+                        Authorities: ${authorities.length}
+                    `;
+                } else {
+                    throw new Error(`API failed: ${response.status}`);
+                }
+            } catch (error) {
+                resultDiv.className = 'result error';
+                resultDiv.innerHTML = `❌ Users API failed: ${error.message}`;
+            }
+        }
+
+        function openAdminDashboard() {
+            window.open('pages/admin-dashboard.html', '_blank');
+            const resultDiv = document.getElementById('dashboard-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = '🚀 Admin dashboard opened in new tab. Check the styling and data!';
+        }
+
+        function openLoginPage() {
+            window.open('pages/login.html', '_blank');
+            const resultDiv = document.getElementById('dashboard-result');
+            resultDiv.style.display = 'block';
+            resultDiv.className = 'result info';
+            resultDiv.innerHTML = '🔐 Login page opened. Use: OceanAdmin / admin';
+        }
+    </script>
+</body>
+</html>
