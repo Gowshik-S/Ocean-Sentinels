@@ -11,8 +11,8 @@ export CARGO_HOME=/tmp/cargo
 # Upgrade pip to the latest version
 pip install --upgrade pip
 
-# Install dependencies
-pip install -r requirements.txt
+# Install dependencies without build isolation to use system environment
+pip install --no-build-isolation -r requirements.txt
 
 echo "✅ Dependencies installed successfully"
 
