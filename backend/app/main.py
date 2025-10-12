@@ -16,7 +16,7 @@ from app.routers import auth, incidents, users, analytics, websocket
 from app.core.config import settings
 
 # Load environment variables
-load_dotenv("env.local")
+load_dotenv(".env")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

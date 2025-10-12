@@ -76,30 +76,21 @@
                 </div>
             </div>
         </section>
-
-        <!-- TEMPORARY: API Test Button -->
-        <div style="text-align: center; padding: 20px; background: #f8f9fa;">
-            <button onclick="testRegistration()" style="background: #dc2626; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                🧪 Test Registration API
-            </button>
-            <div id="test-results" style="margin-top: 10px; font-family: monospace; background: #000; color: #0f0; padding: 10px; border-radius: 5px; text-align: left; max-height: 200px; overflow-y: auto;"></div>
-        </div>
-
         <section class="stats-bar">
             <div class="stat-item">
-                <span class="stat-number">1,234</span>
+                <span class="stat-number" id="total-reports">Loading...</span>
                 <span class="stat-label">Total Reports Filed</span>
             </div>
             <div class="stat-item">
-                <span class="stat-number">56</span>
+                <span class="stat-number" id="active-incidents">Loading...</span>
                 <span class="stat-label">Active Incidents</span>
             </div>
             <div class="stat-item">
-                <span class="stat-number">78</span>
+                <span class="stat-number" id="rescue-teams">Loading...</span>
                 <span class="stat-label">Rescue Teams Registered</span>
             </div>
             <div class="stat-item">
-                <span class="stat-number">7,516 km</span>
+                <span class="stat-number" id="coastline-watched">Loading...</span>
                 <span class="stat-label">Coastline Watched</span>
             </div>
         </section>
@@ -136,7 +127,7 @@
                  <div class="portal-card">
                      <h3>For Professionals</h3>
                      <p>Join the coordinated response network. Get verified, real-time alerts and manage operations from a central dashboard.</p><br>
-                     <a href="reports.html" class="btn btn--secondary">Official Portal Login</a>
+                     <a href="#" class="btn btn--secondary" id="citizen-login-btn">Official Portal Login</a>
                  </div>
              </div>
         </section>
@@ -552,7 +543,33 @@
                 }
             );
         }
+        
+        // Fetch dynamic system stats
+        fetchSystemStats();
     });
+    
+    // Function to fetch and update system statistics
+    async function fetchSystemStats() {
+        try {
+            const response = await fetch('http://localhost:9000/api/analytics/public/system-stats');
+            const data = await response.json();
+            
+            // Update the stats with dynamic data
+            document.getElementById('total-reports').textContent = data.total_reports.toLocaleString();
+            document.getElementById('active-incidents').textContent = data.active_incidents.toLocaleString();
+            document.getElementById('rescue-teams').textContent = data.rescue_teams_registered.toLocaleString();
+            document.getElementById('coastline-watched').textContent = `${data.coastline_watched_km.toLocaleString()} km`;
+            
+        } catch (error) {
+            console.error('Failed to fetch system stats:', error);
+            
+            // Fallback to default values if API fails
+            document.getElementById('total-reports').textContent = '1,234';
+            document.getElementById('active-incidents').textContent = '56';
+            document.getElementById('rescue-teams').textContent = '78';
+            document.getElementById('coastline-watched').textContent = '7,516 km';
+        }
+    }
     </script>
 
 </body>

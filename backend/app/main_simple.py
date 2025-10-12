@@ -10,7 +10,7 @@ import uvicorn
 from dotenv import load_dotenv
 
 # Load environment variables
-load_dotenv("env.local")
+load_dotenv(".env")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):

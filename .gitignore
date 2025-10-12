@@ -34,21 +34,25 @@ env/
 .ENV/
 .env/
 
-# Environment variables
+# Environment variables - IMPORTANT: Keep .env but allow .env.example
 .env
+env.local
 .env.local
 .env.production
 .env.development
-*.env
+backend/.env
+backend/env.local
 
-# IDE
+# IDE and Editor files
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+.vs/
+*.code-workspace
 
-# OS
+# OS generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -56,24 +60,29 @@ env/
 .Trashes
 ehthumbs.db
 Thumbs.db
+desktop.ini
 
 # Logs
 *.log
 logs/
 log/
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Node.js (if using any frontend build tools)
-node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Development files
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+backend/database/*.db
+backend/database/*.sqlite
+
+# Node.js (if using any frontend build tools)
+node_modules/
+package-lock.json
+yarn.lock
+
+# Development and test files
 test_*.py
 debug_*.py
 quick_*.py
@@ -84,12 +93,13 @@ fix_*.py
 verify_*.py
 create_*.py
 add_*.py
-remove_*.py
+remove_demo_users.py
 copy_*.py
 start_*.py
 simple_*.py
+*_admin_*.py
 
-# HTML test files
+# HTML test and debug files
 *test*.html
 *debug*.html
 admin-login-test.html
@@ -97,12 +107,44 @@ debug_*.html
 test-*.html
 login_test.html
 report_submission_test.html
+authority_css_test.html
+analytics-test.html
+error_fix_verification.html
+footer_addition_summary.html
+header-debug.html
+login_fix_test.html
 
-# Documentation files (keep in repo but could exclude drafts)
+# Test directories
+py_test/
+tests/
+test/
+
+# Documentation files (development docs, keep README.md)
 *_COMPLETE.md
 *_FIXED.md
 *_STATUS.md
 *_SUMMARY.md
+ACCESS_CONTROL.md
+ADMIN_SYSTEM_SUMMARY.md
+ANALYTICS_SETUP_COMPLETE.md
+API_METHOD_FIX_COMPLETE.md
+AWS_RDS_SETUP.md
+COLOR_SCHEME_UPDATE_COMPLETE.md
+DATABASE_STATUS_REPORT.md
+DEVELOPMENT_SUMMARY.md
+POST_COMMANDS_DOCUMENTATION.md
+RAILWAY_DEPLOYMENT.md
+REPORTS_BEHAVIOR_CLARIFICATION.md
+REPORTS_LOADING_FIXED.md
+REPORTS_STYLING_UPDATED.md
+RESCUE_LOGIN_STATUS.md
+RESCUE_SYSTEM_OPERATIONAL.md
+RESCUE_TEAM_SETUP_COMPLETE.md
+RESPONSE_HANDLING_FIX.md
+SQLITE_SERVER_FIXED.md
+USER_REGISTRATION_FIX.md
+ENV_MIGRATION_COMPLETE.md
+JWT_CONFIG_COMPLETE.md
 
 # Temporary files
 *.tmp
@@ -110,8 +152,11 @@ report_submission_test.html
 temp/
 tmp/
 
-# Railway specific
+# Deployment specific (Railway)
 .railway/
+
+# Docker
+.dockerignore
 
 # Backup files
 *.bak
@@ -122,11 +167,66 @@ htmlcov/
 .coverage
 .coverage.*
 coverage.xml
+.nyc_output
 
-# pytest
+# Testing
 .pytest_cache/
+.tox/
+.nox/
 
-# mypy
+# Type checking
 .mypy_cache/
 .dmypy.json
 dmypy.json
+.pyre/
+.pytype/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Security and sensitive files
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
+private/
+
+# Build artifacts
+*.tar.gz
+*.zip
+*.7z
+
+# Cache directories
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.vuepress/dist
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Optional npm cache directory
+.npm
+
+# Optional eslint cache
+.eslintcache
+
+# Dependency directories
+jspm_packages/
+
+# Serverless directories
+.serverless/
+
+# FuseBox cache
+.fusebox/
+
+# DynamoDB Local files
+.dynamodb/
+
+# TernJS port file
+.tern-port

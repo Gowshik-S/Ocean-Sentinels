@@ -373,7 +373,7 @@ body {
     border-radius: 5px;
     font-size: 1rem;
     font-family: var(--font-family);
-    transition: border-color 0.3s ease;
+    transition: border-color 1ms ease;
 }
 
 .hazard-form input:focus,
@@ -807,8 +807,8 @@ body {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(5px);
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Removed backdrop-filter entirely for instant modal opening */
 }
 
 .modal-content {
@@ -820,14 +820,15 @@ body {
     max-width: 500px;
     max-height: 95vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    animation: modalSlideIn 0.3s ease-out;
+    /* Simplify shadow and shorten animation for snappier opening */
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
+    animation: modalSlideIn 0.12s ease-out;
 }
 
 @keyframes modalSlideIn {
     from {
         opacity: 0;
-        transform: translateY(-50px) scale(0.9);
+        transform: translateY(-12px) scale(0.985);
     }
     to {
         opacity: 1;

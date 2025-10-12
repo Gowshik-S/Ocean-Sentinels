@@ -1,6 +1,7 @@
 /**
- * Ocean Guard Analytics Dashboard
+ * Ocean Guard Public Analytics Dashboard
  * Dynamic data fetching from backend API with Chart.js visualizations
+ * Public access version - limited data for general public
  */
 
 // Global variables for charts

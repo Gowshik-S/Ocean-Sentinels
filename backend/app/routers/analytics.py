@@ -258,5 +258,36 @@ async def get_geographic_analytics(
         "total_located_incidents": len(geographic_data)
     }
 
-
-
+@router.get("/public/system-stats")
+async def get_public_system_stats(
+    db: AsyncSession = Depends(get_db)
+):
+    """Get public system statistics (no authentication required)"""
+    # Get total reports filed
+    total_reports_result = await db.execute(select(func.count(Incident.id)))
+    total_reports = total_reports_result.scalar()
+    
+    # Get active incidents
+    active_incidents_result = await db.execute(
+        select(func.count(Incident.id)).where(
+            Incident.status.in_([IncidentStatus.PENDING, IncidentStatus.VERIFIED, IncidentStatus.IN_PROGRESS])
+        )
+    )
+    active_incidents = active_incidents_result.scalar()
+    
+    # Get rescue teams registered (users with RESCUE_TEAM role)
+    rescue_teams_result = await db.execute(
+        select(func.count(User.id)).where(User.role == UserRole.RESCUE_TEAM)
+    )
+    rescue_teams = rescue_teams_result.scalar()
+    
+    # Static coastline length for India (actual value)
+    coastline_km = 7516
+    
+    return {
+        "total_reports": total_reports,
+        "active_incidents": active_incidents,
+        "rescue_teams_registered": rescue_teams,
+        "coastline_watched_km": coastline_km,
+        "last_updated": datetime.utcnow().isoformat()
+    }

@@ -57,8 +57,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function openModal(modal) {
         if (modal) {
-            modal.style.display = 'block';
-            document.body.style.overflow = 'hidden';
+            // Use requestAnimationFrame for smoother modal opening
+            requestAnimationFrame(() => {
+                modal.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+            });
         }
     }
 
@@ -584,6 +587,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 // Add this to your JavaScript file
 function initMiniMap() {
+    // Check if Leaflet is available
+    if (typeof L === 'undefined') {
+        console.warn('Leaflet library not loaded, skipping mini map initialization');
+        return;
+    }
+    
+    // Check if mini-map element exists
+    const mapElement = document.getElementById('mini-map');
+    if (!mapElement) {
+        console.warn('mini-map element not found, skipping initialization');
+        return;
+    }
+    
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function(position) {
             const lat = position.coords.latitude;
@@ -608,9 +624,16 @@ function initMiniMap() {
                 fillOpacity: 0.1,
                 radius: 50000 // 50km in meters
             }).addTo(map);
+        }, function(error) {
+            console.warn('Could not get user location for mini map:', error);
         });
+    } else {
+        console.warn('Geolocation not supported by this browser');
     }
 }
 
-// Initialize when page loads
-document.addEventListener('DOMContentLoaded', initMiniMap);
+// Defer map initialization to avoid blocking modal interactions
+document.addEventListener('DOMContentLoaded', () => {
+    // Delay map init by 1 second to ensure smooth page interactions
+    setTimeout(initMiniMap, 1000);
+});
