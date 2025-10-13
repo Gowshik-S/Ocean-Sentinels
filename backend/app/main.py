@@ -23,13 +23,18 @@ async def lifespan(app: FastAPI):
     """Application lifespan events"""
     # Startup
     print("🚀 Starting Ocean Hazard Backend...")
+    print(f"📊 Settings: HOST={settings.HOST}, PORT={settings.PORT}")
+    print(f"🔗 Database URL: {settings.DATABASE_URL[:50]}..." if settings.DATABASE_URL else "❌ No DATABASE_URL")
     
-    # Create database tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-    
-    print("✅ Database tables created successfully")
-    print("🌊 Ocean Hazard Backend is ready!")
+    try:
+        # Create database tables
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        print("✅ Database tables created successfully")
+        print("🌊 Ocean Hazard Backend is ready!")
+    except Exception as e:
+        print(f"❌ Database connection failed: {e}")
+        print("⚠️  Continuing without database (app will have limited functionality)")
     
     yield
     
@@ -75,10 +80,22 @@ async def root():
 # Health check endpoint
 @app.get("/health")
 async def health_check():
+    try:
+        # Test database connection
+        async with engine.begin() as conn:
+            await conn.execute("SELECT 1")
+        db_status = "connected"
+    except Exception as e:
+        print(f"⚠️  Database health check failed: {e}")
+        db_status = f"error: {str(e)}"
+    
     return {
         "status": "healthy",
         "service": "Ocean Hazard API",
-        "timestamp": "2025-01-27T10:30:00Z"
+        "database": db_status,
+        "host": settings.HOST,
+        "port": settings.PORT,
+        "timestamp": "2025-10-13T10:30:00Z"
     }
 
 # Mapbox token endpoint
