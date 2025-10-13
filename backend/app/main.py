@@ -14,6 +14,7 @@ from dotenv import load_dotenv
 from app.database import engine, Base
 from app.routers import auth, incidents, users, analytics, websocket
 from app.core.config import settings
+from sqlalchemy import text
 
 # Load environment variables
 load_dotenv(".env")
@@ -83,7 +84,7 @@ async def health_check():
     try:
         # Test database connection
         async with engine.begin() as conn:
-            await conn.execute("SELECT 1")
+            await conn.execute(text("SELECT 1"))
         db_status = "connected"
     except Exception as e:
         print(f"⚠️  Database health check failed: {e}")
