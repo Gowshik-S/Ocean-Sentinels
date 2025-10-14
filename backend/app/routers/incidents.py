@@ -35,7 +35,7 @@ async def create_incident(
         reference_id = generate_reference_id()
         
         # Manually validate and convert the data
-        hazard_type = incident_data.get('hazard_type', 'other').upper()
+        hazard_type = incident_data.get('hazard_type', 'other').upper().replace('-', '_')
         location = incident_data.get('location', '')
         description = incident_data.get('description', '')
         urgency = incident_data.get('urgency', 'low').upper()
@@ -118,7 +118,7 @@ async def get_incidents(
                     pass  # Invalid status, ignore filter
             if hazard_type:
                 try:
-                    hazard_type_enum = HazardType(hazard_type)
+                    hazard_type_enum = HazardType(hazard_type.upper().replace('-', '_'))
                     filters.append(Incident.hazard_type == hazard_type_enum)
                 except ValueError:
                     pass  # Invalid hazard type, ignore filter
@@ -142,7 +142,7 @@ async def get_incidents(
                     pass
             if hazard_type:
                 try:
-                    hazard_type_enum = HazardType(hazard_type)
+                    hazard_type_enum = HazardType(hazard_type.upper().replace('-', '_'))
                     filters.append(Incident.hazard_type == hazard_type_enum)
                 except ValueError:
                     pass
