@@ -123,7 +123,7 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
             detail=f"Registration failed: {str(e)}"
         )
 
-@router.post("/login", response_model=Token)
+@router.post("/login", response_model=None)
 async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSession = Depends(get_db)):
     """Login user and return access token"""
     # Find user by username
@@ -157,7 +157,20 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     return {
         "access_token": access_token,
         "token_type": "bearer",
-        "user": user
+        "user": {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "phone": user.phone,
+            "location": user.location,
+            "role": user.role.value if hasattr(user.role, 'value') else str(user.role),
+            "is_active": user.is_active,
+            "is_verified": user.is_verified,
+            "created_at": user.created_at,
+            "last_login": user.last_login
+        }
     }
 
 @router.get("/me", response_model=UserResponse)
