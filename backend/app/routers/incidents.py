@@ -13,7 +13,7 @@ import uuid
 from app.database import get_db
 from app.models.incident import Incident, IncidentStatus, HazardType, UrgencyLevel
 from app.models.user import User, UserRole
-from app.schemas.incident import IncidentCreate, IncidentResponse, IncidentUpdate, IncidentListResponse
+from app.schemas.incident import IncidentCreate, IncidentUpdate
 from app.routers.auth import get_current_user, get_current_active_user
 
 router = APIRouter()
@@ -24,110 +24,209 @@ def generate_reference_id() -> str:
     random_suffix = str(uuid.uuid4())[:8].upper()
     return f"OG-{timestamp}-{random_suffix}"
 
-@router.post("/", response_model=IncidentResponse)
+@router.post("/", response_model=None)
 async def create_incident(
-    incident_data: IncidentCreate,
+    incident_data: dict,  # Use dict instead of Pydantic model temporarily
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Create a new incident report"""
-    reference_id = generate_reference_id()
-    
-    db_incident = Incident(
-        reference_id=reference_id,
-        hazard_type=incident_data.hazard_type,
-        location=incident_data.location,
-        latitude=incident_data.latitude,
-        longitude=incident_data.longitude,
-        description=incident_data.description,
-        urgency=incident_data.urgency,
-        contact_info=incident_data.contact_info,
-        reporter_id=current_user.id,
-        status=IncidentStatus.PENDING
-    )
-    
-    db.add(db_incident)
-    await db.commit()
-    await db.refresh(db_incident)
-    
-    return db_incident
+    try:
+        reference_id = generate_reference_id()
+        
+        # Manually validate and convert the data
+        hazard_type = incident_data.get('hazard_type', 'other').upper()
+        location = incident_data.get('location', '')
+        description = incident_data.get('description', '')
+        urgency = incident_data.get('urgency', 'low').upper()
+        
+        # Convert string enum values to enum instances
+        hazard_type_enum = HazardType(hazard_type)
+        urgency_enum = UrgencyLevel(urgency)
+        
+        db_incident = Incident(
+            reference_id=reference_id,
+            hazard_type=hazard_type_enum,
+            location=location,
+            latitude=incident_data.get('latitude'),
+            longitude=incident_data.get('longitude'),
+            description=description,
+            urgency=urgency_enum,
+            contact_info=incident_data.get('contact_info'),
+            reporter_id=current_user.id,
+            status=IncidentStatus.PENDING
+        )
+        
+        db.add(db_incident)
+        await db.commit()
+        await db.refresh(db_incident)
+        
+        # Return incident as simple dict - no validation
+        incident_dict = {
+            "id": db_incident.id,
+            "reference_id": db_incident.reference_id,
+            "hazard_type": str(db_incident.hazard_type.value),
+            "location": str(db_incident.location),
+            "latitude": float(db_incident.latitude) if db_incident.latitude else None,
+            "longitude": float(db_incident.longitude) if db_incident.longitude else None,
+            "description": str(db_incident.description),
+            "urgency": str(db_incident.urgency.value),
+            "status": str(db_incident.status.value),
+            "contact_info": str(db_incident.contact_info) if db_incident.contact_info else None,
+            "photo_url": str(db_incident.photo_url) if db_incident.photo_url else None,
+            "reporter_id": int(db_incident.reporter_id),
+            "verified_by_id": int(db_incident.verified_by_id) if db_incident.verified_by_id else None,
+            "created_at": db_incident.created_at.isoformat() if db_incident.created_at else None,
+            "updated_at": db_incident.updated_at.isoformat() if db_incident.updated_at else None,
+            "verified_at": db_incident.verified_at.isoformat() if db_incident.verified_at else None,
+            "resolved_at": db_incident.resolved_at.isoformat() if db_incident.resolved_at else None
+        }
+        
+        return incident_dict
+        
+    except Exception as e:
+        await db.rollback()
+        print(f"❌ Incident creation error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to create incident: {str(e)}")
 
-@router.get("/", response_model=IncidentListResponse)
+@router.get("/", response_model=None)
 async def get_incidents(
     page: int = Query(1, ge=1),
     size: int = Query(10, ge=1, le=100),
-    status: Optional[IncidentStatus] = None,
-    hazard_type: Optional[HazardType] = None,
+    status: Optional[str] = None,
+    hazard_type: Optional[str] = None,
     reporter_id: Optional[int] = None,
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get incidents with filtering and pagination"""
-    query = select(Incident)
-    
-    # Apply filters based on user role
-    if current_user.role == UserRole.PUBLIC:
-        # Public users can only see their own incidents
-        query = query.where(Incident.reporter_id == current_user.id)
-    elif current_user.role in [UserRole.ADMIN, UserRole.AUTHORITY, UserRole.RESCUE_TEAM]:
-        # Admin/Authority/Rescue Team can see all incidents with filters
-        filters = []
-        if status:
-            filters.append(Incident.status == status)
-        if hazard_type:
-            filters.append(Incident.hazard_type == hazard_type)
-        if reporter_id:
-            filters.append(Incident.reporter_id == reporter_id)
+    try:
+        query = select(Incident)
         
-        if filters:
-            query = query.where(and_(*filters))
-    
-    # Get total count
-    count_query = select(func.count(Incident.id))
-    if current_user.role == UserRole.PUBLIC:
-        count_query = count_query.where(Incident.reporter_id == current_user.id)
-    elif current_user.role in [UserRole.ADMIN, UserRole.AUTHORITY, UserRole.RESCUE_TEAM]:
-        filters = []
-        if status:
-            filters.append(Incident.status == status)
-        if hazard_type:
-            filters.append(Incident.hazard_type == hazard_type)
-        if reporter_id:
-            filters.append(Incident.reporter_id == reporter_id)
+        # Apply filters based on user role
+        if current_user.role == UserRole.PUBLIC:
+            # Public users can only see their own incidents
+            query = query.where(Incident.reporter_id == current_user.id)
+        elif current_user.role in [UserRole.ADMIN, UserRole.AUTHORITY, UserRole.RESCUE_TEAM]:
+            # Admin/Authority/Rescue Team can see all incidents with filters
+            filters = []
+            if status:
+                try:
+                    status_enum = IncidentStatus(status)
+                    filters.append(Incident.status == status_enum)
+                except ValueError:
+                    pass  # Invalid status, ignore filter
+            if hazard_type:
+                try:
+                    hazard_type_enum = HazardType(hazard_type)
+                    filters.append(Incident.hazard_type == hazard_type_enum)
+                except ValueError:
+                    pass  # Invalid hazard type, ignore filter
+            if reporter_id:
+                filters.append(Incident.reporter_id == reporter_id)
+            
+            if filters:
+                query = query.where(and_(*filters))
         
-        if filters:
-            count_query = count_query.where(and_(*filters))
-    
-    total_result = await db.execute(count_query)
-    total = total_result.scalar()
-    
-    # Apply pagination and ordering
-    query = query.order_by(desc(Incident.created_at))
-    query = query.offset((page - 1) * size).limit(size)
-    
-    result = await db.execute(query)
-    incidents = result.scalars().all()
-    
-    return IncidentListResponse(
-        incidents=incidents,
-        total=total,
-        page=page,
-        size=size,
-        has_next=(page * size) < total,
-        has_prev=page > 1
-    )
+        # Get total count
+        count_query = select(func.count(Incident.id))
+        if current_user.role == UserRole.PUBLIC:
+            count_query = count_query.where(Incident.reporter_id == current_user.id)
+        elif current_user.role in [UserRole.ADMIN, UserRole.AUTHORITY, UserRole.RESCUE_TEAM]:
+            filters = []
+            if status:
+                try:
+                    status_enum = IncidentStatus(status)
+                    filters.append(Incident.status == status_enum)
+                except ValueError:
+                    pass
+            if hazard_type:
+                try:
+                    hazard_type_enum = HazardType(hazard_type)
+                    filters.append(Incident.hazard_type == hazard_type_enum)
+                except ValueError:
+                    pass
+            if reporter_id:
+                filters.append(Incident.reporter_id == reporter_id)
+            
+            if filters:
+                count_query = count_query.where(and_(*filters))
+        
+        total_result = await db.execute(count_query)
+        total = total_result.scalar()
+        
+        # Apply pagination and ordering
+        query = query.order_by(desc(Incident.created_at))
+        query = query.offset((page - 1) * size).limit(size)
+        
+        result = await db.execute(query)
+        incidents = result.scalars().all()
+        
+        # Convert incidents to dicts for proper serialization
+        incidents_data = []
+        for incident in incidents:
+            incident_dict = {
+                "id": int(incident.id),
+                "reference_id": str(incident.reference_id),
+                "hazard_type": str(incident.hazard_type.value),
+                "location": str(incident.location),
+                "latitude": float(incident.latitude) if incident.latitude else None,
+                "longitude": float(incident.longitude) if incident.longitude else None,
+                "description": str(incident.description),
+                "urgency": str(incident.urgency.value),
+                "status": str(incident.status.value),
+                "contact_info": str(incident.contact_info) if incident.contact_info else None,
+                "photo_url": str(incident.photo_url) if incident.photo_url else None,
+                "reporter_id": int(incident.reporter_id),
+                "verified_by_id": int(incident.verified_by_id) if incident.verified_by_id else None,
+                "created_at": incident.created_at.isoformat() if incident.created_at else None,
+                "updated_at": incident.updated_at.isoformat() if incident.updated_at else None,
+                "verified_at": incident.verified_at.isoformat() if incident.verified_at else None,
+                "resolved_at": incident.resolved_at.isoformat() if incident.resolved_at else None
+            }
+            incidents_data.append(incident_dict)
+        
+        response_dict = {
+            "incidents": incidents_data,
+            "total": int(total),
+            "page": int(page),
+            "size": int(size),
+            "has_next": bool((page * size) < total),
+            "has_prev": bool(page > 1)
+        }
+        
+        return response_dict
+        
+    except Exception as e:
+        print(f"❌ Get incidents error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get incidents: {str(e)}")
 
-@router.get("/{incident_id}", response_model=IncidentResponse)
+@router.get("/test")
+async def test_incident_endpoint():
+    """Simple test endpoint"""
+    return {"message": "Incident endpoint is working", "status": "ok"}
+
+@router.get("/count")
+async def get_incident_count(
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get incident count only"""
+    try:
+        count_result = await db.execute(select(func.count(Incident.id)))
+        total = count_result.scalar()
+        return {"count": total, "status": "success"}
+    except Exception as e:
+        return {"error": str(e), "status": "error"}
+
+@router.get("/{incident_id}", response_model=None)
 async def get_incident(
     incident_id: int,
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
     """Get a specific incident by ID"""
-    query = select(Incident).options(
-        selectinload(Incident.reporter),
-        selectinload(Incident.verified_by)
-    ).where(Incident.id == incident_id)
+    query = select(Incident).where(Incident.id == incident_id)
     
     result = await db.execute(query)
     incident = result.scalar_one_or_none()
@@ -142,7 +241,28 @@ async def get_incident(
         # Rescue teams can view all incidents but with limited information
         pass
     
-    return incident
+    # Return incident as dict for proper serialization
+    incident_dict = {
+        "id": int(incident.id),
+        "reference_id": str(incident.reference_id),
+        "hazard_type": str(incident.hazard_type.value),
+        "location": str(incident.location),
+        "latitude": float(incident.latitude) if incident.latitude else None,
+        "longitude": float(incident.longitude) if incident.longitude else None,
+        "description": str(incident.description),
+        "urgency": str(incident.urgency.value),
+        "status": str(incident.status.value),
+        "contact_info": str(incident.contact_info) if incident.contact_info else None,
+        "photo_url": str(incident.photo_url) if incident.photo_url else None,
+        "reporter_id": int(incident.reporter_id),
+        "verified_by_id": int(incident.verified_by_id) if incident.verified_by_id else None,
+        "created_at": incident.created_at.isoformat() if incident.created_at else None,
+        "updated_at": incident.updated_at.isoformat() if incident.updated_at else None,
+        "verified_at": incident.verified_at.isoformat() if incident.verified_at else None,
+        "resolved_at": incident.resolved_at.isoformat() if incident.resolved_at else None
+    }
+    
+    return incident_dict
 
 @router.put("/{incident_id}/verify")
 async def verify_incident(

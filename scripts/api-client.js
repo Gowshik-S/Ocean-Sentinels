@@ -113,7 +113,7 @@ class OceanHazardAPI {
 
     // User methods
     async getCurrentUser() {
-        const response = await fetch(`${this.baseURL}/auth/me`, {
+        const response = await fetch(`${this.baseURL}/users/me`, {
             headers: this.getHeaders()
         });
 

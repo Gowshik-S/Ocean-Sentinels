@@ -8,12 +8,12 @@ from datetime import datetime
 from app.models.incident import HazardType, UrgencyLevel, IncidentStatus
 
 class IncidentBase(BaseModel):
-    hazard_type: HazardType
+    hazard_type: str  # Changed from HazardType to str
     location: str
     latitude: Optional[float] = None
     longitude: Optional[float] = None
     description: str
-    urgency: UrgencyLevel = UrgencyLevel.LOW
+    urgency: str = "low"  # Changed from UrgencyLevel to str
     contact_info: Optional[str] = None
 
 class IncidentCreate(IncidentBase):
@@ -27,7 +27,7 @@ class IncidentUpdate(BaseModel):
 class IncidentResponse(IncidentBase):
     id: int
     reference_id: str
-    status: IncidentStatus
+    status: str  # Changed from IncidentStatus to str
     reporter_id: int
     verified_by_id: Optional[int] = None
     photo_url: Optional[str] = None

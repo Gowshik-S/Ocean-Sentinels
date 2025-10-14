@@ -9,26 +9,26 @@ import enum
 from app.database import Base
 
 class IncidentStatus(str, enum.Enum):
-    PENDING = "pending"
-    VERIFIED = "verified"
-    IN_PROGRESS = "in_progress"
-    RESOLVED = "resolved"
-    FALSE_ALARM = "false_alarm"
+    PENDING = "PENDING"
+    VERIFIED = "VERIFIED"
+    IN_PROGRESS = "IN_PROGRESS"
+    RESOLVED = "RESOLVED"
+    FALSE_ALARM = "FALSE_ALARM"
 
 class HazardType(str, enum.Enum):
-    HIGH_WAVES = "high-waves"
-    FLOODING = "flooding"
-    TSUNAMI = "tsunami"
-    LOST_VESSEL = "lost-vessel"
-    DEBRIS = "debris"
-    OIL_SPILL = "oil-spill"
-    OTHER = "other"
+    HIGH_WAVES = "HIGH_WAVES"
+    FLOODING = "FLOODING"
+    TSUNAMI = "TSUNAMI"
+    LOST_VESSEL = "LOST_VESSEL"
+    DEBRIS = "DEBRIS"
+    OIL_SPILL = "OIL_SPILL"
+    OTHER = "OTHER"
 
 class UrgencyLevel(str, enum.Enum):
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
+    LOW = "LOW"
+    MEDIUM = "MEDIUM"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
 
 class Incident(Base):
     __tablename__ = "incidents"

@@ -144,3 +144,53 @@ async def activate_user(
     
     return {"message": f"User {'activated' if user.is_active else 'deactivated'} successfully"}
 
+@router.put("/{user_id}/reset-password")
+async def reset_user_password(
+    user_id: int,
+    password_data: dict,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Reset user password (Admin only)"""
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    new_password = password_data.get("password")
+    if not new_password:
+        raise HTTPException(status_code=400, detail="Password is required")
+
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Hash the new password
+    from app.core.security import get_password_hash
+    user.hashed_password = get_password_hash(new_password)
+    await db.commit()
+
+    return {"message": "Password reset successfully"}
+
+# TEMPORARY ENDPOINT - Remove after use
+@router.put("/reset-oceanadmin-password")
+async def reset_oceanadmin_password(
+    password_data: dict,
+    db: AsyncSession = Depends(get_db)
+):
+    """TEMPORARY: Reset OceanAdmin password - Remove after use"""
+    new_password = password_data.get("password", "admin")
+
+    result = await db.execute(select(User).where(User.username == "oceanadmin"))
+    user = result.scalar_one_or_none()
+
+    if not user:
+        return {"message": "OceanAdmin user not found"}
+
+    # Hash the new password
+    from app.core.security import get_password_hash
+    user.hashed_password = get_password_hash(new_password)
+    await db.commit()
+
+    return {"message": f"OceanAdmin password reset to '{new_password}'"}
+
