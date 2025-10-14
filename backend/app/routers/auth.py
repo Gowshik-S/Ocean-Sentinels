@@ -48,7 +48,7 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register", response_model=None)
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
     """Register a new user"""
     print(f"🔥 Registration attempt for: {user_data.email}")
@@ -94,7 +94,22 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
         await db.refresh(db_user)
         
         print(f"🎉 User registered successfully: {user_data.email}")
-        return db_user
+
+        # Return user data as dict to avoid serialization issues
+        return {
+            "id": db_user.id,
+            "username": db_user.username,
+            "email": db_user.email,
+            "first_name": db_user.first_name,
+            "last_name": db_user.last_name,
+            "phone": db_user.phone,
+            "location": db_user.location,
+            "role": db_user.role.value if hasattr(db_user.role, 'value') else str(db_user.role),
+            "is_active": db_user.is_active,
+            "is_verified": db_user.is_verified,
+            "created_at": db_user.created_at,
+            "last_login": db_user.last_login
+        }
         
     except HTTPException as he:
         # Re-raise HTTP exceptions (like duplicate username/email)
