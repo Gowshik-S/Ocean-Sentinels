@@ -2,7 +2,7 @@
 User schemas for Ocean Hazard API
 """
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from typing import Optional
 from datetime import datetime
 from app.models.user import UserRole
@@ -14,6 +14,13 @@ class UserBase(BaseModel):
     last_name: str
     phone: Optional[str] = None
     location: Optional[str] = None
+
+    @validator('username', 'first_name', 'last_name', 'phone', 'location', pre=True)
+    def strip_whitespace(cls, v):
+        """Strip leading and trailing whitespace from string fields"""
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
 class UserCreate(UserBase):
     password: str

@@ -473,13 +473,13 @@ class AdminDashboard {
             
             // Get form data
             const teamData = {
-                username: document.getElementById('team-email').value, // Use email as username
-                email: document.getElementById('team-email').value,
+                username: document.getElementById('team-email').value.trim(), // Use email as username and trim
+                email: document.getElementById('team-email').value.trim(),
                 password: 'Ocean@123', // Default password - team can change it later
-                first_name: document.getElementById('team-name').value.split(' ')[0] || document.getElementById('team-name').value,
-                last_name: document.getElementById('team-name').value.split(' ').slice(1).join(' ') || '',
-                phone: document.getElementById('team-phone').value,
-                location: document.getElementById('team-location').value,
+                first_name: document.getElementById('team-name').value.trim().split(' ')[0] || document.getElementById('team-name').value.trim(),
+                last_name: document.getElementById('team-name').value.trim().split(' ').slice(1).join(' ') || '',
+                phone: document.getElementById('team-phone').value.trim(),
+                location: document.getElementById('team-location').value.trim(),
                 role: 'rescue_team' // Use lowercase as expected by backend enum
             };
 
@@ -509,13 +509,13 @@ class AdminDashboard {
             
             // Get form data
             const authorityData = {
-                username: document.getElementById('authority-email').value, // Use email as username
-                email: document.getElementById('authority-email').value,
+                username: document.getElementById('authority-email').value.trim(), // Use email as username and trim
+                email: document.getElementById('authority-email').value.trim(),
                 password: 'Ocean@123', // Default password - authority can change it later
-                first_name: document.getElementById('authority-name').value.split(' ')[0] || document.getElementById('authority-name').value,
-                last_name: document.getElementById('authority-name').value.split(' ').slice(1).join(' ') || '',
-                phone: document.getElementById('authority-phone').value,
-                location: document.getElementById('authority-department').value, // Using department as location
+                first_name: document.getElementById('authority-name').value.trim().split(' ')[0] || document.getElementById('authority-name').value.trim(),
+                last_name: document.getElementById('authority-name').value.trim().split(' ').slice(1).join(' ') || '',
+                phone: document.getElementById('authority-phone').value.trim(),
+                location: document.getElementById('authority-department').value.trim(), // Using department as location
                 role: 'authority' // Use lowercase as expected by backend enum
             };
 
