@@ -4,7 +4,7 @@
  */
 
 class OceanHazardAPI {
-    constructor(baseURL = 'http://127.0.0.1:9000/api') {
+    constructor(baseURL = 'https://ocean-hazard-1-6j5g.onrender.com/api') {
         this.baseURL = baseURL;
         
         // Check both localStorage and sessionStorage for token and user
