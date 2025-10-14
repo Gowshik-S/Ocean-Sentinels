@@ -2,7 +2,7 @@
 Configuration settings for Ocean Hazard API
 """
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 from typing import List
 import os
 
