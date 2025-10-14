@@ -28,7 +28,7 @@ class UserUpdate(BaseModel):
 
 class UserResponse(UserBase):
     id: int
-    role: UserRole
+    role: str
     is_active: bool
     is_verified: bool
     created_at: datetime
