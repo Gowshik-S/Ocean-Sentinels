@@ -18,6 +18,27 @@ from app.routers.auth import get_current_user, get_current_active_user
 
 router = APIRouter()
 
+def format_hazard_type(value: Optional[HazardType]) -> Optional[str]:
+    """Convert hazard type to frontend-friendly format (e.g., HIGH_WAVES -> high-waves)"""
+    if not value:
+        return None
+    raw = value.value if hasattr(value, "value") else str(value)
+    return raw.lower().replace("_", "-")
+
+def format_status(value: Optional[IncidentStatus]) -> Optional[str]:
+    """Convert status to lowercase with underscores (e.g., IN_PROGRESS -> in_progress)"""
+    if not value:
+        return None
+    raw = value.value if hasattr(value, "value") else str(value)
+    return raw.lower()
+
+def format_urgency(value: Optional[UrgencyLevel]) -> Optional[str]:
+    """Convert urgency to lowercase (e.g., CRITICAL -> critical)"""
+    if not value:
+        return None
+    raw = value.value if hasattr(value, "value") else str(value)
+    return raw.lower()
+
 def generate_reference_id() -> str:
     """Generate a unique reference ID for incidents"""
     timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
@@ -65,13 +86,13 @@ async def create_incident(
         incident_dict = {
             "id": db_incident.id,
             "reference_id": db_incident.reference_id,
-            "hazard_type": str(db_incident.hazard_type.value),
+            "hazard_type": format_hazard_type(db_incident.hazard_type),
             "location": str(db_incident.location),
             "latitude": float(db_incident.latitude) if db_incident.latitude else None,
             "longitude": float(db_incident.longitude) if db_incident.longitude else None,
             "description": str(db_incident.description),
-            "urgency": str(db_incident.urgency.value),
-            "status": str(db_incident.status.value),
+            "urgency": format_urgency(db_incident.urgency),
+            "status": format_status(db_incident.status),
             "contact_info": str(db_incident.contact_info) if db_incident.contact_info else None,
             "photo_url": str(db_incident.photo_url) if db_incident.photo_url else None,
             "reporter_id": int(db_incident.reporter_id),
@@ -168,13 +189,13 @@ async def get_incidents(
             incident_dict = {
                 "id": int(incident.id),
                 "reference_id": str(incident.reference_id),
-                "hazard_type": str(incident.hazard_type.value),
+                "hazard_type": format_hazard_type(incident.hazard_type),
                 "location": str(incident.location),
                 "latitude": float(incident.latitude) if incident.latitude else None,
                 "longitude": float(incident.longitude) if incident.longitude else None,
                 "description": str(incident.description),
-                "urgency": str(incident.urgency.value),
-                "status": str(incident.status.value),
+                "urgency": format_urgency(incident.urgency),
+                "status": format_status(incident.status),
                 "contact_info": str(incident.contact_info) if incident.contact_info else None,
                 "photo_url": str(incident.photo_url) if incident.photo_url else None,
                 "reporter_id": int(incident.reporter_id),
@@ -245,13 +266,13 @@ async def get_incident(
     incident_dict = {
         "id": int(incident.id),
         "reference_id": str(incident.reference_id),
-        "hazard_type": str(incident.hazard_type.value),
+        "hazard_type": format_hazard_type(incident.hazard_type),
         "location": str(incident.location),
         "latitude": float(incident.latitude) if incident.latitude else None,
         "longitude": float(incident.longitude) if incident.longitude else None,
         "description": str(incident.description),
-        "urgency": str(incident.urgency.value),
-        "status": str(incident.status.value),
+        "urgency": format_urgency(incident.urgency),
+        "status": format_status(incident.status),
         "contact_info": str(incident.contact_info) if incident.contact_info else None,
         "photo_url": str(incident.photo_url) if incident.photo_url else None,
         "reporter_id": int(incident.reporter_id),
