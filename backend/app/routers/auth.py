@@ -11,7 +11,7 @@ from typing import Optional
 from jose import JWTError
 
 from app.database import get_db
-from app.models.user import User
+from app.models.user import User, UserRole
 from app.schemas.user import UserCreate, UserResponse, Token, UserLogin
 from app.core.security import verify_password, get_password_hash, create_access_token, verify_token
 from app.core.config import settings
@@ -49,9 +49,22 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
     return current_user
 
 @router.post("/register", response_model=None)
-async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)):
-    """Register a new user"""
-    print(f"🔥 Registration attempt for: {user_data.email}")
+async def register(
+    user_data: UserCreate, 
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Register a new user (Admin only for non-public roles)"""
+    print(f"🔥 Registration attempt for: {user_data.email} by user: {current_user.username} (role: {current_user.role})")
+    
+    # Check if current user is admin for creating non-public users
+    if user_data.role and user_data.role != UserRole.PUBLIC:
+        if current_user.role != UserRole.ADMIN:
+            print(f"❌ Non-admin user {current_user.username} tried to create user with role {user_data.role}")
+            raise HTTPException(
+                status_code=403,
+                detail="Only administrators can create users with special roles"
+            )
     
     try:
         # Check if username already exists
