@@ -24,6 +24,10 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
                 <li><a href="my-reports.html">My Reports</a></li>
+                <!-- Incident Reports - Only visible for Admin, Authority, Rescue Team -->
+                <li id="nav-reports" style="display: none;">
+                    <a href="reports.html">Incident Reports</a>
+                </li>
                 <li><a href="#about-us">About Us</a></li>
             </ul>
             <div class="nav-actions">
@@ -450,6 +454,8 @@
     
     <!-- API Client -->
     <script src="../scripts/api-client.js?v=2.1" defer></script>
+    <!-- Navigation Manager - Must load before main script -->
+    <script src="../scripts/navigation-manager.js?v=1.0"></script>
     <script src="../scripts/script.js?v=2.1" defer></script>
     
     <!-- Mapbox Map Initialization -->

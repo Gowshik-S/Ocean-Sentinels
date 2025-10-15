@@ -229,6 +229,15 @@ class OceanHazardAPI {
         return await this.handleResponse(response);
     }
 
+    async deleteUser(userId) {
+        const response = await fetch(`${this.baseURL}/users/${userId}`, {
+            method: 'DELETE',
+            headers: this.getHeaders()
+        });
+
+        return await this.handleResponse(response);
+    }
+
     // Analytics methods
     async getDashboardAnalytics() {
         const response = await fetch(`${this.baseURL}/analytics/dashboard`, {

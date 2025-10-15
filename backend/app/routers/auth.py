@@ -11,7 +11,7 @@ from typing import Optional
 from jose import JWTError
 
 from app.database import get_db
-from app.models.user import User, UserRole
+from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, Token, UserLogin
 from app.core.security import verify_password, get_password_hash, create_access_token, verify_token
 from app.core.config import settings
@@ -54,13 +54,13 @@ async def register(
     current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Register a new user (Admin only for non-public roles)"""
-    print(f"🔥 Registration attempt for: {user_data.email} by user: {current_user.username} (role: {current_user.role})")
+    """Register a new user"""
+    print(f"🔥 Registration attempt for: {user_data.email}")
     
-    # Check if current user is admin for creating non-public users
-    if user_data.role and user_data.role != UserRole.PUBLIC:
-        if current_user.role != UserRole.ADMIN:
-            print(f"❌ Non-admin user {current_user.username} tried to create user with role {user_data.role}")
+    # Check if user has admin role for creating special role users
+    if user_data.role and user_data.role != "public":
+        if current_user.role != "admin":
+            print(f"❌ Non-admin user {current_user.username} tried to create {user_data.role} user")
             raise HTTPException(
                 status_code=403,
                 detail="Only administrators can create users with special roles"
@@ -88,10 +88,7 @@ async def register(
         print(f"✅ Hashing password for user: {user_data.email}")
         # Create new user
         hashed_password = get_password_hash(user_data.password)
-        print(f"✅ Password hashed successfully: {hashed_password[:20]}...")
-        
-        # Debug: print user data
-        print(f"📋 User data: username={user_data.username}, role={user_data.role}, password_len={len(user_data.password)}")
+        print(f"✅ Password hashed successfully")
         
         db_user = User(
             username=user_data.username,
@@ -144,29 +141,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     """Login user and return access token"""
     # Find user by username (trim whitespace)
     username = form_data.username.strip()
-    print(f"🔐 Login attempt for username: '{username}'")
-    
     result = await db.execute(select(User).where(User.username == username))
     user = result.scalar_one_or_none()
     
-    if not user:
-        print(f"❌ User not found: {username}")
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    
-    print(f"✅ User found: {user.username}, role: {user.role}, active: {user.is_active}")
-    print(f"🔑 Stored hash: {user.hashed_password[:20]}...")
-    print(f"🔑 Provided password: '{form_data.password}'")
-    
-    # Verify password
-    password_valid = verify_password(form_data.password, user.hashed_password)
-    print(f"🔍 Password verification result: {password_valid}")
-    
-    if not password_valid:
-        print(f"❌ Password verification failed")
+    if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",

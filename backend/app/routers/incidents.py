@@ -18,26 +18,17 @@ from app.routers.auth import get_current_user, get_current_active_user
 
 router = APIRouter()
 
-def format_hazard_type(value: Optional[HazardType]) -> Optional[str]:
-    """Convert hazard type to frontend-friendly format (e.g., HIGH_WAVES -> high-waves)"""
-    if not value:
-        return None
-    raw = value.value if hasattr(value, "value") else str(value)
-    return raw.lower().replace("_", "-")
+def format_hazard_type(hazard_type: HazardType) -> str:
+    """Format hazard type enum to frontend-compatible format"""
+    return hazard_type.value.lower().replace('_', '-')
 
-def format_status(value: Optional[IncidentStatus]) -> Optional[str]:
-    """Convert status to lowercase with underscores (e.g., IN_PROGRESS -> in_progress)"""
-    if not value:
-        return None
-    raw = value.value if hasattr(value, "value") else str(value)
-    return raw.lower()
+def format_status(status: IncidentStatus) -> str:
+    """Format status enum to frontend-compatible format"""
+    return status.value.lower()
 
-def format_urgency(value: Optional[UrgencyLevel]) -> Optional[str]:
-    """Convert urgency to lowercase (e.g., CRITICAL -> critical)"""
-    if not value:
-        return None
-    raw = value.value if hasattr(value, "value") else str(value)
-    return raw.lower()
+def format_urgency(urgency: UrgencyLevel) -> str:
+    """Format urgency enum to frontend-compatible format"""
+    return urgency.value.lower()
 
 def generate_reference_id() -> str:
     """Generate a unique reference ID for incidents"""

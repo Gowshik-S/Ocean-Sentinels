@@ -260,6 +260,10 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
                 <li><a href="admin-dashboard.html" class="active">Admin Dashboard</a></li>
+                <!-- Incident Reports - Only visible for Admin, Authority, Rescue Team -->
+                <li id="nav-reports" style="display: none;">
+                    <a href="reports.html">Incident Reports</a>
+                </li>
             </ul>
             <div class="nav-actions">
                 <span class="welcome-user" id="welcome-message">Welcome, Admin</span>
@@ -412,6 +416,8 @@
 
     <!-- Include API Client -->
     <script src="../scripts/api-client.js"></script>
+    <!-- Include Navigation Manager for role-based visibility -->
+    <script src="../scripts/navigation-manager.js"></script>
     <!-- Include Admin Dashboard functionality -->
     <script src="../scripts/admin-dashboard.js"></script>
 

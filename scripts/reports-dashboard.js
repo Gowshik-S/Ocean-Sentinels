@@ -21,17 +21,25 @@ class ReportsManager {
 
     async init() {
         try {
+            console.log('🚀 Initializing Reports Dashboard...');
+            
             // Check authentication and role access
             await this.checkRoleAccess();
+            console.log('✅ Role access verified');
             
             // Setup UI based on user role
             this.setupRoleBasedUI();
+            console.log('✅ UI setup complete');
             
             // Load reports data
             await this.loadReports();
+            console.log('✅ Reports loaded');
             
             // Setup event listeners
             this.setupEventListeners();
+            console.log('✅ Event listeners setup complete');
+            
+            console.log('🎉 Reports Dashboard initialized successfully!');
             
         } catch (error) {
             console.error('❌ Failed to initialize Reports Dashboard:', error);
@@ -42,20 +50,26 @@ class ReportsManager {
     async checkRoleAccess() {
         const token = localStorage.getItem('oceanGuardToken');
         if (!token) {
-            throw new Error('No authentication token found');
+            throw new Error('No authentication token found. Please login first.');
         }
 
         try {
             this.currentUser = await this.api.getCurrentUser();
-            
+
             // Check if user has appropriate role
             const allowedRoles = ['admin', 'authority', 'rescue_team'];
             if (!this.currentUser || !allowedRoles.includes(this.currentUser.role)) {
-                throw new Error('Access denied: Insufficient privileges');
+                throw new Error(`Access denied: Insufficient privileges. Your role (${this.currentUser?.role || 'unknown'}) does not have access to this page.`);
             }
-            
+
+            console.log('✅ User authenticated:', this.currentUser.username, 'Role:', this.currentUser.role);
+
         } catch (error) {
-            throw new Error('Invalid token or insufficient privileges');
+            console.error('❌ Authentication failed:', error);
+            // Clear invalid tokens
+            localStorage.removeItem('oceanGuardToken');
+            localStorage.removeItem('oceanGuardUser');
+            throw new Error('Authentication failed: ' + error.message + '. Please login again.');
         }
     }
 
@@ -69,41 +83,48 @@ class ReportsManager {
             welcomeMessage.textContent = `Welcome, ${this.currentUser.full_name || this.currentUser.username}`;
         }
 
+        // Only update elements if they exist
+        if (!this.currentUser) {
+            console.warn('No current user found for role-based UI setup');
+            return;
+        }
+
         // Customize UI based on role
         switch (this.currentUser.role) {
             case 'admin':
-                pageTitle.textContent = 'Admin - Incident Reports Dashboard';
-                pageDescription.textContent = 'Complete oversight and management of all incident reports';
-                roleBadge.textContent = '👨‍💼 Administrator';
-                roleBadge.style.background = 'rgba(231, 76, 60, 0.3)';
+                if (pageTitle) pageTitle.textContent = 'Admin - Incident Reports Dashboard';
+                if (pageDescription) pageDescription.textContent = 'Complete oversight and management of all incident reports';
+                if (roleBadge) {
+                    roleBadge.textContent = '👨‍💼 Administrator';
+                    roleBadge.style.background = 'rgba(231, 76, 60, 0.3)';
+                }
                 break;
-                
+
             case 'rescue_team':
-                pageTitle.textContent = 'Rescue Team - Incident Response Dashboard';
-                pageDescription.textContent = 'Manage and respond to emergency incidents in your area';
-                roleBadge.textContent = '🚁 Rescue Team';
-                roleBadge.style.background = 'rgba(230, 126, 34, 0.3)';
+                if (pageTitle) pageTitle.textContent = 'Rescue Team - Incident Response Dashboard';
+                if (pageDescription) pageDescription.textContent = 'Manage and respond to emergency incidents in your area';
+                if (roleBadge) {
+                    roleBadge.textContent = '🚁 Rescue Team';
+                    roleBadge.style.background = 'rgba(230, 126, 34, 0.3)';
+                }
                 break;
-                
+
             case 'authority':
-                pageTitle.textContent = 'Authority - Incident Oversight Dashboard';
-                pageDescription.textContent = 'Monitor and coordinate incident response activities';
-                roleBadge.textContent = '🏛️ Authority';
-                roleBadge.style.background = 'rgba(52, 152, 219, 0.3)';
+                if (pageTitle) pageTitle.textContent = 'Authority - Incident Oversight Dashboard';
+                if (pageDescription) pageDescription.textContent = 'Monitor and coordinate incident response activities';
+                if (roleBadge) {
+                    roleBadge.textContent = '🏛️ Authority';
+                    roleBadge.style.background = 'rgba(52, 152, 219, 0.3)';
+                }
                 break;
-            
-            case 'authority':
-                pageTitle.textContent = 'Authority - Incident Reports';
-                pageDescription.textContent = 'Monitor and coordinate incident response within your jurisdiction';
-                roleBadge.textContent = '🏛️ Authority Personnel';
-                roleBadge.style.background = 'rgba(142, 68, 173, 0.3)';
-                break;
-            
-            case 'rescue_team':
-                pageTitle.textContent = 'Rescue Team - Active Incidents';
-                pageDescription.textContent = 'View assigned incidents and coordinate rescue operations';
-                roleBadge.textContent = '🚁 Rescue Team';
-                roleBadge.style.background = 'rgba(39, 174, 96, 0.3)';
+
+            default:
+                if (pageTitle) pageTitle.textContent = 'Incident Reports Dashboard';
+                if (pageDescription) pageDescription.textContent = 'Monitor and manage incident reports';
+                if (roleBadge) {
+                    roleBadge.textContent = '👤 User';
+                    roleBadge.style.background = 'rgba(149, 165, 166, 0.3)';
+                }
                 break;
         }
     }
@@ -111,25 +132,33 @@ class ReportsManager {
     async loadReports() {
         try {
             this.showLoading();
-            
-            // Use the admin incidents endpoint for authorized users
-            const response = await fetch('http://127.0.0.1:9000/api/incidents/', {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('oceanGuardToken')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
 
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            // Use the API client instead of direct fetch
+            const response = await this.api.getIncidents();
+            
+            console.log('📊 API Response:', response);
+
+            // Handle different response formats
+            let reports = [];
+            if (Array.isArray(response)) {
+                reports = response;
+            } else if (response && response.incidents) {
+                reports = response.incidents;
+            } else if (response && response.items) {
+                reports = response.items;
+            } else if (response && typeof response === 'object') {
+                // If response is an object, try to extract array from it
+                reports = Object.values(response).find(val => Array.isArray(val)) || [];
             }
 
-            const data = await response.json();
-            this.reports = data.incidents || data.items || [];
+            console.log('📋 Processed reports:', reports.length, 'reports');
+
+            this.reports = reports;
+            this.filteredReports = [...this.reports];
             this.applyFilters();
-            
+
         } catch (error) {
-            console.error('Failed to load reports:', error);
+            console.error('❌ Failed to load reports:', error);
             this.showError('Failed to load incident reports: ' + error.message);
         }
     }

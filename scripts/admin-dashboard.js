@@ -674,35 +674,57 @@ class AdminDashboard {
     }
 
     deleteTeam(teamId, confirm = true) {
-        if (confirm && !window.confirm('Are you sure you want to delete this rescue team?')) {
+        if (confirm && !window.confirm('Are you sure you want to delete this rescue team member? This action cannot be undone.')) {
             return;
         }
 
-        this.teams = this.teams.filter(team => team.id !== teamId);
-        localStorage.setItem('rescueTeams', JSON.stringify(this.teams));
-        
-        this.renderTeamsList();
-        this.loadStatistics();
-        
-        if (confirm) {
-            alert('✅ Rescue team deleted successfully!');
-        }
+        // Call backend API to delete the user
+        this.api.deleteUser(teamId)
+            .then(response => {
+                console.log('✅ Rescue team member deleted:', response);
+                
+                // Remove from local array
+                this.teams = this.teams.filter(team => team.id !== teamId);
+                
+                // Update UI
+                this.renderTeamsList();
+                this.loadStatistics();
+                
+                if (confirm) {
+                    this.showSuccessNotification(`✅ Rescue team member deleted successfully!`);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Failed to delete rescue team member:', error);
+                this.showErrorNotification(`Failed to delete rescue team member: ${error.message}`);
+            });
     }
 
     deleteAuthority(authorityId, confirm = true) {
-        if (confirm && !window.confirm('Are you sure you want to delete this authority?')) {
+        if (confirm && !window.confirm('Are you sure you want to delete this authority member? This action cannot be undone.')) {
             return;
         }
 
-        this.authorities = this.authorities.filter(authority => authority.id !== authorityId);
-        localStorage.setItem('authorities', JSON.stringify(this.authorities));
-        
-        this.renderAuthoritiesList();
-        this.loadStatistics();
-        
-        if (confirm) {
-            alert('✅ Authority deleted successfully!');
-        }
+        // Call backend API to delete the user
+        this.api.deleteUser(authorityId)
+            .then(response => {
+                console.log('✅ Authority member deleted:', response);
+                
+                // Remove from local array
+                this.authorities = this.authorities.filter(authority => authority.id !== authorityId);
+                
+                // Update UI
+                this.renderAuthoritiesList();
+                this.loadStatistics();
+                
+                if (confirm) {
+                    this.showSuccessNotification(`✅ Authority member deleted successfully!`);
+                }
+            })
+            .catch(error => {
+                console.error('❌ Failed to delete authority member:', error);
+                this.showErrorNotification(`Failed to delete authority member: ${error.message}`);
+            });
     }
 
     logout() {

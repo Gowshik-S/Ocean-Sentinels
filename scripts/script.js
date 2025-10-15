@@ -171,7 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- SECTION 6: USER STATE & HEADER MANAGEMENT ---
 
     function checkLoginState() {
-        const user = JSON.parse(sessionStorage.getItem('oceanGuardUser'));
+        // Check both localStorage and sessionStorage for user data
+        const user = JSON.parse(localStorage.getItem('oceanGuardUser')) || 
+                     JSON.parse(sessionStorage.getItem('oceanGuardUser'));
 
         if (user && user.role === 'public') {
             if (navActions) {
@@ -201,6 +203,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 navActions.innerHTML = `
                     <span class="welcome-user">Welcome, ${user.name}</span>
                     <a href="admin-dashboard.html" class="btn btn--primary">Admin Dashboard</a>
+                    <a href="#" id="logout-button" class="btn btn--secondary">Logout</a>
+                `;
+                
+                const logoutBtn = document.getElementById('logout-button');
+                if (logoutBtn) {
+                    logoutBtn.addEventListener('click', logout);
+                }
+            }
+        } else if (user && (user.role === 'authority' || user.role === 'rescue_team')) {
+            if (navActions) {
+                navActions.innerHTML = `
+                    <span class="welcome-user">Welcome, ${user.name || user.username}</span>
+                    <a href="reports.html" class="btn btn--primary">Incident Reports</a>
                     <a href="#" id="logout-button" class="btn btn--secondary">Logout</a>
                 `;
                 
@@ -246,6 +261,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const mockToken = `mock-token-${user.role}-${Date.now()}`;
                 localStorage.setItem('oceanGuardToken', mockToken);
                 
+                // Dispatch login event for navigation update
+                window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: user }));
+                
                 alert('Demo login successful! You can now view sample reports.');
                 window.location.href = 'my-reports.html';
                 return;
@@ -262,6 +280,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 const mockToken = `mock-token-${user.role}-${Date.now()}`;
                 localStorage.setItem('oceanGuardToken', mockToken);
+                
+                // Dispatch login event for navigation update
+                window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: user }));
                 
                 alert('Demo admin login successful!');
                 window.location.href = 'reports.html';
@@ -294,6 +315,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionStorage.setItem('oceanGuardUser', JSON.stringify(user));
                 localStorage.setItem('oceanGuardUser', JSON.stringify(user));
                 localStorage.setItem('oceanGuardToken', response.access_token);
+                
+                // Dispatch login event for navigation update
+                window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: user }));
                 
                 alert('Login successful! Welcome back.');
                 
@@ -544,6 +568,9 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.removeItem('oceanGuardUser');
         localStorage.removeItem('oceanGuardToken');
         
+        // Dispatch logout event for navigation update
+        window.dispatchEvent(new Event('userLoggedOut'));
+        
         alert('You have been logged out.');
         window.location.href = 'index.html';
     }
@@ -559,7 +586,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentPage = window.location.pathname.split('/').pop();
 
     if (currentPage === 'my-reports.html') {
-        const user = JSON.parse(sessionStorage.getItem('oceanGuardUser'));
+        const user = JSON.parse(localStorage.getItem('oceanGuardUser')) || 
+                     JSON.parse(sessionStorage.getItem('oceanGuardUser'));
         if (!user || user.role !== 'public') {
             alert('Access Denied. Please log in as a citizen to view your reports.');
             window.location.href = 'index.html';
@@ -567,7 +595,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (currentPage === 'reports.html') {
-        const user = JSON.parse(sessionStorage.getItem('oceanGuardUser'));
+        const user = JSON.parse(localStorage.getItem('oceanGuardUser')) || 
+                     JSON.parse(sessionStorage.getItem('oceanGuardUser'));
         if (!user || !['admin', 'authority', 'rescue_team'].includes(user.role)) {
             alert('⚠️ Access denied: This page is for authorized personnel only.');
             window.location.href = 'index.html';
@@ -575,16 +604,24 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (currentPage === 'admin-dashboard.html') {
-        const user = JSON.parse(sessionStorage.getItem('oceanGuardUser'));
+        const user = JSON.parse(localStorage.getItem('oceanGuardUser')) || 
+                     JSON.parse(sessionStorage.getItem('oceanGuardUser'));
         if (!user || user.role !== 'admin') {
             alert('⚠️ Access denied: This page is for administrators only.');
             window.location.href = 'index.html';
         }
     }
 
-    // --- INITIALIZE THE PAGE ---
+    // --- SECTION 10: ROLE-BASED NAVIGATION VISIBILITY ---
+    // Navigation is now handled by navigation-manager.js
+    // This section is kept for backwards compatibility
+
+    // --- SECTION 11: INITIALIZE LOGIN STATE ON PAGE LOAD ---
+    // Check and update login button/user info on page load
     checkLoginState();
+
 });
+
 // Add this to your JavaScript file
 function initMiniMap() {
     // Check if Leaflet is available

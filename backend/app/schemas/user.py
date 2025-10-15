@@ -26,14 +26,11 @@ class UserCreate(UserBase):
     password: str
     role: Optional[UserRole] = UserRole.PUBLIC
 
-    @validator('password', pre=True)
+    @validator('password')
     def validate_password(cls, v):
-        """Ensure password is not empty and strip whitespace"""
-        if isinstance(v, str):
-            v = v.strip()
-            if not v:
-                raise ValueError('Password cannot be empty')
-            return v
+        """Validate password strength"""
+        if len(v) < 6:
+            raise ValueError('Password must be at least 6 characters long')
         return v
 
 class UserUpdate(BaseModel):
