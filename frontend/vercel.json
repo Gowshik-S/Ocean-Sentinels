@@ -1,46 +1,6 @@
 {
   "version": 2,
   "name": "ocean-guard-frontend",
-  "builds": [
-    {
-      "src": "pages/*.html",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "scripts/*.js",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "styles/*.css",
-      "use": "@vercel/static"
-    },
-    {
-      "src": "assets/**",
-      "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/",
-      "dest": "/index.html"
-    },
-    {
-      "src": "/pages/(.*)",
-      "dest": "/pages/$1"
-    },
-    {
-      "src": "/scripts/(.*)",
-      "dest": "/scripts/$1"
-    },
-    {
-      "src": "/styles/(.*)",
-      "dest": "/styles/$1"
-    },
-    {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    }
-  ],
   "headers": [
     {
       "source": "/scripts/(.*)",
