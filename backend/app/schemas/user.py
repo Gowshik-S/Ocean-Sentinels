@@ -26,6 +26,16 @@ class UserCreate(UserBase):
     password: str
     role: Optional[UserRole] = UserRole.PUBLIC
 
+    @validator('password', pre=True)
+    def validate_password(cls, v):
+        """Ensure password is not empty and strip whitespace"""
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                raise ValueError('Password cannot be empty')
+            return v
+        return v
+
 class UserUpdate(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
