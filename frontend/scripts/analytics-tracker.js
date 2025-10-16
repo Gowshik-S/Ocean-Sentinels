@@ -83,9 +83,84 @@ class UserAnalyticsTracker {
     }
 
     /**
-     * Get location data using IP geolocation
+     * Get location data using browser geolocation API with IP fallback
      */
     async getLocationData() {
+        try {
+            // Try browser geolocation first (more accurate)
+            const browserLocation = await this.getBrowserLocation();
+            console.log('Browser location obtained:', browserLocation);
+
+            if (browserLocation.latitude && browserLocation.longitude) {
+                // Get additional location data from IP geolocation
+                const ipLocation = await this.getIPLocationData();
+                const combinedLocation = {
+                    ...browserLocation,
+                    ...ipLocation
+                };
+                console.log('Combined location data:', combinedLocation);
+                return combinedLocation;
+            }
+        } catch (error) {
+            console.warn('Browser geolocation failed, trying IP geolocation:', error);
+        }
+
+        // Fallback to IP geolocation
+        try {
+            const ipLocation = await this.getIPLocationData();
+            console.log('IP location data:', ipLocation);
+            return ipLocation;
+        } catch (error) {
+            console.warn('IP geolocation also failed:', error);
+            return {};
+        }
+    }
+
+    /**
+     * Get location using browser geolocation API
+     */
+    getBrowserLocation() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error('Geolocation not supported'));
+                return;
+            }
+
+            // Check if user has already denied permission
+            if (navigator.permissions) {
+                navigator.permissions.query({name: 'geolocation'}).then(permission => {
+                    if (permission.state === 'denied') {
+                        reject(new Error('Geolocation permission denied'));
+                        return;
+                    }
+                });
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                        accuracy: position.coords.accuracy
+                    });
+                },
+                (error) => {
+                    console.warn('Browser geolocation error:', error);
+                    reject(error);
+                },
+                {
+                    enableHighAccuracy: false, // Changed to false for faster response
+                    timeout: 5000, // Reduced timeout
+                    maximumAge: 300000 // 5 minutes
+                }
+            );
+        });
+    }
+
+    /**
+     * Get location data using IP geolocation (fallback)
+     */
+    async getIPLocationData() {
         try {
             // Using ipapi.co for free geolocation
             const response = await fetch('https://ipapi.co/json/');
@@ -100,7 +175,7 @@ class UserAnalyticsTracker {
                 timezone: data.timezone
             };
         } catch (error) {
-            console.warn('Failed to get location data:', error);
+            console.warn('Failed to get IP location data:', error);
             return {};
         }
     }
