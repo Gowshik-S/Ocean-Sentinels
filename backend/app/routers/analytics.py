@@ -519,6 +519,12 @@ async def get_visits_stats(
     total_visits_result = await db.execute(select(func.count(UserVisit.id)))
     total_visits = total_visits_result.scalar()
 
+    # Unique visitors (distinct IP addresses)
+    unique_visitors_result = await db.execute(
+        select(func.count(func.distinct(UserVisit.ip_address)))
+    )
+    unique_visitors = unique_visitors_result.scalar()
+
     # Current online users (visits in last 5 minutes)
     online_threshold = datetime.utcnow() - timedelta(minutes=5)
     online_users_result = await db.execute(
@@ -533,6 +539,7 @@ async def get_visits_stats(
         "week_visits": week_visits,
         "month_visits": month_visits,
         "total_visits": total_visits,
+        "unique_visitors": unique_visitors,
         "online_users": online_users,
         "last_updated": datetime.utcnow().isoformat()
     }

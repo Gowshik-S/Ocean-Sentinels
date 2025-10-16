@@ -134,12 +134,12 @@ class VisitorAnalytics {
             const stats = await response.json();
 
             // Update stats cards
-            document.getElementById('today-visits').textContent = stats.today_visits.toLocaleString();
-            document.getElementById('week-visits').textContent = stats.week_visits.toLocaleString();
-            document.getElementById('month-visits').textContent = stats.month_visits.toLocaleString();
-            document.getElementById('total-visits').textContent = stats.total_visits.toLocaleString();
-            document.getElementById('unique-visitors').textContent = stats.unique_visitors.toLocaleString();
-            document.getElementById('online-users').textContent = stats.online_users.toLocaleString();
+            document.getElementById('today-visits').textContent = (stats.today_visits || 0).toLocaleString();
+            document.getElementById('week-visits').textContent = (stats.week_visits || 0).toLocaleString();
+            document.getElementById('month-visits').textContent = (stats.month_visits || 0).toLocaleString();
+            document.getElementById('total-visits').textContent = (stats.total_visits || 0).toLocaleString();
+            document.getElementById('unique-visitors').textContent = (stats.unique_visitors || 0).toLocaleString();
+            document.getElementById('online-users').textContent = (stats.online_users || 0).toLocaleString();
 
         } catch (error) {
             console.error('❌ Failed to load analytics stats:', error);
