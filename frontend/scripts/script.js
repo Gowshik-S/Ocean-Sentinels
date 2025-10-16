@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: user }));
                 
                 alert('Demo admin login successful!');
-                window.location.href = 'reports.html';
+                window.location.href = 'admin-dashboard.html';
                 return;
             }
             
@@ -323,7 +323,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Redirect based on role
                 if (user.role === 'admin' || user.role === 'rescue_team' || user.role === 'authority') {
-                    window.location.href = 'reports.html';
+                    window.location.href = 'admin-dashboard.html';
                 } else {
                     window.location.href = 'my-reports.html';
                 }
