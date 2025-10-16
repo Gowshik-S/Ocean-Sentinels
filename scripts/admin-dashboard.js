@@ -19,6 +19,9 @@ class AdminDashboard {
             // Load data
             await this.loadData();
             
+            // Load analytics data
+            await this.loadAnalyticsData();
+            
             // Setup event listeners
             this.setupEventListeners();
             
@@ -725,6 +728,214 @@ class AdminDashboard {
                 console.error('❌ Failed to delete authority member:', error);
                 this.showErrorNotification(`Failed to delete authority member: ${error.message}`);
             });
+    }
+
+    // ===== USER ANALYTICS METHODS =====
+
+    async loadAnalyticsData() {
+        try {
+            console.log('📊 Loading analytics data...');
+
+            // Load real-time stats
+            await this.loadAnalyticsStats();
+
+            // Load visits summary for charts
+            await this.loadVisitsSummary();
+
+            // Load recent visits
+            await this.loadRecentVisits();
+
+        } catch (error) {
+            console.error('❌ Failed to load analytics data:', error);
+            this.showErrorNotification('Failed to load analytics data');
+        }
+    }
+
+    async loadAnalyticsStats() {
+        try {
+            const response = await fetch(`${this.api.baseURL}/analytics/visits/stats`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('oceanGuardToken')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const stats = await response.json();
+
+            // Update stats cards
+            document.getElementById('today-visits').textContent = stats.today_visits.toLocaleString();
+            document.getElementById('week-visits').textContent = stats.week_visits.toLocaleString();
+            document.getElementById('month-visits').textContent = stats.month_visits.toLocaleString();
+            document.getElementById('total-visits').textContent = stats.total_visits.toLocaleString();
+            document.getElementById('unique-visitors').textContent = stats.unique_visitors.toLocaleString();
+            document.getElementById('online-users').textContent = stats.online_users.toLocaleString();
+
+        } catch (error) {
+            console.error('❌ Failed to load analytics stats:', error);
+            // Set defaults
+            document.getElementById('today-visits').textContent = '0';
+            document.getElementById('week-visits').textContent = '0';
+            document.getElementById('month-visits').textContent = '0';
+            document.getElementById('total-visits').textContent = '0';
+            document.getElementById('unique-visitors').textContent = '0';
+            document.getElementById('online-users').textContent = '0';
+        }
+    }
+
+    async loadVisitsSummary() {
+        try {
+            const response = await fetch(`${this.api.baseURL}/analytics/visits/summary?days=30`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('oceanGuardToken')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const summary = await response.json();
+            this.renderAnalyticsCharts(summary);
+
+        } catch (error) {
+            console.error('❌ Failed to load visits summary:', error);
+        }
+    }
+
+    renderAnalyticsCharts(summary) {
+        // Country chart
+        const countryCtx = document.getElementById('countryChart').getContext('2d');
+        new Chart(countryCtx, {
+            type: 'pie',
+            data: {
+                labels: Object.keys(summary.visits_by_country),
+                datasets: [{
+                    data: Object.values(summary.visits_by_country),
+                    backgroundColor: [
+                        '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0',
+                        '#9966FF', '#FF9F40', '#FF6384', '#C9CBCF'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Device chart
+        const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+        new Chart(deviceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(summary.visits_by_device),
+                datasets: [{
+                    data: Object.values(summary.visits_by_device),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Daily visits chart
+        const dailyCtx = document.getElementById('dailyVisitsChart').getContext('2d');
+        const dailyLabels = summary.daily_visits.map(day => {
+            const date = new Date(day.date);
+            return date.toLocaleDateString();
+        });
+        const dailyData = summary.daily_visits.map(day => day.visits);
+
+        new Chart(dailyCtx, {
+            type: 'line',
+            data: {
+                labels: dailyLabels,
+                datasets: [{
+                    label: 'Daily Visits',
+                    data: dailyData,
+                    borderColor: '#005A9C',
+                    backgroundColor: 'rgba(0, 90, 156, 0.1)',
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    async loadRecentVisits() {
+        try {
+            const response = await fetch(`${this.api.baseURL}/analytics/visits/details?limit=50`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('oceanGuardToken')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+
+            const data = await response.json();
+            this.renderRecentVisits(data.visits);
+
+        } catch (error) {
+            console.error('❌ Failed to load recent visits:', error);
+            document.getElementById('visits-table-body').innerHTML =
+                '<tr><td colspan="6" class="text-center">Failed to load recent visits</td></tr>';
+        }
+    }
+
+    renderRecentVisits(visits) {
+        const tbody = document.getElementById('visits-table-body');
+
+        if (!visits || visits.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center">No recent visits found</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = visits.map(visit => {
+            const timestamp = new Date(visit.created_at).toLocaleString();
+            const location = [visit.city, visit.country].filter(Boolean).join(', ') || 'Unknown';
+            const device = visit.device_type || 'Unknown';
+            const browser = visit.browser || 'Unknown';
+            const page = visit.page_url ? new URL(visit.page_url).pathname : '/';
+
+            return `
+                <tr>
+                    <td>${timestamp}</td>
+                    <td>${visit.ip_address}</td>
+                    <td>${location}</td>
+                    <td>${device}</td>
+                    <td>${browser}</td>
+                    <td>${page}</td>
+                </tr>
+            `;
+        }).join('');
     }
 
     logout() {

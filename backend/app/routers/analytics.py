@@ -2,7 +2,7 @@
 Analytics router for Ocean Hazard API
 """
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, and_, desc
 from sqlalchemy.orm import selectinload
@@ -12,7 +12,7 @@ import json
 
 from app.database import get_db
 from app.models.incident import Incident, IncidentStatus, HazardType
-from app.models.analytics import AnalyticsSnapshot, SystemMetrics
+from app.models.analytics import AnalyticsSnapshot, SystemMetrics, UserVisit, WebsiteStats
 from app.models.user import User, UserRole
 from app.routers.auth import get_current_active_user
 
@@ -289,5 +289,250 @@ async def get_public_system_stats(
         "active_incidents": active_incidents,
         "rescue_teams_registered": rescue_teams,
         "coastline_watched_km": coastline_km,
+        "last_updated": datetime.utcnow().isoformat()
+    }
+
+# ===== USER VISIT TRACKING ENDPOINTS =====
+
+@router.post("/track-visit")
+async def track_user_visit(
+    visit_data: Dict[str, Any],
+    db: AsyncSession = Depends(get_db)
+):
+    """Track user visits and store analytics data"""
+    try:
+        # Extract visit data
+        ip_address = visit_data.get('ip', 'unknown')
+        user_agent = visit_data.get('userAgent', '')
+        location_data = visit_data.get('location', {})
+        referrer = visit_data.get('referrer', '')
+        page_url = visit_data.get('pageUrl', '')
+        session_id = visit_data.get('sessionId', '')
+        user_id = visit_data.get('userId')
+
+        # Parse location data
+        country = location_data.get('country')
+        city = location_data.get('city')
+        region = location_data.get('region')
+        latitude = location_data.get('latitude')
+        longitude = location_data.get('longitude')
+        timezone = location_data.get('timezone')
+
+        # Parse device/browser info
+        language = visit_data.get('language', '')
+        device_type = visit_data.get('deviceType', 'desktop')
+        browser = visit_data.get('browser', '')
+        os = visit_data.get('os', '')
+        is_bot = visit_data.get('isBot', False)
+
+        # Create new visit record
+        new_visit = UserVisit(
+            ip_address=ip_address,
+            user_agent=user_agent,
+            country=country,
+            city=city,
+            region=region,
+            latitude=latitude,
+            longitude=longitude,
+            timezone=timezone,
+            language=language,
+            referrer=referrer,
+            page_url=page_url,
+            session_id=session_id,
+            user_id=user_id,
+            device_type=device_type,
+            browser=browser,
+            os=os,
+            is_bot=is_bot
+        )
+
+        db.add(new_visit)
+        await db.commit()
+        await db.refresh(new_visit)
+
+        return {
+            "success": True,
+            "visit_id": new_visit.id,
+            "message": "Visit tracked successfully"
+        }
+
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to track visit: {str(e)}")
+
+@router.get("/visits/summary")
+async def get_visits_summary(
+    days: int = Query(default=30, description="Number of days to look back"),
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get website visits summary (admin only)"""
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    start_date = datetime.utcnow() - timedelta(days=days)
+
+    # Total visits
+    total_visits_result = await db.execute(
+        select(func.count(UserVisit.id)).where(UserVisit.created_at >= start_date)
+    )
+    total_visits = total_visits_result.scalar()
+
+    # Unique visitors (unique IP addresses)
+    unique_visitors_result = await db.execute(
+        select(func.count(func.distinct(UserVisit.ip_address))).where(UserVisit.created_at >= start_date)
+    )
+    unique_visitors = unique_visitors_result.scalar()
+
+    # Unique sessions
+    unique_sessions_result = await db.execute(
+        select(func.count(func.distinct(UserVisit.session_id))).where(
+            and_(UserVisit.created_at >= start_date, UserVisit.session_id.isnot(None))
+        )
+    )
+    unique_sessions = unique_sessions_result.scalar()
+
+    # Visits by country
+    country_result = await db.execute(
+        select(UserVisit.country, func.count(UserVisit.id))
+        .where(and_(UserVisit.created_at >= start_date, UserVisit.country.isnot(None)))
+        .group_by(UserVisit.country)
+        .order_by(func.count(UserVisit.id).desc())
+        .limit(10)
+    )
+    visits_by_country = dict(country_result.all())
+
+    # Visits by device type
+    device_result = await db.execute(
+        select(UserVisit.device_type, func.count(UserVisit.id))
+        .where(and_(UserVisit.created_at >= start_date, UserVisit.device_type.isnot(None)))
+        .group_by(UserVisit.device_type)
+    )
+    visits_by_device = dict(device_result.all())
+
+    # Daily visits for the last 30 days
+    daily_visits_result = await db.execute(
+        select(
+            func.date(UserVisit.created_at).label('date'),
+            func.count(UserVisit.id).label('visits')
+        )
+        .where(UserVisit.created_at >= start_date)
+        .group_by(func.date(UserVisit.created_at))
+        .order_by(func.date(UserVisit.created_at))
+    )
+
+    daily_visits = []
+    for row in daily_visits_result.all():
+        daily_visits.append({
+            "date": row.date.isoformat() if row.date else None,
+            "visits": row.visits
+        })
+
+    return {
+        "total_visits": total_visits,
+        "unique_visitors": unique_visitors,
+        "unique_sessions": unique_sessions,
+        "visits_by_country": visits_by_country,
+        "visits_by_device": visits_by_device,
+        "daily_visits": daily_visits,
+        "period_days": days,
+        "generated_at": datetime.utcnow().isoformat()
+    }
+
+@router.get("/visits/details")
+async def get_visits_details(
+    skip: int = Query(default=0, description="Number of records to skip"),
+    limit: int = Query(default=100, description="Number of records to return"),
+    days: int = Query(default=7, description="Number of days to look back"),
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get detailed visit records (admin only)"""
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    start_date = datetime.utcnow() - timedelta(days=days)
+
+    result = await db.execute(
+        select(UserVisit)
+        .where(UserVisit.created_at >= start_date)
+        .order_by(UserVisit.created_at.desc())
+        .offset(skip)
+        .limit(limit)
+    )
+
+    visits = result.scalars().all()
+
+    return {
+        "visits": [
+            {
+                "id": visit.id,
+                "ip_address": visit.ip_address,
+                "country": visit.country,
+                "city": visit.city,
+                "device_type": visit.device_type,
+                "browser": visit.browser,
+                "os": visit.os,
+                "page_url": visit.page_url,
+                "referrer": visit.referrer,
+                "created_at": visit.created_at.isoformat() if visit.created_at else None,
+                "is_bot": visit.is_bot
+            }
+            for visit in visits
+        ],
+        "total": len(visits),
+        "skip": skip,
+        "limit": limit
+    }
+
+@router.get("/visits/stats")
+async def get_visits_stats(
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get real-time visit statistics (admin only)"""
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Admin access required")
+
+    # Today's visits
+    today_start = datetime.utcnow().replace(hour=0, minute=0, second=0, microsecond=0)
+    today_visits_result = await db.execute(
+        select(func.count(UserVisit.id)).where(UserVisit.created_at >= today_start)
+    )
+    today_visits = today_visits_result.scalar()
+
+    # This week's visits
+    week_start = datetime.utcnow() - timedelta(days=7)
+    week_visits_result = await db.execute(
+        select(func.count(UserVisit.id)).where(UserVisit.created_at >= week_start)
+    )
+    week_visits = week_visits_result.scalar()
+
+    # This month's visits
+    month_start = datetime.utcnow() - timedelta(days=30)
+    month_visits_result = await db.execute(
+        select(func.count(UserVisit.id)).where(UserVisit.created_at >= month_start)
+    )
+    month_visits = month_visits_result.scalar()
+
+    # Total visits ever
+    total_visits_result = await db.execute(select(func.count(UserVisit.id)))
+    total_visits = total_visits_result.scalar()
+
+    # Current online users (visits in last 5 minutes)
+    online_threshold = datetime.utcnow() - timedelta(minutes=5)
+    online_users_result = await db.execute(
+        select(func.count(func.distinct(UserVisit.session_id))).where(
+            UserVisit.created_at >= online_threshold
+        )
+    )
+    online_users = online_users_result.scalar()
+
+    return {
+        "today_visits": today_visits,
+        "week_visits": week_visits,
+        "month_visits": month_visits,
+        "total_visits": total_visits,
+        "online_users": online_users,
         "last_updated": datetime.utcnow().isoformat()
     }
