@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visitor Details - Ocean Guard</title>
+
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="../styles/report-enhancements.css">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background: white;
+        }
+
+        .visitor-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: white;
+        }
+
+        .visitor-header {
+            background: #005A9C;
+            color: white;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
+        }
+
+        .visitor-header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+
+        .visitor-header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .analytics-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .analytics-charts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .chart-container {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .chart-header h3 {
+            color: #005A9C;
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 250px;
+        }
+
+        .recent-visits h3 {
+            color: #005A9C;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: bold;
+            color: #005A9C;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .text-center {
+            text-align: center;
+            color: #666;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .filters-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-group label {
+            font-weight: bold;
+            color: #005A9C;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .btn-filter {
+            background: #005A9C;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-filter:hover {
+            background: #004080;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #666;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            border: 1px solid #f5c6cb;
+        }
+
+        .access-denied {
+            text-align: center;
+            padding: 50px;
+            background: white;
+            color: #FF6B6B;
+            border: 2px solid #FF6B6B;
+            border-radius: 8px;
+            margin: 50px 0;
+        }
+
+        .access-denied h2 {
+            color: #FF6B6B;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #005A9C;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            z-index: 1000;
+        }
+
+        .back-btn:hover {
+            background: #004080;
+        }
+
+        @media (max-width: 768px) {
+            .analytics-stats {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .analytics-charts {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group {
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Back to Admin Dashboard Button -->
+    <button class="back-btn" onclick="window.location.href='admin-dashboard.html'">
+        <i class="fas fa-arrow-left"></i> Back to Admin
+    </button>
+
+    <main class="visitor-container">
+        <!-- Access Denied Message (shown to non-admin users) -->
+        <div id="access-denied" class="access-denied" style="display: none;">
+            <h2>🚫 Access Denied</h2>
+            <p>This page is restricted to administrators only.</p>
+            <p>Please contact your system administrator if you believe you should have access.</p>
+            <a href="admin-dashboard.html" class="admin-btn">Return to Admin Dashboard</a>
+        </div>
+
+        <!-- Visitor Analytics Content (shown to admin users) -->
+        <div id="visitor-content">
+            <div class="visitor-header">
+                <h1><i class="fas fa-chart-line"></i> Visitor Analytics</h1>
+                <p>Comprehensive visitor tracking and analytics dashboard</p>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="filters-section">
+                <div class="filter-group">
+                    <label for="period-select">Time Period:</label>
+                    <select id="period-select">
+                        <option value="7">Last 7 Days</option>
+                        <option value="30" selected>Last 30 Days</option>
+                        <option value="90">Last 3 Months</option>
+                        <option value="365">Last Year</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="country-filter">Country:</label>
+                    <select id="country-filter">
+                        <option value="">All Countries</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="device-filter">Device:</label>
+                    <select id="device-filter">
+                        <option value="">All Devices</option>
+                        <option value="desktop">Desktop</option>
+                        <option value="mobile">Mobile</option>
+                        <option value="tablet">Tablet</option>
+                    </select>
+                </div>
+
+                <button class="btn-filter" onclick="applyFilters()">
+                    <i class="fas fa-filter"></i> Apply Filters
+                </button>
+
+                <button class="btn-filter" onclick="refreshData()" style="background: #28a745;">
+                    <i class="fas fa-sync"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Analytics Stats -->
+            <div class="analytics-stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="today-visits">0</div>
+                    <div class="stat-label">Today's Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="week-visits">0</div>
+                    <div class="stat-label">This Week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="month-visits">0</div>
+                    <div class="stat-label">This Month</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-visits">0</div>
+                    <div class="stat-label">Total Visits</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="unique-visitors">0</div>
+                    <div class="stat-label">Unique Visitors</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="online-users">0</div>
+                    <div class="stat-label">Online Now</div>
+                </div>
+            </div>
+
+            <!-- Analytics Charts -->
+            <div class="analytics-charts">
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Visits by Country</h3>
+                        <div class="chart-controls">
+                            <select id="country-chart-period">
+                                <option value="30">Last 30 Days</option>
+                                <option value="7">Last 7 Days</option>
+                                <option value="90">Last 3 Months</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="countryChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Visits by Device Type</h3>
+                        <div class="chart-controls">
+                            <select id="device-chart-period">
+                                <option value="30">Last 30 Days</option>
+                                <option value="7">Last 7 Days</option>
+                                <option value="90">Last 3 Months</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="deviceChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Daily Visits Trend</h3>
+                        <div class="chart-controls">
+                            <select id="daily-chart-period">
+                                <option value="30">Last 30 Days</option>
+                                <option value="7">Last 7 Days</option>
+                                <option value="90">Last 3 Months</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="dailyVisitsChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-header">
+                        <h3>Top Pages Visited</h3>
+                        <div class="chart-controls">
+                            <select id="pages-chart-period">
+                                <option value="30">Last 30 Days</option>
+                                <option value="7">Last 7 Days</option>
+                                <option value="90">Last 3 Months</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chart-wrapper">
+                        <canvas id="topPagesChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Visits Table -->
+            <div class="recent-visits">
+                <h3>Recent Visitor Details</h3>
+                <div class="table-container">
+                    <table id="visits-table" class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>IP Address</th>
+                                <th>Location</th>
+                                <th>Coordinates</th>
+                                <th>Device</th>
+                                <th>Browser</th>
+                                <th>Page</th>
+                                <th>Referrer</th>
+                            </tr>
+                        </thead>
+                        <tbody id="visits-table-body">
+                            <tr>
+                                <td colspan="8" class="text-center">Loading visitor details...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Include API Client -->
+    <script src="../scripts/api-client.js"></script>
+    <!-- Include Analytics functionality -->
+    <script src="../scripts/visitor-analytics.js"></script>
+
+</body>
+</html>
