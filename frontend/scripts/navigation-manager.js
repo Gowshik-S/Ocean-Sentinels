@@ -26,22 +26,7 @@
             // Show "Incident Reports" link only for admin, authority, rescue_team
             if (user && ['admin', 'authority', 'rescue_team'].includes(user.role)) {
                 navReportsLink.style.display = 'block';
-                
-                // Set the correct destination based on user role
-                const linkElement = navReportsLink.querySelector('a');
-                if (linkElement) {
-                    if (user.role === 'admin') {
-                        linkElement.href = 'admin-dashboard.html';
-                        linkElement.textContent = 'Admin Dashboard';
-                        console.log('✅ Admin logged in - showing Admin Dashboard link, href:', linkElement.href);
-                    } else {
-                        linkElement.href = 'reports.html';
-                        linkElement.textContent = 'Incident Reports';
-                        console.log('✅ Showing Incident Reports link for role:', user.role, 'href:', linkElement.href);
-                    }
-                } else {
-                    console.error('❌ Could not find <a> element inside nav-reports');
-                }
+                console.log('✅ Showing Incident Reports link for role:', user.role);
             } else {
                 navReportsLink.style.display = 'none';
                 console.log('❌ Hiding Incident Reports link. User role:', user?.role || 'not logged in');

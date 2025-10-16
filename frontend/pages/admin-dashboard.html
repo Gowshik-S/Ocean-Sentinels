@@ -10,6 +10,9 @@
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
         body {
             background: white;
@@ -30,6 +33,15 @@
             margin-bottom: 30px;
             text-align: center;
             box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
+        }
+        
+        .admin-actions {
+            margin-top: 20px;
+        }
+        
+        .admin-actions .btn {
+            display: inline-block;
+            margin: 0 10px;
         }
         
         .admin-section {
@@ -286,6 +298,7 @@
             <div class="admin-header">
                 <h1><i class="fas fa-shield-alt"></i> Ocean Guard Admin Dashboard</h1>
                 <p>Manage rescue teams, authorities, and emergency response personnel</p>
+
             </div>
 
             <!-- Statistics -->
@@ -420,6 +433,8 @@
     <script src="../scripts/navigation-manager.js"></script>
     <!-- Include Admin Dashboard functionality -->
     <script src="../scripts/admin-dashboard.js"></script>
+    <!-- Analytics Tracking Script -->
+    <script src="../scripts/analytics-tracker.js"></script>
 
 </body>
 </html>

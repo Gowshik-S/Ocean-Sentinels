@@ -285,7 +285,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.dispatchEvent(new CustomEvent('userLoggedIn', { detail: user }));
                 
                 alert('Demo admin login successful!');
-                window.location.href = 'admin-dashboard.html';
+                window.location.href = 'reports.html';
                 return;
             }
             
@@ -322,9 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Login successful! Welcome back.');
                 
                 // Redirect based on role
-                if (user.role === 'admin') {
-                    window.location.href = 'admin-dashboard.html';
-                } else if (user.role === 'authority' || user.role === 'rescue_team') {
+                if (user.role === 'admin' || user.role === 'rescue_team' || user.role === 'authority') {
                     window.location.href = 'reports.html';
                 } else {
                     window.location.href = 'my-reports.html';
