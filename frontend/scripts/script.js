@@ -322,9 +322,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Login successful! Welcome back.');
                 
                 // Redirect based on role
-                if (user.role === 'admin' || user.role === 'rescue_team' || user.role === 'authority') {
+                if (user.role === 'admin') {
                     window.location.href = 'admin-dashboard.html';
+                } else if (user.role === 'rescue_team' || user.role === 'rescue' || user.role === 'authority') {
+                    window.location.href = 'reports.html';
                 } else {
+                    // For public users
                     window.location.href = 'my-reports.html';
                 }
                 
