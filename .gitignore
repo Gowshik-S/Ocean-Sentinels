@@ -230,3 +230,22 @@ jspm_packages/
 
 # TernJS port file
 .tern-port
+
+# Flutter and Dart
+flutter/
+flutter_application_1/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+build/
+.pub/
+*.dart.js
+*.info.json
+.DS_Store
+.packages
+.pub-cache/
+.pub/
+flutter.lock
+main.dart
