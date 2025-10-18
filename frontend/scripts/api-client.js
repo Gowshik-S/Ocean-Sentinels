@@ -88,9 +88,12 @@ class OceanHazardAPI {
         console.log('🔗 API URL:', `${this.baseURL}/auth/register`);
         
         try {
+            // Registration is a public endpoint, so we only send Content-Type header
             const response = await fetch(`${this.baseURL}/auth/register`, {
                 method: 'POST',
-                headers: this.getHeaders(),
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(userData)
             });
 

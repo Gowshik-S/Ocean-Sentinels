@@ -51,20 +51,18 @@ async def get_current_active_user(current_user: User = Depends(get_current_user)
 @router.post("/register", response_model=None)
 async def register(
     user_data: UserCreate, 
-    current_user: User = Depends(get_current_active_user),
     db: AsyncSession = Depends(get_db)
 ):
-    """Register a new user"""
+    """Register a new user - Public endpoint"""
     print(f"🔥 Registration attempt for: {user_data.email}")
     
-    # Check if user has admin role for creating special role users
+    # Force role to "public" for public registrations (only admins can create special roles via different endpoint)
     if user_data.role and user_data.role != "public":
-        if current_user.role != "admin":
-            print(f"❌ Non-admin user {current_user.username} tried to create {user_data.role} user")
-            raise HTTPException(
-                status_code=403,
-                detail="Only administrators can create users with special roles"
-            )
+        print(f"❌ Public registration attempted with special role: {user_data.role}")
+        raise HTTPException(
+            status_code=403,
+            detail="Public registration only allows 'public' role. Contact administrator for special roles."
+        )
     
     try:
         # Check if username already exists
