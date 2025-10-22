@@ -8,7 +8,43 @@
 // Wait for the entire HTML document to be loaded before running the script
 document.addEventListener('DOMContentLoaded', () => {
 
+    // --- DEMO POPUP INITIALIZATION ---
+    const demoPopup = document.getElementById('demo-popup');
+    const demoCloseButton = document.querySelector('.demo-close-button');
+    const demoCloseBtn = document.querySelector('.demo-close-btn');
+
+    // Initialize demo popup on page load
+    function initializeDemoPopup() {
+        // Show demo popup (it's visible by default in CSS)
+        demoPopup.classList.remove('hidden');
+        
+        // Add close functionality to the close button (X)
+        if (demoCloseButton) {
+            demoCloseButton.addEventListener('click', closeDemoPopup);
+        }
+        
+        // Add close functionality to the "Get Started" button
+        if (demoCloseBtn) {
+            demoCloseBtn.addEventListener('click', closeDemoPopup);
+        }
+        
+        // Close popup when clicking outside the modal
+        window.addEventListener('click', (event) => {
+            if (event.target === demoPopup) {
+                closeDemoPopup();
+            }
+        });
+    }
+
+    function closeDemoPopup() {
+        demoPopup.classList.add('hidden');
+    }
+
+    // Initialize demo popup on page load
+    initializeDemoPopup();
+
     // --- SECTION 1: ELEMENT SELECTION ---
+
     const authModal = document.getElementById('auth-modal');
     const reportModal = document.getElementById('report-modal');
     const loginButton = document.getElementById('login-btn');

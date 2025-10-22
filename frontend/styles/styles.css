@@ -1641,3 +1641,227 @@ body {
     50% { box-shadow: 0 0 0 6px rgba(0, 90, 156, 0.1); }
     100% { box-shadow: 0 0 0 3px rgba(0, 90, 156, 0.3); }
 }
+
+/* ======================= SIH 25 Demo Popup Styles ======================= */
+
+.demo-modal {
+    display: flex;
+    position: fixed;
+    z-index: 3000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.demo-modal.hidden {
+    display: none;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.demo-modal-content {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+    border-radius: 20px;
+    padding: 40px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.4s ease-out;
+    position: relative;
+    border: 2px solid var(--primary-color);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.demo-close-button {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #aaa;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease, transform 0.3s ease;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.demo-close-button:hover {
+    color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.demo-popup-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.demo-star-icon {
+    font-size: 3rem;
+    color: var(--accent-color);
+    display: block;
+    margin-bottom: 10px;
+    animation: starRotate 2s ease-in-out infinite;
+}
+
+@keyframes starRotate {
+    0%, 100% {
+        transform: rotate(0deg) scale(1);
+    }
+    50% {
+        transform: rotate(15deg) scale(1.1);
+    }
+}
+
+.demo-popup-header h2 {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin: 10px 0 5px;
+    font-weight: bold;
+}
+
+.demo-popup-body {
+    margin-bottom: 25px;
+}
+
+.demo-welcome-text {
+    font-size: 1.1rem;
+    color: var(--primary-color);
+    font-weight: 600;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.demo-main-text {
+    font-size: 1rem;
+    color: var(--text-dark);
+    margin-bottom: 12px;
+    text-align: center;
+    line-height: 1.5;
+}
+
+.demo-instruction {
+    font-size: 0.95rem;
+    color: var(--text-dark);
+    text-align: center;
+    margin-bottom: 20px;
+    line-height: 1.6;
+    background-color: rgba(255, 193, 7, 0.1);
+    padding: 15px;
+    border-left: 4px solid var(--accent-color);
+    border-radius: 5px;
+}
+
+.demo-credentials-box {
+    background-color: #f0f7ff;
+    border: 2px solid var(--primary-color);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.demo-credentials-box p {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 0.95rem;
+}
+
+.demo-credentials-box ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.demo-credentials-box li {
+    padding: 8px 0;
+    color: var(--text-dark);
+    font-size: 0.9rem;
+    border-bottom: 1px solid rgba(0, 90, 156, 0.1);
+}
+
+.demo-credentials-box li:last-child {
+    border-bottom: none;
+}
+
+.demo-credentials-box li strong {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.demo-close-btn {
+    width: 100%;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 90, 156, 0.3);
+}
+
+.demo-close-btn:hover {
+    background-color: #003d73;
+    box-shadow: 0 6px 16px rgba(0, 90, 156, 0.4);
+    transform: translateY(-2px);
+}
+
+.demo-close-btn:active {
+    transform: translateY(0);
+}
+
+/* Responsive Design for Demo Popup */
+@media (max-width: 600px) {
+    .demo-modal-content {
+        width: 95%;
+        padding: 30px 20px;
+        margin: 20px;
+    }
+
+    .demo-popup-header h2 {
+        font-size: 1.6rem;
+    }
+
+    .demo-star-icon {
+        font-size: 2.5rem;
+    }
+
+    .demo-instruction {
+        font-size: 0.9rem;
+        padding: 12px;
+    }
+
+    .demo-credentials-box {
+        padding: 12px;
+    }
+
+    .demo-credentials-box li {
+        font-size: 0.85rem;
+    }
+}
+
