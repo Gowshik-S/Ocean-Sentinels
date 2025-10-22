@@ -15,29 +15,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize demo popup on page load
     function initializeDemoPopup() {
-        // Show demo popup (it's visible by default in CSS)
-        demoPopup.classList.remove('hidden');
+        // Check if user has already seen the popup (using localStorage)
+        const hasSeenDemoPopup = localStorage.getItem('hasSeenDemoPopup');
         
-        // Add close functionality to the close button (X)
-        if (demoCloseButton) {
-            demoCloseButton.addEventListener('click', closeDemoPopup);
-        }
-        
-        // Add close functionality to the "Get Started" button
-        if (demoCloseBtn) {
-            demoCloseBtn.addEventListener('click', closeDemoPopup);
-        }
-        
-        // Close popup when clicking outside the modal
-        window.addEventListener('click', (event) => {
-            if (event.target === demoPopup) {
-                closeDemoPopup();
+        if (!hasSeenDemoPopup) {
+            // Show demo popup only if it hasn't been seen before
+            demoPopup.classList.remove('hidden');
+            
+            // Add close functionality to the close button (X)
+            if (demoCloseButton) {
+                demoCloseButton.addEventListener('click', closeDemoPopup);
             }
-        });
+            
+            // Add close functionality to the "Get Started" button
+            if (demoCloseBtn) {
+                demoCloseBtn.addEventListener('click', closeDemoPopup);
+            }
+            
+            // Close popup when clicking outside the modal
+            window.addEventListener('click', (event) => {
+                if (event.target === demoPopup) {
+                    closeDemoPopup();
+                }
+            });
+        } else {
+            // Hide popup immediately if already seen
+            demoPopup.classList.add('hidden');
+        }
     }
 
     function closeDemoPopup() {
         demoPopup.classList.add('hidden');
+        // Remember that user has seen the popup
+        localStorage.setItem('hasSeenDemoPopup', 'true');
     }
 
     // Initialize demo popup on page load
