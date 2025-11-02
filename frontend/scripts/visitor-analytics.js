@@ -153,9 +153,9 @@ class VisitorAnalytics {
         }
     }
 
-    async loadVisitsSummary() {
+    async loadVisitsSummary(period = this.filters.period) {
         try {
-            const response = await fetch(`${this.api.baseURL}/analytics/visits/summary?days=${this.filters.period}`, {
+            const response = await fetch(`${this.api.baseURL}/analytics/visits/summary?days=${period}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('oceanGuardToken')}`,
                     'Content-Type': 'application/json'
@@ -291,7 +291,14 @@ class VisitorAnalytics {
 
     async loadRecentVisits() {
         try {
-            const response = await fetch(`${this.api.baseURL}/analytics/visits/details?limit=100&days=${this.filters.period}`, {
+            // Build query params with optional filters
+            const params = new URLSearchParams();
+            params.set('limit', '100');
+            params.set('days', String(this.filters.period || 30));
+            if (this.filters.country) params.set('country', this.filters.country);
+            if (this.filters.device) params.set('device', this.filters.device);
+
+            const response = await fetch(`${this.api.baseURL}/analytics/visits/details?${params.toString()}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('oceanGuardToken')}`,
                     'Content-Type': 'application/json'
@@ -405,6 +412,64 @@ class VisitorAnalytics {
         this.loadRecentVisits();
     }
 
+    // Export full report as CSV using current filters/period
+    async exportFullReport() {
+        try {
+            const days = this.filters.period || 30;
+            // Fetch a large limit to approximate "full" report
+            const response = await fetch(`${this.api.baseURL}/analytics/visits/details?limit=10000&days=${days}`, {
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('oceanGuardToken')}`,
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+
+            const data = await response.json();
+            const visits = data.visits || [];
+
+            if (!visits.length) {
+                this.showError('No visit data available to export');
+                return;
+            }
+
+            // Build CSV
+            const headers = ['time','ip_address','city','country','latitude','longitude','device','browser','page','referrer'];
+            const rows = visits.map(v => [
+                new Date(v.created_at).toISOString(),
+                v.ip_address || '',
+                v.city || '',
+                v.country || '',
+                v.latitude != null ? v.latitude : '',
+                v.longitude != null ? v.longitude : '',
+                v.device_type || '',
+                v.browser || '',
+                v.page_url || '',
+                v.referrer || ''
+            ]);
+
+            const csvContent = [headers.join(','), ...rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(','))].join('\n');
+
+            // Trigger download
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `visitor_report_${days}d_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            this.showSuccess('Full report exported');
+
+        } catch (error) {
+            console.error('❌ Failed to export full report:', error);
+            this.showError('Failed to export full report: ' + error.message);
+        }
+    }
+
     async refreshData() {
         await this.loadData();
         this.showSuccess('Data refreshed successfully!');
@@ -436,3 +501,30 @@ const visitorAnalytics = new VisitorAnalytics();
 document.addEventListener('DOMContentLoaded', () => {
     visitorAnalytics.init();
 });
+
+// Expose small wrappers so inline `onclick` attributes in the HTML work
+// (the filters/refresh buttons use onclick="applyFilters()" / onclick="refreshData()")
+window.applyFilters = function() {
+    try {
+        visitorAnalytics.applyFilters();
+    } catch (e) {
+        console.error('applyFilters error:', e);
+    }
+};
+
+window.refreshData = function() {
+    try {
+        visitorAnalytics.refreshData();
+    } catch (e) {
+        console.error('refreshData error:', e);
+    }
+};
+
+// Export full report wrapper for onclick usage
+window.exportFullReport = function() {
+    try {
+        visitorAnalytics.exportFullReport();
+    } catch (e) {
+        console.error('exportFullReport error:', e);
+    }
+};
