@@ -13,7 +13,7 @@ let regionalChart = null;
 let responseTimeChart = null;
 let teamPerformanceChart = null;
 
-// Color scheme matching Ocean Guard theme
+// Color scheme matching Ocean Sentinels theme
 const chartColors = {
     primary: '#005A9C',      // Deep Blue
     secondary: '#FFFFFF',    // White

@@ -1,5 +1,5 @@
 /**
- * Ocean Guard Public Analytics Dashboard
+ * Ocean Sentinels Public Analytics Dashboard
  * Dynamic data fetching from backend API with Chart.js visualizations
  * Public access version - limited data for general public
  */
@@ -11,8 +11,33 @@ let analyticsData = null;
 // Initialize analytics when page loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🌊 Analytics Dashboard Initializing...');
+    displayLoginStatus();
     initializeAnalytics();
 });
+
+/**
+ * Display login status in the header or somewhere visible
+ */
+function displayLoginStatus() {
+    const token = localStorage.getItem('oceanGuardToken');
+    const user = localStorage.getItem('oceanGuardUser');
+    
+    console.log('🔍 Checking login status...');
+    console.log('Token exists:', !!token);
+    console.log('User data:', user);
+    
+    if (token && user) {
+        try {
+            const userData = JSON.parse(user);
+            console.log('✅ User is logged in:', userData);
+            console.log('User role:', userData.role);
+        } catch (e) {
+            console.log('User data exists but is not JSON:', user);
+        }
+    } else {
+        console.log('⚠️ User is not logged in');
+    }
+}
 
 /**
  * Initialize the analytics dashboard
@@ -42,7 +67,7 @@ async function loadAnalytics() {
         try {
             // Fetch dashboard analytics from real backend API
             console.log('🔄 Fetching dashboard analytics...');
-            const dashboardResponse = await fetch('http://127.0.0.1:9000/api/analytics/public/dashboard', {
+            const dashboardResponse = await fetch('https://ocean-hazard-1-6j5g.onrender.com/api/analytics/public/dashboard', {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -57,7 +82,7 @@ async function loadAnalytics() {
                 
             // Fetch timeline data from real backend API
             console.log('🔄 Fetching timeline analytics...');
-            const timelineResponse = await fetch('http://127.0.0.1:9000/api/analytics/public/timeline?days=30', {
+            const timelineResponse = await fetch('https://ocean-hazard-1-6j5g.onrender.com/api/analytics/public/timeline?days=30', {
                 headers: {
                     'Content-Type': 'application/json'
                 }
@@ -338,7 +363,7 @@ async function loadRecentActivity() {
                 headers['Authorization'] = `Bearer ${token}`;
             }
             
-            const response = await fetch('http://127.0.0.1:9000/api/incidents/?page=1&size=5', {
+            const response = await fetch('https://ocean-hazard-1-6j5g.onrender.com/api/incidents/?page=1&size=5', {
                 headers: headers
             });
             
@@ -445,7 +470,7 @@ async function loadIncidentsTable() {
                 headers['Authorization'] = `Bearer ${token}`;
             }
             
-            const response = await fetch('http://127.0.0.1:9000/api/incidents/?page=1&size=10', {
+            const response = await fetch('https://ocean-hazard-1-6j5g.onrender.com/api/incidents/?page=1&size=10', {
                 headers: headers
             });
             

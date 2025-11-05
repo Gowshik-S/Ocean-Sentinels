@@ -1,5 +1,5 @@
 /**
- * Ocean Guard - Main JavaScript
+ * Ocean Sentinels - Main JavaScript
  * Enhanced Login & Registration System
  * Version: 2.1 - Updated Sep 30, 2025
  * Features: Demo accounts + Real database authentication
@@ -15,11 +15,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Initialize demo popup on page load
     function initializeDemoPopup() {
-        // Check if user has already seen the popup (using localStorage)
+        // Check if user is already logged in
+        const authToken = localStorage.getItem('oceanGuardToken');
         const hasSeenDemoPopup = localStorage.getItem('hasSeenDemoPopup');
         
-        if (!hasSeenDemoPopup) {
-            // Show demo popup only if it hasn't been seen before
+        // Only show popup if user is NOT logged in and hasn't seen it before
+        if (!authToken && !hasSeenDemoPopup) {
+            // Show demo popup only if not authenticated and first visit
             demoPopup.classList.remove('hidden');
             
             // Add close functionality to the close button (X)
@@ -39,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         } else {
-            // Hide popup immediately if already seen
+            // Hide popup if user is logged in or has already seen it
             demoPopup.classList.add('hidden');
         }
     }
@@ -105,7 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modal) {
             // Use requestAnimationFrame for smoother modal opening
             requestAnimationFrame(() => {
-                modal.style.display = 'block';
+                modal.classList.add('show');
                 document.body.style.overflow = 'hidden';
             });
         }
@@ -113,8 +115,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function closeModal(modal) {
         if (modal) {
-            modal.style.display = 'none';
+            console.log('Closing modal:', modal.id);
+            modal.classList.remove('show');
             document.body.style.overflow = 'auto';
+            
+            // Re-enable any disabled submit buttons in the modal
+            const submitBtns = modal.querySelectorAll('button[type="submit"]');
+            submitBtns.forEach(btn => {
+                if (btn.disabled) {
+                    btn.disabled = false;
+                    // Reset button text if it was changed
+                    if (btn.innerHTML.includes('fa-spinner')) {
+                        const reportBtn = modal.querySelector('.report-submit-btn');
+                        if (reportBtn) {
+                            reportBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Report';
+                        }
+                    }
+                }
+            });
+            console.log('Modal closed successfully');
         }
     }
 
@@ -178,10 +197,28 @@ document.addEventListener('DOMContentLoaded', () => {
     // Close modals
     closeButtons.forEach(button => {
         button.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
             const modal = button.closest('.modal');
-            closeModal(modal);
+            console.log('Close button clicked, modal:', modal ? modal.id : 'none');
+            if (modal) {
+                closeModal(modal);
+            }
         });
     });
+
+    // Additional handler for report modal close button
+    const closeReportBtn = document.getElementById('close-report-modal');
+    if (closeReportBtn) {
+        closeReportBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log('Report modal close button clicked');
+            if (reportModal) {
+                closeModal(reportModal);
+            }
+        });
+    }
 
     // Close modal when clicking outside
     window.addEventListener('click', (event) => {
@@ -459,7 +496,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Store in localStorage for API client and other pages
                 localStorage.setItem('oceanGuardUser', JSON.stringify(user));
                 localStorage.setItem('oceanGuardToken', loginResponse.access_token);
-                alert('Registration successful! Welcome to Ocean Guard! Your account has been saved to the database.');
+                alert('Registration successful! Welcome to Ocean Sentinels! Your account has been saved to the database.');
                 window.location.href = 'my-reports.html';
                 
             } catch (error) {
@@ -484,6 +521,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (reportForm) {
         reportForm.addEventListener('submit', async (event) => {
             event.preventDefault();
+            
+            const submitBtn = reportForm.querySelector('button[type="submit"]');
+            const originalBtnText = submitBtn.innerHTML;
+            
+            // Disable button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
             
             const referenceId = generateReferenceId();
             const formData = new FormData(reportForm);
@@ -541,6 +585,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 // Show success message with reference ID
                 closeModal(reportModal);
+                
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
                 
                 // Create and show success notification
                 const notification = document.createElement('div');
@@ -603,6 +651,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 // Still show success for local storage
                 closeModal(reportModal);
+                
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnText;
+                
                 reportForm.reset();
             }
         });

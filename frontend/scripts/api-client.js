@@ -84,7 +84,7 @@ class OceanHazardAPI {
     }
 
     async register(userData) {
-        console.log('🌊 Ocean Guard Registration Attempt:', userData);
+        console.log('🌊 Ocean Sentinels Registration Attempt:', userData);
         console.log('🔗 API URL:', `${this.baseURL}/auth/register`);
         
         try {

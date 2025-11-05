@@ -1,5 +1,5 @@
 /**
- * Admin Dashboard - Ocean Guard
+ * Admin Dashboard - Ocean Sentinels
  * Manages rescue teams and authorities
  */
 
@@ -266,7 +266,7 @@ class AdminDashboard {
                 position: "Authority Officer",
                 email: user.email,
                 phone: user.phone || 'Not provided',
-                department: "Ocean Guard Authority",
+                department: "Ocean Sentinels Authority",
                 level: "state",
                 status: user.is_active ? 'active' : 'inactive',
                 jurisdiction: user.location || 'Regional operations',

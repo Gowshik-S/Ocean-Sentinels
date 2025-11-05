@@ -1,10 +1,10 @@
-# Ocean Guard Frontend
+# Ocean Sentinels Frontend
 
-Modern, responsive frontend for the Ocean Guard marine safety system.
+Modern, responsive frontend for the Ocean Sentinels marine safety system.
 
 ## 🌊 Overview
 
-Ocean Guard is India's coastal safety network that enables citizens to report maritime incidents and authorities to respond quickly. This frontend provides:
+Ocean Sentinels is India's coastal safety network that enables citizens to report maritime incidents and authorities to respond quickly. This frontend provides:
 
 - 📱 Responsive incident reporting system
 - 📊 Real-time analytics dashboard  
@@ -215,7 +215,7 @@ For issues or questions:
 
 ## 📝 License
 
-Ocean Guard - Marine Safety System
+Ocean Sentinels - Marine Safety System
 Built for India's coastal communities
 
 ---

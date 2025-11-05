@@ -31,6 +31,7 @@ class UserAnalyticsTracker {
                 ip: await this.getIPAddress(),
                 userAgent: navigator.userAgent,
                 location: locationData,
+                location_source: locationData.source || 'IP', // Add location source at top level
                 referrer: document.referrer,
                 pageUrl: window.location.href,
                 sessionId: this.sessionId,
@@ -87,32 +88,35 @@ class UserAnalyticsTracker {
      */
     async getLocationData() {
         try {
-            // Try browser geolocation first (more accurate)
+            // Try browser GPS geolocation first (most accurate)
             const browserLocation = await this.getBrowserLocation();
-            console.log('Browser location obtained:', browserLocation);
 
             if (browserLocation.latitude && browserLocation.longitude) {
-                // Get additional location data from IP geolocation
+                // Get city/country info from reverse geocoding or IP lookup
                 const ipLocation = await this.getIPLocationData();
                 const combinedLocation = {
-                    ...browserLocation,
-                    ...ipLocation
+                    latitude: browserLocation.latitude,
+                    longitude: browserLocation.longitude,
+                    accuracy: browserLocation.accuracy,
+                    country: ipLocation.country || 'Unknown',
+                    city: ipLocation.city || 'Unknown',
+                    region: ipLocation.region || '',
+                    timezone: ipLocation.timezone || '',
+                    source: 'GPS' // Track that this came from GPS
                 };
-                console.log('Combined location data:', combinedLocation);
                 return combinedLocation;
             }
         } catch (error) {
-            console.warn('Browser geolocation failed, trying IP geolocation:', error);
+            // GPS failed, fallback to IP
         }
 
-        // Fallback to IP geolocation
+        // Fallback to IP geolocation only if GPS fails
         try {
             const ipLocation = await this.getIPLocationData();
-            console.log('IP location data:', ipLocation);
+            ipLocation.source = 'IP'; // Track that this came from IP
             return ipLocation;
         } catch (error) {
-            console.warn('IP geolocation also failed:', error);
-            return {};
+            return { source: 'None' };
         }
     }
 
@@ -145,13 +149,12 @@ class UserAnalyticsTracker {
                     });
                 },
                 (error) => {
-                    console.warn('Browser geolocation error:', error);
                     reject(error);
                 },
                 {
-                    enableHighAccuracy: false, // Changed to false for faster response
-                    timeout: 5000, // Reduced timeout
-                    maximumAge: 300000 // 5 minutes
+                    enableHighAccuracy: true, // Use GPS for precise location
+                    timeout: 10000, // 10 seconds timeout for GPS
+                    maximumAge: 0 // Don't use cached location, get fresh GPS data
                 }
             );
         });
@@ -267,8 +270,7 @@ class UserAnalyticsTracker {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
 
-            const result = await response.json();
-            console.log('Visit tracked successfully:', result);
+            await response.json();
 
         } catch (error) {
             console.warn('Failed to send visit data:', error);

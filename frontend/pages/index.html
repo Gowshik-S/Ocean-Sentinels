@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ocean Guard - India's Coastal Safety Network</title>
+    <title>Ocean Sentinels - India's Coastal Safety Network</title>
     
     <!-- Favicon to prevent 404 errors -->
     <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231e40af'/%3E%3Cpath d='M6 16 Q11 12 16 16 Q21 20 26 16' stroke='white' stroke-width='2' fill='none'/%3E%3Cpath d='M6 20 Q11 16 16 20 Q21 24 26 20' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E">
@@ -19,7 +19,7 @@
 
     <header class="main-header">
         <nav class="navbar">
-            <a href="#" class="nav-logo">Ocean Guard</a>
+            <a href="#" class="nav-logo">Ocean Sentinels</a>
             <ul class="nav-menu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
@@ -57,7 +57,7 @@
     <main>
         <section class="hero-section">
             <div class="hero-content">
-                <h1 class="hero-title">Ocean Guard: Your Shield on the Shoreline.</h1>
+                <h1 class="hero-title">Ocean Sentinels: Your Shield on the Shoreline.</h1>
                 <p class="hero-subtitle">Report real-time ocean hazards, alert rescue teams, and help protect our coastal communities.</p>
                 <div class="hero-cta">
                     <a href="#report-hazard" class="btn btn--primary btn--large">REPORT A HAZARD NOW</a>
@@ -108,7 +108,7 @@
                     <p>See a hazard? Anonymously submit a report with a photo in seconds.</p>
                 </div>
                 <div class="step">
-                    <i class="fas fa-shield-alt step-icon"></i>
+                    <i class="fas fa-check-circle step-icon"></i>
                     <h3>2. Verify & Alert</h3>
                     <p>Our experts and AI verify the report and instantly alert nearby rescue teams.</p>
                 </div>
@@ -140,7 +140,7 @@
     <footer class="main-footer">
         <div class="footer-content">
             <div class="footer-section">
-                <h4>Ocean Guard</h4>
+                <h4>Ocean Sentinels</h4>
                 <p>A citizen-centric coastal safety platform under the Digital India initiative, ensuring comprehensive coastal security through community participation and advanced monitoring systems.</p>
                 <div class="footer-social">
                     <a href="#"><i class="fab fa-twitter"></i></a>
@@ -196,8 +196,8 @@
                 <a href="#">Sitemap</a> |
                 <a href="#">Help</a>
             </div>
-            <p>&copy; 2025 Ocean Guard, Ministry of Earth Sciences, Government of India. All rights reserved.</p>
-            <p class="footer-update">Website last updated: 27 Sep 2025 | Best viewed in Chrome, Firefox, Safari</p>
+            <p>&copy; 2025 Ocean Sentinels, Ministry of Earth Sciences, Government of India. All rights reserved.</p>
+            <p class="footer-update">Website last updated: <span id="last-updated-date">Loading...</span> | Best viewed in Chrome, Firefox, Safari</p>
         </div>
     </footer>
 
@@ -209,8 +209,8 @@
             <!-- Modal Header -->
             <div class="auth-header">
                 <div class="auth-logo">
-                    <i class="fas fa-shield-alt"></i>
-                    <h2>Ocean Guard Portal</h2>
+                    <i class="fas fa-lock"></i>
+                    <h2>Ocean Sentinels Portal</h2>
                 </div>
                 <p>Secure access to India's coastal safety network</p>
             </div>
@@ -275,7 +275,7 @@
                     </div>
                     <div class="reg-type-card disabled" data-type="authority">
                         <div class="reg-type-icon">
-                            <i class="fas fa-shield-alt"></i>
+                            <i class="fas fa-key"></i>
                         </div>
                         <h4>Authority Registration</h4>
                         <p>Contact administrator for access</p>
@@ -374,7 +374,7 @@
                 <h2>SIH 25 Demo</h2>
             </div>
             <div class="demo-popup-body">
-                <p class="demo-welcome-text">Welcome to Ocean Guard!</p>
+                <p class="demo-welcome-text">Welcome to Ocean Sentinels!</p>
                 <p class="demo-main-text">This is a <strong>SIH 25 Demo</strong> environment.</p>
                 <p class="demo-instruction">Login using demo credentials (provided in the login page too) to unlock full access to the web.</p>
                 <div class="demo-credentials-box">
@@ -506,7 +506,8 @@
             container: 'live-map',
             style: 'mapbox://styles/mapbox/streets-v11',
             center: [77.2090, 28.6139], // Default to Delhi, India
-            zoom: 10
+            zoom: 10,
+            renderWorldCopies: false
         });
         
         // Add user location control
@@ -533,7 +534,7 @@
                     // Add a marker for user's location
                     new mapboxgl.Marker({ color: '#005A9C' })
                         .setLngLat([userLng, userLat])
-                        .setPopup(new mapboxgl.Popup().setHTML('<h4>Your Location</h4><p>Ocean Guard is monitoring this area</p>'))
+                        .setPopup(new mapboxgl.Popup().setHTML('<h4>Your Location</h4><p>Ocean Sentinels is monitoring this area</p>'))
                         .addTo(map);
                         
                     // Add a circle to show monitoring radius (50km)
@@ -602,6 +603,19 @@
             document.getElementById('coastline-watched').textContent = '7,516 km';
         }
     }
+    
+    // Function to update last updated date from local system
+    function updateLastUpdatedDate() {
+        const currentDate = new Date().toLocaleDateString('en-GB', { 
+            day: '2-digit', 
+            month: 'short', 
+            year: 'numeric' 
+        });
+        document.getElementById('last-updated-date').textContent = currentDate;
+    }
+    
+    // Call the function to update last updated date
+    updateLastUpdatedDate();
     </script>
 
     <!-- Analytics Tracking Script -->

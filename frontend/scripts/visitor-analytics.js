@@ -1,5 +1,5 @@
 /**
- * Visitor Analytics - Ocean Guard
+ * Visitor Analytics - Ocean Sentinels
  * Comprehensive visitor tracking and analytics dashboard
  */
 
@@ -291,14 +291,7 @@ class VisitorAnalytics {
 
     async loadRecentVisits() {
         try {
-            // Build query params with optional filters
-            const params = new URLSearchParams();
-            params.set('limit', '100');
-            params.set('days', String(this.filters.period || 30));
-            if (this.filters.country) params.set('country', this.filters.country);
-            if (this.filters.device) params.set('device', this.filters.device);
-
-            const response = await fetch(`${this.api.baseURL}/analytics/visits/details?${params.toString()}`, {
+            const response = await fetch(`${this.api.baseURL}/analytics/visits/details?limit=100&days=${this.filters.period}`, {
                 headers: {
                     'Authorization': `Bearer ${localStorage.getItem('oceanGuardToken')}`,
                     'Content-Type': 'application/json'
@@ -336,12 +329,45 @@ class VisitorAnalytics {
             const browser = visit.browser || 'Unknown';
             const page = visit.page_url ? new URL(visit.page_url).pathname : '/';
             const referrer = visit.referrer ? new URL(visit.referrer).hostname : 'Direct';
+            
+            // Determine location source (GPS or IP)
+            // Try multiple field names and infer from accuracy
+            let locationSource = visit.location_source || visit.source;
+            
+            // If no source field, try to infer from accuracy
+            if (!locationSource && visit.accuracy !== undefined && visit.accuracy !== null) {
+                // GPS typically has accuracy < 1000 meters, IP location doesn't have accuracy
+                locationSource = visit.accuracy < 1000 ? 'GPS' : 'IP';
+            }
+            
+            // Check if coordinates are very precise (more than 4 decimal places = likely GPS)
+            if (!locationSource && visit.latitude && visit.longitude) {
+                const latStr = visit.latitude.toString();
+                const lngStr = visit.longitude.toString();
+                const latDecimals = latStr.includes('.') ? latStr.split('.')[1].length : 0;
+                const lngDecimals = lngStr.includes('.') ? lngStr.split('.')[1].length : 0;
+                
+                // GPS usually has 6+ decimal places, IP location has 4 or fewer
+                if (latDecimals > 5 || lngDecimals > 5) {
+                    locationSource = 'GPS';
+                }
+            }
+            
+            // Default to IP if still unknown
+            if (!locationSource) {
+                locationSource = 'IP';
+            }
+            
+            const sourceIcon = locationSource === 'GPS' ? 
+                '<i class="fas fa-satellite-dish" style="color: #28a745;" title="GPS Location (Accurate)"></i>' : 
+                '<i class="fas fa-network-wired" style="color: #ffc107;" title="IP-based Location (Approximate)"></i>';
+            const locationWithSource = `${location} ${sourceIcon}`;
 
             return `
                 <tr>
                     <td>${timestamp}</td>
                     <td>${visit.ip_address}</td>
-                    <td>${location}</td>
+                    <td>${locationWithSource}</td>
                     <td>${coordinates}</td>
                     <td>${device}</td>
                     <td>${browser}</td>
@@ -412,64 +438,6 @@ class VisitorAnalytics {
         this.loadRecentVisits();
     }
 
-    // Export full report as CSV using current filters/period
-    async exportFullReport() {
-        try {
-            const days = this.filters.period || 30;
-            // Fetch a large limit to approximate "full" report
-            const response = await fetch(`${this.api.baseURL}/analytics/visits/details?limit=10000&days=${days}`, {
-                headers: {
-                    'Authorization': `Bearer ${localStorage.getItem('oceanGuardToken')}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-
-            if (!response.ok) throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-
-            const data = await response.json();
-            const visits = data.visits || [];
-
-            if (!visits.length) {
-                this.showError('No visit data available to export');
-                return;
-            }
-
-            // Build CSV
-            const headers = ['time','ip_address','city','country','latitude','longitude','device','browser','page','referrer'];
-            const rows = visits.map(v => [
-                new Date(v.created_at).toISOString(),
-                v.ip_address || '',
-                v.city || '',
-                v.country || '',
-                v.latitude != null ? v.latitude : '',
-                v.longitude != null ? v.longitude : '',
-                v.device_type || '',
-                v.browser || '',
-                v.page_url || '',
-                v.referrer || ''
-            ]);
-
-            const csvContent = [headers.join(','), ...rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(','))].join('\n');
-
-            // Trigger download
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `visitor_report_${days}d_${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-
-            this.showSuccess('Full report exported');
-
-        } catch (error) {
-            console.error('❌ Failed to export full report:', error);
-            this.showError('Failed to export full report: ' + error.message);
-        }
-    }
-
     async refreshData() {
         await this.loadData();
         this.showSuccess('Data refreshed successfully!');
@@ -501,30 +469,3 @@ const visitorAnalytics = new VisitorAnalytics();
 document.addEventListener('DOMContentLoaded', () => {
     visitorAnalytics.init();
 });
-
-// Expose small wrappers so inline `onclick` attributes in the HTML work
-// (the filters/refresh buttons use onclick="applyFilters()" / onclick="refreshData()")
-window.applyFilters = function() {
-    try {
-        visitorAnalytics.applyFilters();
-    } catch (e) {
-        console.error('applyFilters error:', e);
-    }
-};
-
-window.refreshData = function() {
-    try {
-        visitorAnalytics.refreshData();
-    } catch (e) {
-        console.error('refreshData error:', e);
-    }
-};
-
-// Export full report wrapper for onclick usage
-window.exportFullReport = function() {
-    try {
-        visitorAnalytics.exportFullReport();
-    } catch (e) {
-        console.error('exportFullReport error:', e);
-    }
-};
