@@ -3,21 +3,24 @@ Ocean Hazard FastAPI Backend
 Main application entry point
 """
 
+from dotenv import load_dotenv
+from pathlib import Path
+import os
+
+# Load environment variables FIRST before any imports that use them
+env_path = Path(__file__).parent.parent / ".env"
+load_dotenv(env_path)
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 import uvicorn
-import os
-from dotenv import load_dotenv
 
 from app.database import engine, Base
 from app.routers import auth, incidents, users, analytics, websocket
 from app.core.config import settings
 from sqlalchemy import text
-
-# Load environment variables
-load_dotenv(".env")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
