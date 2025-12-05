@@ -142,19 +142,26 @@ class UserAnalyticsTracker {
 
             navigator.geolocation.getCurrentPosition(
                 (position) => {
-                    resolve({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                        accuracy: position.coords.accuracy
-                    });
+                    // Check GPS accuracy - only accept if reasonably accurate
+                    // GPS typically has accuracy < 100m, IP-based is usually > 1000m
+                    if (position.coords.accuracy && position.coords.accuracy < 500) {
+                        resolve({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            accuracy: position.coords.accuracy
+                        });
+                    } else {
+                        // GPS accuracy too poor, reject to fall back to IP
+                        reject(new Error(`GPS accuracy too low: ${position.coords.accuracy}m`));
+                    }
                 },
                 (error) => {
                     reject(error);
                 },
                 {
                     enableHighAccuracy: true, // Use GPS for precise location
-                    timeout: 10000, // 10 seconds timeout for GPS
-                    maximumAge: 0 // Don't use cached location, get fresh GPS data
+                    timeout: 20000, // 20 seconds timeout for better GPS fix
+                    maximumAge: 60000 // Accept cached location up to 1 minute old if accurate
                 }
             );
         });
