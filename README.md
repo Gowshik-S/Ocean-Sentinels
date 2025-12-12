@@ -116,7 +116,7 @@ All HTML files now use relative paths:
 
 ## 📝 License
 
-This project mainlyu focuses on public safety and disaster management improvement.
+This project mainly focuses on public safety and disaster management improvement.
 
 ---
-**Last Updated**: November 28, 2025 | **Version**: 2.0.0 | **Status**: Active Development
+**Last Updated**: November 28, 2025 | **Version**: 0.1.4 | **Status**: Active Development
