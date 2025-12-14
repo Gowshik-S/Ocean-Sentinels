@@ -263,23 +263,29 @@ async def get_public_system_stats(
     db: AsyncSession = Depends(get_db)
 ):
     """Get public system statistics (no authentication required)"""
-    # Get total reports filed
-    total_reports_result = await db.execute(select(func.count(Incident.id)))
-    total_reports = total_reports_result.scalar()
-    
-    # Get active incidents
-    active_incidents_result = await db.execute(
-        select(func.count(Incident.id)).where(
-            Incident.status.in_([IncidentStatus.PENDING, IncidentStatus.VERIFIED, IncidentStatus.IN_PROGRESS])
+    try:
+        # Get total reports filed
+        total_reports_result = await db.execute(select(func.count(Incident.id)))
+        total_reports = total_reports_result.scalar()
+        
+        # Get active incidents
+        active_incidents_result = await db.execute(
+            select(func.count(Incident.id)).where(
+                Incident.status.in_([IncidentStatus.PENDING, IncidentStatus.VERIFIED, IncidentStatus.IN_PROGRESS])
+            )
         )
-    )
-    active_incidents = active_incidents_result.scalar()
-    
-    # Get rescue teams registered (users with RESCUE_TEAM role)
-    rescue_teams_result = await db.execute(
-        select(func.count(User.id)).where(User.role == UserRole.RESCUE_TEAM)
-    )
-    rescue_teams = rescue_teams_result.scalar()
+        active_incidents = active_incidents_result.scalar()
+        
+        # Get rescue teams registered (users with RESCUE_TEAM role)
+        rescue_teams_result = await db.execute(
+            select(func.count(User.id)).where(User.role == UserRole.RESCUE_TEAM)
+        )
+        rescue_teams = rescue_teams_result.scalar()
+    except Exception as e:
+        # Return default values if database is unavailable
+        total_reports = 0
+        active_incidents = 0
+        rescue_teams = 0
     
     # Static coastline length for India (actual value)
     coastline_km = 7516
@@ -358,7 +364,11 @@ async def track_user_visit(
 
     except Exception as e:
         await db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to track visit: {str(e)}")
+        # Return success even if database fails to avoid breaking frontend
+        return {
+            "success": False,
+            "message": "Visit tracking temporarily unavailable"
+        }
 
 @router.get("/visits/summary")
 async def get_visits_summary(
