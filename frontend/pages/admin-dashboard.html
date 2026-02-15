@@ -1,36 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard - Ocean Sentinels</title>
-    
+
     <link rel="stylesheet" href="../styles/styles.css">
     <link rel="stylesheet" href="../styles/report-enhancements.css">
-    
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+
     <!-- Chart.js for analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Vercel Web Analytics -->
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
-    
+
     <style>
         body {
-            background: white;
+            background: var(--secondary-color, #FFFFFF);
         }
-        
+
         .admin-container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 20px;
             background: white;
         }
-        
+
         .admin-header {
             background: #005A9C;
             color: white;
@@ -40,16 +41,16 @@
             text-align: center;
             box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
         }
-        
+
         .admin-actions {
             margin-top: 20px;
         }
-        
+
         .admin-actions .btn {
             display: inline-block;
             margin: 0 10px;
         }
-        
+
         .admin-section {
             background: white;
             border: 2px solid #F5F5F5;
@@ -58,21 +59,21 @@
             margin-bottom: 25px;
             box-shadow: 0 2px 10px rgba(0, 90, 156, 0.1);
         }
-        
+
         .admin-section h2 {
             color: #005A9C;
             border-bottom: 3px solid #ffc107;
             padding-bottom: 10px;
             margin-bottom: 20px;
         }
-        
+
         .admin-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
-        
+
         .admin-card {
             background: white;
             border: 2px solid #F5F5F5;
@@ -81,13 +82,13 @@
             transition: transform 0.2s, box-shadow 0.2s;
             box-shadow: 0 2px 8px rgba(0, 90, 156, 0.1);
         }
-        
+
         .admin-card:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
             border-color: #ffc107;
         }
-        
+
         .admin-card h3 {
             color: #005A9C;
             margin-bottom: 15px;
@@ -95,18 +96,20 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .admin-card .icon {
             font-size: 24px;
             color: #ffc107;
         }
-        
+
         .admin-form {
             display: grid;
             gap: 15px;
         }
-        
-        .admin-form input, .admin-form select, .admin-form textarea {
+
+        .admin-form input,
+        .admin-form select,
+        .admin-form textarea {
             padding: 12px;
             border: 2px solid #F5F5F5;
             border-radius: 4px;
@@ -114,18 +117,20 @@
             background: white;
             transition: border-color 0.2s;
         }
-        
-        .admin-form input:focus, .admin-form select:focus, .admin-form textarea:focus {
+
+        .admin-form input:focus,
+        .admin-form select:focus,
+        .admin-form textarea:focus {
             outline: none;
             border-color: #005A9C;
             box-shadow: 0 0 5px rgba(0, 90, 156, 0.3);
         }
-        
+
         .admin-form textarea {
             resize: vertical;
             min-height: 80px;
         }
-        
+
         .admin-btn {
             background: #005A9C;
             color: white;
@@ -136,36 +141,38 @@
             font-size: 14px;
             transition: all 0.2s;
         }
-        
+
         .admin-btn:hover {
             background: #ffc107;
             color: #005A9C;
             transform: translateY(-1px);
         }
-        
+
         .admin-btn.danger {
             background: #FF6B6B;
         }
-        
+
         .admin-btn.danger:hover {
             background: #FF5252;
             color: white;
         }
-        
+
         .admin-btn.success {
             background: #4ECDC4;
         }
-        
+
         .admin-btn.success:hover {
             background: #26D0CE;
             color: white;
         }
-        
-        .team-list, .authority-list {
+
+        .team-list,
+        .authority-list {
             margin-top: 20px;
         }
-        
-        .team-item, .authority-item {
+
+        .team-item,
+        .authority-item {
             background: white;
             border: 2px solid #F5F5F5;
             border-radius: 4px;
@@ -176,57 +183,58 @@
             align-items: center;
             transition: all 0.2s;
         }
-        
-        .team-item:hover, .authority-item:hover {
+
+        .team-item:hover,
+        .authority-item:hover {
             border-color: #ffc107;
             box-shadow: 0 2px 8px rgba(255, 193, 7, 0.2);
         }
-        
+
         .team-info h4 {
             margin: 0 0 5px 0;
             color: #005A9C;
         }
-        
+
         .team-info p {
             margin: 0;
             color: #666;
             font-size: 14px;
         }
-        
+
         .team-actions {
             display: flex;
             gap: 10px;
         }
-        
+
         .status-badge {
             padding: 4px 8px;
             border-radius: 4px;
             font-size: 12px;
             font-weight: bold;
         }
-        
+
         .status-active {
             background: #d4edda;
             color: #155724;
         }
-        
+
         .status-inactive {
             background: #f8d7da;
             color: #721c24;
         }
-        
+
         .status-on-duty {
             background: #d1ecf1;
             color: #0c5460;
         }
-        
+
         .admin-stats {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 30px;
         }
-        
+
         .stat-card {
             background: #005A9C;
             color: white;
@@ -236,24 +244,24 @@
             box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
             transition: transform 0.2s;
         }
-        
+
         .stat-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 6px 20px rgba(255, 193, 7, 0.3);
         }
-        
+
         .stat-number {
             font-size: 36px;
             font-weight: bold;
             margin-bottom: 5px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
         }
-        
+
         .stat-label {
             font-size: 14px;
             opacity: 0.9;
         }
-        
+
         .access-denied {
             text-align: center;
             padding: 50px;
@@ -263,12 +271,13 @@
             border-radius: 8px;
             margin: 50px 0;
         }
-        
+
         .access-denied h2 {
             color: #FF6B6B;
         }
     </style>
 </head>
+
 <body>
 
     <header class="main-header">
@@ -278,9 +287,12 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="analytics.html">Analytics</a></li>
                 <li><a href="admin-dashboard.html" class="active">Admin Dashboard</a></li>
-                <!-- Incident Reports - Only visible for Admin, Authority, Rescue Team -->
                 <li id="nav-reports" style="display: none;">
                     <a href="reports.html">Incident Reports</a>
+                </li>
+                <li id="nav-admin-console" style="display: none;"><a href="admin-dashboard.html">Admin</a></li>
+                <li id="nav-rescue-console" style="display: none;"><a href="rescue-console.html">Rescue</a></li>
+                <li id="nav-authority-console" style="display: none;"><a href="authority-console.html">Authority</a>
                 </li>
             </ul>
             <div class="nav-actions">
@@ -293,7 +305,7 @@
     <main class="admin-container">
         <!-- Access Denied Message (shown to non-admin users) -->
         <div id="access-denied" class="access-denied" style="display: none;">
-            <h2>🚫 Access Denied</h2>
+            <h2><i class="fas fa-ban"></i> Access Denied</h2>
             <p>This page is restricted to administrators only.</p>
             <p>Please contact your system administrator if you believe you should have access.</p>
             <a href="index.html" class="admin-btn">Return to Home</a>
@@ -303,8 +315,7 @@
         <div id="admin-content">
             <div class="admin-header">
                 <h1><i class="fas fa-tachometer-alt"></i> Ocean Sentinels Admin Dashboard</h1>
-                <p>Manage rescue teams, authorities, and emergency response personnel</p>
-
+                <p>Manage rescue teams, authorities, incidents, and emergency response personnel</p>
             </div>
 
             <!-- Statistics -->
@@ -327,82 +338,122 @@
                 </div>
             </div>
 
-            <div class="admin-grid">
-                <!-- Add Rescue Team -->
+            <!-- Tab Navigation -->
+            <div class="admin-tabs"
+                style="display: flex; gap: 0; margin-bottom: 24px; border-bottom: 2px solid #dee2e6;">
+                <button class="admin-tab-btn active" data-tab="users-tab" onclick="switchAdminTab('users-tab')"
+                    style="flex:1; padding: 12px 20px; border: none; background: none; font-size: 16px; font-weight: 600; cursor: pointer; border-bottom: 3px solid #005A9C; color: #005A9C;">
+                    <i class="fas fa-users"></i> User Management
+                </button>
+                <button class="admin-tab-btn" data-tab="incidents-tab" onclick="switchAdminTab('incidents-tab')"
+                    style="flex:1; padding: 12px 20px; border: none; background: none; font-size: 16px; font-weight: 600; cursor: pointer; border-bottom: 3px solid transparent; color: #6c757d;">
+                    <i class="fas fa-exclamation-triangle"></i> Incidents
+                </button>
+            </div>
+
+            <!-- Users Tab -->
+            <div id="users-tab" class="admin-tab-content">
+                <div class="admin-grid">
+                    <!-- Add Rescue Team -->
+                    <div class="admin-section">
+                        <h2><i class="fas fa-life-ring"></i> Add Rescue Team</h2>
+                        <form class="admin-form" id="add-team-form">
+                            <input type="text" id="team-name" placeholder="Team Name" required>
+                            <input type="text" id="team-leader" placeholder="Team Leader Name" required>
+                            <input type="email" id="team-email" placeholder="Contact Email" required>
+                            <input type="tel" id="team-phone" placeholder="Contact Phone" required>
+                            <input type="text" id="team-location" placeholder="Base Location" required>
+                            <select id="team-type" required>
+                                <option value="">Select Team Type</option>
+                                <option value="coast-guard">Coast Guard</option>
+                                <option value="marine-rescue">Marine Rescue</option>
+                                <option value="emergency-response">Emergency Response</option>
+                                <option value="search-rescue">Search & Rescue</option>
+                                <option value="disaster-management">Disaster Management</option>
+                            </select>
+                            <select id="team-status" required>
+                                <option value="active">Active</option>
+                                <option value="on-duty">On Duty</option>
+                                <option value="off-duty">Off Duty</option>
+                                <option value="maintenance">Maintenance</option>
+                            </select>
+                            <textarea id="team-equipment" placeholder="Equipment & Capabilities"></textarea>
+                            <button type="submit" class="admin-btn success">
+                                <i class="fas fa-plus"></i> Add Rescue Team
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Add Authority -->
+                    <div class="admin-section">
+                        <h2><i class="fas fa-user-shield"></i> Add Authority</h2>
+                        <form class="admin-form" id="add-authority-form">
+                            <input type="text" id="authority-name" placeholder="Authority Name" required>
+                            <input type="text" id="authority-position" placeholder="Position/Title" required>
+                            <input type="email" id="authority-email" placeholder="Contact Email" required>
+                            <input type="tel" id="authority-phone" placeholder="Contact Phone" required>
+                            <input type="text" id="authority-department" placeholder="Department/Organization" required>
+                            <select id="authority-level" required>
+                                <option value="">Select Authority Level</option>
+                                <option value="local">Local Authority</option>
+                                <option value="district">District Authority</option>
+                                <option value="state">State Authority</option>
+                                <option value="national">National Authority</option>
+                                <option value="emergency">Emergency Coordinator</option>
+                            </select>
+                            <select id="authority-status" required>
+                                <option value="active">Active</option>
+                                <option value="on-call">On Call</option>
+                                <option value="unavailable">Unavailable</option>
+                            </select>
+                            <textarea id="authority-jurisdiction"
+                                placeholder="Jurisdiction & Responsibilities"></textarea>
+                            <button type="submit" class="admin-btn success">
+                                <i class="fas fa-plus"></i> Add Authority
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Rescue Teams List -->
                 <div class="admin-section">
-                    <h2><i class="fas fa-life-ring"></i> Add Rescue Team</h2>
-                    <form class="admin-form" id="add-team-form">
-                        <input type="text" id="team-name" placeholder="Team Name" required>
-                        <input type="text" id="team-leader" placeholder="Team Leader Name" required>
-                        <input type="email" id="team-email" placeholder="Contact Email" required>
-                        <input type="tel" id="team-phone" placeholder="Contact Phone" required>
-                        <input type="text" id="team-location" placeholder="Base Location" required>
-                        <select id="team-type" required>
-                            <option value="">Select Team Type</option>
-                            <option value="coast-guard">Coast Guard</option>
-                            <option value="marine-rescue">Marine Rescue</option>
-                            <option value="emergency-response">Emergency Response</option>
-                            <option value="search-rescue">Search & Rescue</option>
-                            <option value="disaster-management">Disaster Management</option>
-                        </select>
-                        <select id="team-status" required>
-                            <option value="active">Active</option>
-                            <option value="on-duty">On Duty</option>
-                            <option value="off-duty">Off Duty</option>
-                            <option value="maintenance">Maintenance</option>
-                        </select>
-                        <textarea id="team-equipment" placeholder="Equipment & Capabilities"></textarea>
-                        <button type="submit" class="admin-btn success">
-                            <i class="fas fa-plus"></i> Add Rescue Team
-                        </button>
-                    </form>
+                    <h2><i class="fas fa-users"></i> Rescue Teams Management</h2>
+                    <div id="teams-list" class="team-list">
+                        <p class="text-center">Loading rescue teams...</p>
+                    </div>
                 </div>
 
-                <!-- Add Authority -->
+                <!-- Authorities List -->
                 <div class="admin-section">
-                    <h2><i class="fas fa-user-shield"></i> Add Authority</h2>
-                    <form class="admin-form" id="add-authority-form">
-                        <input type="text" id="authority-name" placeholder="Authority Name" required>
-                        <input type="text" id="authority-position" placeholder="Position/Title" required>
-                        <input type="email" id="authority-email" placeholder="Contact Email" required>
-                        <input type="tel" id="authority-phone" placeholder="Contact Phone" required>
-                        <input type="text" id="authority-department" placeholder="Department/Organization" required>
-                        <select id="authority-level" required>
-                            <option value="">Select Authority Level</option>
-                            <option value="local">Local Authority</option>
-                            <option value="district">District Authority</option>
-                            <option value="state">State Authority</option>
-                            <option value="national">National Authority</option>
-                            <option value="emergency">Emergency Coordinator</option>
+                    <h2><i class="fas fa-user-tie"></i> Authorities Management</h2>
+                    <div id="authorities-list" class="authority-list">
+                        <p class="text-center">Loading authorities...</p>
+                    </div>
+                </div>
+            </div> <!-- end users-tab -->
+
+            <!-- Incidents Tab -->
+            <div id="incidents-tab" class="admin-tab-content" style="display: none;">
+                <div class="admin-section">
+                    <h2><i class="fas fa-exclamation-triangle"></i> Incident Management</h2>
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+                        <select id="admin-incident-status-filter" class="admin-form"
+                            style="padding: 8px 12px; border-radius: 4px; border: 1px solid #ddd;">
+                            <option value="">All Statuses</option>
+                            <option value="pending">Pending</option>
+                            <option value="verified">Verified</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
                         </select>
-                        <select id="authority-status" required>
-                            <option value="active">Active</option>
-                            <option value="on-call">On Call</option>
-                            <option value="unavailable">Unavailable</option>
-                        </select>
-                        <textarea id="authority-jurisdiction" placeholder="Jurisdiction & Responsibilities"></textarea>
-                        <button type="submit" class="admin-btn success">
-                            <i class="fas fa-plus"></i> Add Authority
+                        <button class="admin-btn" onclick="adminDashboard.loadIncidents()">
+                            <i class="fas fa-sync-alt"></i> Refresh
                         </button>
-                    </form>
+                    </div>
+                    <div id="admin-incidents-list">
+                        <p class="text-center">Loading incidents...</p>
+                    </div>
                 </div>
-            </div>
-
-            <!-- Rescue Teams List -->
-            <div class="admin-section">
-                <h2><i class="fas fa-users"></i> Rescue Teams Management</h2>
-                <div id="teams-list" class="team-list">
-                    <p class="text-center">Loading rescue teams...</p>
-                </div>
-            </div>
-
-            <!-- Authorities List -->
-            <div class="admin-section">
-                <h2><i class="fas fa-user-tie"></i> Authorities Management</h2>
-                <div id="authorities-list" class="authority-list">
-                    <p class="text-center">Loading authorities...</p>
-                </div>
-            </div>
+            </div> <!-- end incidents-tab -->
         </div>
     </main>
 
@@ -429,7 +480,8 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 Ocean Sentinels Admin, Ministry of Earth Sciences, Government of India. All rights reserved.</p>
+            <p>&copy; 2025 Ocean Sentinels Admin, Ministry of Earth Sciences, Government of India. All rights reserved.
+            </p>
         </div>
     </footer>
 
@@ -439,6 +491,33 @@
     <script src="../scripts/navigation-manager.js"></script>
     <!-- Include Admin Dashboard functionality -->
     <script src="../scripts/admin-dashboard.js"></script>
+
+    <!-- Tab Switching -->
+    <script>
+        function switchAdminTab(tabId) {
+            // Hide all tab contents
+            document.querySelectorAll('.admin-tab-content').forEach(c => c.style.display = 'none');
+            // Show selected tab
+            const tab = document.getElementById(tabId);
+            if (tab) tab.style.display = 'block';
+            // Update tab button styles
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.style.borderBottomColor = 'transparent';
+                btn.style.color = '#6c757d';
+                btn.classList.remove('active');
+            });
+            const activeBtn = document.querySelector(`.admin-tab-btn[data-tab="${tabId}"]`);
+            if (activeBtn) {
+                activeBtn.style.borderBottomColor = '#005A9C';
+                activeBtn.style.color = '#005A9C';
+                activeBtn.classList.add('active');
+            }
+            // Load incidents when switching to incidents tab
+            if (tabId === 'incidents-tab' && typeof adminDashboard !== 'undefined') {
+                adminDashboard.loadIncidents();
+            }
+        }
+    </script>
     <!-- Analytics Tracking Script -->
     <script src="../scripts/analytics-tracker.js"></script>
 
@@ -449,4 +528,5 @@
     <script defer src="/_vercel/speed-insights/script.js"></script>
 
 </body>
+
 </html>

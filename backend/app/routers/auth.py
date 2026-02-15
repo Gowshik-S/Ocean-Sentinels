@@ -54,11 +54,11 @@ async def register(
     db: AsyncSession = Depends(get_db)
 ):
     """Register a new user - Public endpoint"""
-    print(f"🔥 Registration attempt for: {user_data.email}")
+    print(f"Registration attempt for: {user_data.email}")
     
     # Force role to "public" for public registrations (only admins can create special roles via different endpoint)
     if user_data.role and user_data.role != "public":
-        print(f"❌ Public registration attempted with special role: {user_data.role}")
+        print(f"Public registration attempted with special role: {user_data.role}")
         raise HTTPException(
             status_code=403,
             detail="Public registration only allows 'public' role. Contact administrator for special roles."
@@ -68,7 +68,7 @@ async def register(
         # Check if username already exists
         result = await db.execute(select(User).where(User.username == user_data.username))
         if result.scalar_one_or_none():
-            print(f"❌ Username already exists: {user_data.username}")
+            print(f"Username already exists: {user_data.username}")
             raise HTTPException(
                 status_code=400,
                 detail="Username already registered"
@@ -77,16 +77,16 @@ async def register(
         # Check if email already exists
         result = await db.execute(select(User).where(User.email == user_data.email))
         if result.scalar_one_or_none():
-            print(f"❌ Email already exists: {user_data.email}")
+            print(f"Email already exists: {user_data.email}")
             raise HTTPException(
                 status_code=400,
                 detail="Email already registered"
             )
         
-        print(f"✅ Hashing password for user: {user_data.email}")
+        print(f"Hashing password for user: {user_data.email}")
         # Create new user
         hashed_password = get_password_hash(user_data.password)
-        print(f"✅ Password hashed successfully")
+        print(f"Password hashed successfully")
         
         db_user = User(
             username=user_data.username,
@@ -99,12 +99,12 @@ async def register(
             role=user_data.role if user_data.role else "public"
         )
         
-        print(f"✅ Saving user to database: {user_data.email}")
+        print(f"Saving user to database: {user_data.email}")
         db.add(db_user)
         await db.commit()
         await db.refresh(db_user)
         
-        print(f"🎉 User registered successfully: {user_data.email}")
+        print(f"User registered successfully: {user_data.email}")
 
         # Return user data as dict to avoid serialization issues
         return {
@@ -127,7 +127,7 @@ async def register(
         await db.rollback()
         raise he
     except Exception as e:
-        print(f"❌ Registration error: {str(e)}")
+        print(f"Registration error: {str(e)}")
         await db.rollback()
         raise HTTPException(
             status_code=500,

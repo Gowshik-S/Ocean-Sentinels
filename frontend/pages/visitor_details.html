@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +13,7 @@
 
     <!-- Chart.js for analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Vercel Web Analytics -->
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
@@ -243,6 +244,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <!-- Back to Admin Dashboard Button -->
@@ -253,7 +255,7 @@
     <main class="visitor-container">
         <!-- Access Denied Message (shown to non-admin users) -->
         <div id="access-denied" class="access-denied" style="display: none;">
-            <h2>🚫 Access Denied</h2>
+            <h2><i class="fas fa-ban"></i> Access Denied</h2>
             <p>This page is restricted to administrators only.</p>
             <p>Please contact your system administrator if you believe you should have access.</p>
             <a href="admin-dashboard.html" class="admin-btn">Return to Admin Dashboard</a>
@@ -439,4 +441,5 @@
     <script defer src="/_vercel/speed-insights/script.js"></script>
 
 </body>
+
 </html>

@@ -45,15 +45,20 @@ class Incident(Base):
     contact_info = Column(String(100), nullable=True)
     photo_url = Column(String(500), nullable=True)
     
+    # Mesh deduplication — unique ID from BLE mesh origin device
+    mesh_message_id = Column(String(128), nullable=True, unique=True, index=True)
+    
     # Foreign keys
     reporter_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     verified_by_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    assigned_to_id = Column(Integer, ForeignKey("users.id"), nullable=True)
     
     # Timestamps
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     verified_at = Column(DateTime(timezone=True), nullable=True)
     resolved_at = Column(DateTime(timezone=True), nullable=True)
+    assigned_at = Column(DateTime(timezone=True), nullable=True)
     
     # Relationships (commented out to avoid circular imports)
     # reporter = relationship("User", back_populates="incidents", foreign_keys=[reporter_id])

@@ -223,10 +223,28 @@ class OceanHazardAPI {
     }
 
     async createUser(userData) {
-        const response = await fetch(`${this.baseURL}/auth/register`, {
+        const response = await fetch(`${this.baseURL}/users/create`, {
             method: 'POST',
             headers: this.getHeaders(),
             body: JSON.stringify(userData)
+        });
+
+        return await this.handleResponse(response);
+    }
+
+    async assignIncident(incidentId, rescueTeamId) {
+        const response = await fetch(`${this.baseURL}/incidents/${incidentId}/assign`, {
+            method: 'PUT',
+            headers: this.getHeaders(),
+            body: JSON.stringify({ rescue_team_id: rescueTeamId })
+        });
+
+        return await this.handleResponse(response);
+    }
+
+    async getAssignedIncidents() {
+        const response = await fetch(`${this.baseURL}/incidents/assigned/me`, {
+            headers: this.getHeaders()
         });
 
         return await this.handleResponse(response);

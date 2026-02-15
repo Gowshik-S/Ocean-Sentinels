@@ -407,8 +407,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Redirect based on role
                 if (user.role === 'admin') {
                     window.location.href = 'admin-dashboard.html';
-                } else if (user.role === 'rescue_team' || user.role === 'rescue' || user.role === 'authority') {
-                    window.location.href = 'reports.html';
+                } else if (user.role === 'rescue_team' || user.role === 'rescue') {
+                    window.location.href = 'rescue-console.html';
+                } else if (user.role === 'authority') {
+                    window.location.href = 'authority-console.html';
                 } else {
                     // For public users
                     window.location.href = 'my-reports.html';
@@ -420,10 +422,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 if (error.message.includes('401') || error.message.includes('Invalid credentials')) {
                     errorMsg += 'Try these options:\n\n';
-                    errorMsg += '🎭 Quick Demo (no password):\n';
+                    errorMsg += 'Quick Demo (no password):\n';
                     errorMsg += '• Username: "user" or "citizen"\n';
                     errorMsg += '• Username: "admin" or "rescue"\n\n';
-                    errorMsg += '🔑 Database Accounts:\n';
+                    errorMsg += 'Database Accounts:\n';
                     errorMsg += '• demo_citizen / citizen123\n';
                     errorMsg += '• demo_admin / admin123\n';
                     errorMsg += '• demo_rescue / rescue123';
@@ -700,7 +702,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = JSON.parse(localStorage.getItem('oceanGuardUser')) || 
                      JSON.parse(sessionStorage.getItem('oceanGuardUser'));
         if (!user || !['admin', 'authority', 'rescue_team'].includes(user.role)) {
-            alert('⚠️ Access denied: This page is for authorized personnel only.');
+            alert('Access denied: This page is for authorized personnel only.');
             window.location.href = 'index.html';
         }
     }
@@ -709,7 +711,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const user = JSON.parse(localStorage.getItem('oceanGuardUser')) || 
                      JSON.parse(sessionStorage.getItem('oceanGuardUser'));
         if (!user || user.role !== 'admin') {
-            alert('⚠️ Access denied: This page is for administrators only.');
+            alert('Access denied: This page is for administrators only.');
             window.location.href = 'index.html';
         }
     }

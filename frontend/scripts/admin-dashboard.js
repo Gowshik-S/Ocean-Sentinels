@@ -15,13 +15,13 @@ class AdminDashboard {
         try {
             // Check authentication and admin access
             await this.checkAdminAccess();
-            
+
             // Load data
             await this.loadData();
-            
+
             // Setup event listeners
             this.setupEventListeners();
-            
+
         } catch (error) {
             console.error('❌ Failed to initialize admin dashboard:', error);
             this.showAccessDenied();
@@ -30,10 +30,10 @@ class AdminDashboard {
 
     async checkAdminAccess() {
         console.log('🔍 Checking admin access...');
-        
+
         const token = localStorage.getItem('oceanGuardToken');
         console.log('Token found:', token ? 'Yes' : 'No');
-        
+
         if (!token) {
             console.log('❌ No authentication token found');
             throw new Error('No authentication token found');
@@ -44,27 +44,27 @@ class AdminDashboard {
             this.currentUser = await this.api.getCurrentUser();
             console.log('✅ Current user retrieved:', this.currentUser);
             console.log('User role type:', typeof this.currentUser.role, 'Value:', this.currentUser.role);
-            
+
             // Check if user has admin role - database uses UPPERCASE, backend might return either
             const userRole = this.currentUser.role;
             const isAdmin = userRole === 'ADMIN' || userRole === 'admin' || userRole === 'Admin';
-            
+
             console.log('Is admin check:', isAdmin, 'for role:', userRole);
-            
+
             if (!this.currentUser || !isAdmin) {
                 console.log('❌ Access denied. User role:', userRole, 'Expected: ADMIN or admin');
                 throw new Error('Access denied: Admin privileges required');
             }
-            
+
             console.log('✅ Admin access granted for role:', userRole);
-            
+
             // Update welcome message
             const welcomeMessage = document.getElementById('welcome-message');
             if (welcomeMessage) {
                 const fullName = `${this.currentUser.first_name || ''} ${this.currentUser.last_name || ''}`.trim();
                 welcomeMessage.textContent = `Welcome, ${fullName || this.currentUser.username}`;
             }
-            
+
         } catch (error) {
             console.error('❌ checkAdminAccess error:', error);
             throw new Error('Invalid token or insufficient privileges');
@@ -78,7 +78,7 @@ class AdminDashboard {
 
     showErrorNotification(message) {
         console.error('Error notification:', message);
-        
+
         // Create or update error notification
         let errorDiv = document.getElementById('error-notification');
         if (!errorDiv) {
@@ -99,13 +99,13 @@ class AdminDashboard {
             `;
             document.body.appendChild(errorDiv);
         }
-        
+
         errorDiv.innerHTML = `
-            <strong>⚠️ Error:</strong><br>
+            <strong><i class="fas fa-exclamation-triangle"></i> Error:</strong><br>
             ${message}
             <button onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 18px; cursor: pointer;">×</button>
         `;
-        
+
         // Auto-remove after 10 seconds
         setTimeout(() => {
             if (errorDiv.parentElement) {
@@ -116,7 +116,7 @@ class AdminDashboard {
 
     showSuccessNotification(message) {
         console.log('Success notification:', message);
-        
+
         // Create or update success notification
         let successDiv = document.getElementById('success-notification');
         if (!successDiv) {
@@ -137,13 +137,13 @@ class AdminDashboard {
             `;
             document.body.appendChild(successDiv);
         }
-        
+
         successDiv.innerHTML = `
-            <strong>✅ Success:</strong><br>
+            <strong><i class="fas fa-check-circle"></i> Success:</strong><br>
             ${message}
             <button onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 18px; cursor: pointer;">×</button>
         `;
-        
+
         // Auto-remove after 8 seconds
         setTimeout(() => {
             if (successDiv.parentElement) {
@@ -156,12 +156,98 @@ class AdminDashboard {
         await this.loadTeams();
         await this.loadAuthorities();
         await this.loadStatistics();
+        // Don't auto-load incidents - loaded on tab switch
+    }
+
+    async loadIncidents() {
+        const container = document.getElementById('admin-incidents-list');
+        if (!container) return;
+        container.innerHTML = '<p class="text-center"><i class="fas fa-spinner fa-spin"></i> Loading incidents...</p>';
+
+        try {
+            const incidents = await this.api.getIncidents();
+            const list = Array.isArray(incidents) ? incidents : (incidents.incidents || incidents.items || []);
+
+            // Apply status filter
+            const statusFilter = document.getElementById('admin-incident-status-filter')?.value || '';
+            const filtered = statusFilter ? list.filter(i => i.status === statusFilter) : list;
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<p class="text-center">No incidents found.</p>';
+                return;
+            }
+
+            let html = '';
+            filtered.forEach(incident => {
+                const statusColor = {
+                    'pending': '#ffc107', 'verified': '#17a2b8', 'in_progress': '#fd7e14',
+                    'deployed': '#007bff', 'resolved': '#28a745', 'closed': '#6c757d'
+                }[incident.status] || '#6c757d';
+
+                html += `
+                    <div class="team-item" style="border-left: 4px solid ${statusColor};">
+                        <div class="team-info">
+                            <h4>${incident.hazard_type || 'Unknown Hazard'}</h4>
+                            <p><strong>ID:</strong> ${incident.reference_id || incident.id} | <strong>Location:</strong> ${incident.location || 'N/A'}</p>
+                            <p><strong>Status:</strong> <span style="color: ${statusColor}; font-weight: bold;">${(incident.status || 'unknown').toUpperCase()}</span> | <strong>Urgency:</strong> ${incident.urgency || 'N/A'}</p>
+                            <p>${incident.description ? incident.description.substring(0, 120) + '...' : 'No description'}</p>
+                        </div>
+                        <div class="team-actions">
+                            ${incident.status === 'pending' ? `<button class="admin-btn success" onclick="adminDashboard.verifyIncidentAdmin('${incident.id}')"><i class="fas fa-check"></i> Verify</button>` : ''}
+                            ${!['resolved', 'closed'].includes(incident.status) ? `<button class="admin-btn" onclick="adminDashboard.showAssignDialog('${incident.id}')"><i class="fas fa-user-plus"></i> Assign</button>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } catch (error) {
+            container.innerHTML = `<p class="text-center" style="color: #dc3545;">Failed to load incidents: ${error.message}</p>`;
+        }
+    }
+
+    async verifyIncidentAdmin(incidentId) {
+        try {
+            await this.api.verifyIncident(incidentId);
+            this.showSuccessNotification('Incident verified successfully!');
+            this.loadIncidents();
+        } catch (error) {
+            this.showErrorNotification('Failed to verify: ' + error.message);
+        }
+    }
+
+    async showAssignDialog(incidentId) {
+        // Get rescue teams for assignment
+        try {
+            const users = await this.api.getUsers();
+            const rescueTeams = users.filter(u => u.role === 'RESCUE_TEAM' || u.role === 'rescue_team');
+
+            if (rescueTeams.length === 0) {
+                alert('No rescue teams available for assignment.');
+                return;
+            }
+
+            let options = rescueTeams.map(t => `${t.id}: ${t.first_name} ${t.last_name} (${t.email})`).join('\n');
+            const choice = prompt(`Select a rescue team to assign (enter ID):\n\n${options}`);
+
+            if (choice) {
+                const teamId = parseInt(choice);
+                if (isNaN(teamId)) {
+                    alert('Invalid team ID');
+                    return;
+                }
+                await this.api.assignIncident(incidentId, teamId);
+                this.showSuccessNotification('Incident assigned successfully!');
+                this.loadIncidents();
+            }
+        } catch (error) {
+            this.showErrorNotification('Failed to assign: ' + error.message);
+        }
     }
 
     async loadTeams() {
         try {
             console.log('📊 Loading teams from database...');
-            
+
             // Get users data using the API client method (with fallback for browser cache)
             let usersData = [];
             try {
@@ -182,14 +268,14 @@ class AdminDashboard {
                 console.error('❌ Failed to fetch users:', fetchError.message);
                 throw fetchError;
             }
-            
+
             console.log(`Found ${usersData.length} total users in database`);
-            
-            const rescueTeamUsers = usersData.filter(user => 
+
+            const rescueTeamUsers = usersData.filter(user =>
                 user.role === 'RESCUE_TEAM' || user.role === 'rescue_team'
             );
             console.log(`Found ${rescueTeamUsers.length} rescue team users in database`);
-            
+
             // Transform user data to team format
             this.teams = rescueTeamUsers.map(user => ({
                 id: user.id,
@@ -203,14 +289,14 @@ class AdminDashboard {
                 equipment: "Standard rescue equipment",
                 created_at: user.created_at
             }));
-            
+
             this.renderTeamsList();
-            
+
         } catch (error) {
             console.error('❌ Failed to load teams from database:', error);
             this.teams = [];
             this.renderTeamsList();
-            
+
             // Show an error message to user
             const teamsList = document.getElementById('teams-list');
             if (teamsList) {
@@ -222,7 +308,7 @@ class AdminDashboard {
                     </div>
                 `;
             }
-            
+
             this.showErrorNotification(`Failed to load teams: ${error.message}`);
         }
     }
@@ -230,7 +316,7 @@ class AdminDashboard {
     async loadAuthorities() {
         try {
             console.log('📊 Loading authorities from database...');
-            
+
             // Get users data using the API client method (with fallback for browser cache)
             let usersData = [];
             try {
@@ -251,14 +337,14 @@ class AdminDashboard {
                 console.error('❌ Failed to fetch users:', fetchError.message);
                 throw fetchError;
             }
-            
+
             console.log(`Found ${usersData.length} total users in database`);
-            
-            const authorityUsers = usersData.filter(user => 
+
+            const authorityUsers = usersData.filter(user =>
                 user.role === 'AUTHORITY' || user.role === 'authority'
             );
             console.log(`Found ${authorityUsers.length} authority users in database`);
-            
+
             // Transform user data to authority format
             this.authorities = authorityUsers.map(user => ({
                 id: user.id,
@@ -272,14 +358,14 @@ class AdminDashboard {
                 jurisdiction: user.location || 'Regional operations',
                 created_at: user.created_at
             }));
-            
+
             this.renderAuthoritiesList();
-            
+
         } catch (error) {
             console.error('❌ Failed to load authorities from database:', error);
             this.authorities = [];
             this.renderAuthoritiesList();
-            
+
             // Show an error message to user
             const authoritiesList = document.getElementById('authorities-list');
             if (authoritiesList) {
@@ -291,7 +377,7 @@ class AdminDashboard {
                     </div>
                 `;
             }
-            
+
             this.showErrorNotification(`Failed to load authorities: ${error.message}`);
         }
     }
@@ -299,16 +385,16 @@ class AdminDashboard {
     async loadStatistics() {
         try {
             console.log('📊 Loading statistics from database...');
-            
+
             // Get analytics data from backend using the correct API method
             console.log('🔄 Fetching analytics data...');
             const analyticsData = await this.api.getDashboardAnalytics();
             console.log('✅ Analytics data received:', analyticsData);
-            
+
             // Try to get users data using the cleaner API method (with fallback)
             console.log('🔄 Fetching users data...');
             let usersData = [];
-            
+
             try {
                 if (typeof this.api.getUsers === 'function') {
                     usersData = await this.api.getUsers();
@@ -328,38 +414,38 @@ class AdminDashboard {
                 console.warn('❌ Could not fetch users data:', userError.message);
                 usersData = [];
             }
-            
+
             // Filter users by role (handle both UPPERCASE and lowercase)
-            const rescueTeams = usersData.filter(user => 
+            const rescueTeams = usersData.filter(user =>
                 user.role === 'RESCUE_TEAM' || user.role === 'rescue_team'
             );
-            const authorities = usersData.filter(user => 
+            const authorities = usersData.filter(user =>
                 user.role === 'AUTHORITY' || user.role === 'authority'
             );
             const activeTeams = rescueTeams.filter(user => user.is_active);
-            
+
             console.log(`Statistics: ${rescueTeams.length} rescue teams, ${activeTeams.length} active teams, ${authorities.length} authorities`);
-            
+
             // Update statistics display with real data
             document.getElementById('total-teams').textContent = rescueTeams.length;
             document.getElementById('active-teams').textContent = activeTeams.length;
             document.getElementById('total-authorities').textContent = authorities.length;
             document.getElementById('total-incidents').textContent = analyticsData.total_incidents || 0;
-            
+
             console.log('✅ Statistics updated with database data');
-            
+
         } catch (error) {
             console.error('❌ Failed to load statistics from database:', error);
             console.error('Error details:', error.message);
             console.error('Error stack:', error.stack);
-            
+
             // Show specific error information
             const errorMsg = error.message || 'Unknown error';
             document.getElementById('total-teams').textContent = 'Error';
             document.getElementById('active-teams').textContent = 'Error';
             document.getElementById('total-authorities').textContent = 'Error';
             document.getElementById('total-incidents').textContent = 'Error';
-            
+
             // Show error notification to user
             this.showErrorNotification(`Failed to load statistics: ${errorMsg}`);
         }
@@ -470,7 +556,7 @@ class AdminDashboard {
     async addTeam() {
         try {
             console.log('🔄 Adding new rescue team...');
-            
+
             // Get form data
             const teamData = {
                 username: document.getElementById('team-email').value.trim(), // Use email as username and trim
@@ -491,12 +577,12 @@ class AdminDashboard {
 
             // Reset form
             document.getElementById('add-team-form').reset();
-            
+
             // Reload data to show the new team
             await this.loadTeams();
             await this.loadStatistics();
-            
-            this.showSuccessNotification('✅ Rescue team added successfully! Default password: Ocean@123');
+
+            this.showSuccessNotification('Rescue team added successfully! Default password: Ocean@123');
         } catch (error) {
             console.error('❌ Failed to add rescue team:', error);
             this.showErrorNotification(`Failed to add rescue team: ${error.message}`);
@@ -506,7 +592,7 @@ class AdminDashboard {
     async addAuthority() {
         try {
             console.log('🔄 Adding new authority...');
-            
+
             // Get form data
             const authorityData = {
                 username: document.getElementById('authority-email').value.trim(), // Use email as username and trim
@@ -527,12 +613,12 @@ class AdminDashboard {
 
             // Reset form
             document.getElementById('add-authority-form').reset();
-            
+
             // Reload data to show the new authority
             await this.loadAuthorities();
             await this.loadStatistics();
-            
-            this.showSuccessNotification('✅ Authority added successfully! Default password: Ocean@123');
+
+            this.showSuccessNotification('Authority added successfully! Default password: Ocean@123');
         } catch (error) {
             console.error('❌ Failed to add authority:', error);
             this.showErrorNotification(`Failed to add authority: ${error.message}`);
@@ -541,7 +627,7 @@ class AdminDashboard {
 
     renderTeamsList() {
         const container = document.getElementById('teams-list');
-        
+
         if (this.teams.length === 0) {
             container.innerHTML = '<p class="text-center">No rescue teams found. Add a team to get started.</p>';
             return;
@@ -577,7 +663,7 @@ class AdminDashboard {
 
     renderAuthoritiesList() {
         const container = document.getElementById('authorities-list');
-        
+
         if (this.authorities.length === 0) {
             container.innerHTML = '<p class="text-center">No authorities found. Add an authority to get started.</p>';
             return;
@@ -612,7 +698,7 @@ class AdminDashboard {
     }
 
     getStatusClass(status) {
-        switch(status) {
+        switch (status) {
             case 'active': return 'status-active';
             case 'on-duty': case 'on-call': return 'status-on-duty';
             default: return 'status-inactive';
@@ -620,13 +706,13 @@ class AdminDashboard {
     }
 
     formatTeamType(type) {
-        return type.split('-').map(word => 
+        return type.split('-').map(word =>
             word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
     }
 
     formatAuthorityLevel(level) {
-        return level.split('-').map(word => 
+        return level.split('-').map(word =>
             word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
     }
@@ -643,10 +729,10 @@ class AdminDashboard {
             document.getElementById('team-type').value = team.type;
             document.getElementById('team-status').value = team.status;
             document.getElementById('team-equipment').value = team.equipment;
-            
+
             // Remove team for re-adding with updates
             this.deleteTeam(teamId, false);
-            
+
             // Scroll to form
             document.getElementById('add-team-form').scrollIntoView({ behavior: 'smooth' });
         }
@@ -664,10 +750,10 @@ class AdminDashboard {
             document.getElementById('authority-level').value = authority.level;
             document.getElementById('authority-status').value = authority.status;
             document.getElementById('authority-jurisdiction').value = authority.jurisdiction;
-            
+
             // Remove authority for re-adding with updates
             this.deleteAuthority(authorityId, false);
-            
+
             // Scroll to form
             document.getElementById('add-authority-form').scrollIntoView({ behavior: 'smooth' });
         }
@@ -682,16 +768,16 @@ class AdminDashboard {
         this.api.deleteUser(teamId)
             .then(response => {
                 console.log('✅ Rescue team member deleted:', response);
-                
+
                 // Remove from local array
                 this.teams = this.teams.filter(team => team.id !== teamId);
-                
+
                 // Update UI
                 this.renderTeamsList();
                 this.loadStatistics();
-                
+
                 if (confirm) {
-                    this.showSuccessNotification(`✅ Rescue team member deleted successfully!`);
+                    this.showSuccessNotification(`Rescue team member deleted successfully!`);
                 }
             })
             .catch(error => {
@@ -709,16 +795,16 @@ class AdminDashboard {
         this.api.deleteUser(authorityId)
             .then(response => {
                 console.log('✅ Authority member deleted:', response);
-                
+
                 // Remove from local array
                 this.authorities = this.authorities.filter(authority => authority.id !== authorityId);
-                
+
                 // Update UI
                 this.renderAuthoritiesList();
                 this.loadStatistics();
-                
+
                 if (confirm) {
-                    this.showSuccessNotification(`✅ Authority member deleted successfully!`);
+                    this.showSuccessNotification(`Authority member deleted successfully!`);
                 }
             })
             .catch(error => {

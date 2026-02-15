@@ -51,6 +51,39 @@ async def create_incident(
         location = incident_data.get('location', '')
         description = incident_data.get('description', '')
         urgency = incident_data.get('urgency', 'low').upper()
+        mesh_message_id = incident_data.get('mesh_message_id')
+        
+        # --- Mesh deduplication ---
+        # If a mesh_message_id is provided, check if this incident already exists
+        if mesh_message_id:
+            existing_result = await db.execute(
+                select(Incident).where(Incident.mesh_message_id == mesh_message_id)
+            )
+            existing_incident = existing_result.scalar_one_or_none()
+            if existing_incident:
+                # Return the existing incident instead of creating a duplicate
+                incident_dict = {
+                    "id": int(existing_incident.id),
+                    "reference_id": str(existing_incident.reference_id),
+                    "hazard_type": format_hazard_type(existing_incident.hazard_type),
+                    "location": str(existing_incident.location),
+                    "latitude": float(existing_incident.latitude) if existing_incident.latitude else None,
+                    "longitude": float(existing_incident.longitude) if existing_incident.longitude else None,
+                    "description": str(existing_incident.description),
+                    "urgency": format_urgency(existing_incident.urgency),
+                    "status": format_status(existing_incident.status),
+                    "contact_info": str(existing_incident.contact_info) if existing_incident.contact_info else None,
+                    "photo_url": str(existing_incident.photo_url) if existing_incident.photo_url else None,
+                    "reporter_id": int(existing_incident.reporter_id),
+                    "verified_by_id": int(existing_incident.verified_by_id) if existing_incident.verified_by_id else None,
+                    "assigned_to_id": int(existing_incident.assigned_to_id) if existing_incident.assigned_to_id else None,
+                    "created_at": existing_incident.created_at.isoformat() if existing_incident.created_at else None,
+                    "updated_at": existing_incident.updated_at.isoformat() if existing_incident.updated_at else None,
+                    "verified_at": existing_incident.verified_at.isoformat() if existing_incident.verified_at else None,
+                    "resolved_at": existing_incident.resolved_at.isoformat() if existing_incident.resolved_at else None,
+                    "assigned_at": existing_incident.assigned_at.isoformat() if existing_incident.assigned_at else None
+                }
+                return incident_dict
         
         # Convert string enum values to enum instances
         hazard_type_enum = HazardType(hazard_type)
@@ -66,7 +99,8 @@ async def create_incident(
             urgency=urgency_enum,
             contact_info=incident_data.get('contact_info'),
             reporter_id=current_user.id,
-            status=IncidentStatus.PENDING
+            status=IncidentStatus.PENDING,
+            mesh_message_id=mesh_message_id
         )
         
         db.add(db_incident)
@@ -88,17 +122,19 @@ async def create_incident(
             "photo_url": str(db_incident.photo_url) if db_incident.photo_url else None,
             "reporter_id": int(db_incident.reporter_id),
             "verified_by_id": int(db_incident.verified_by_id) if db_incident.verified_by_id else None,
+            "assigned_to_id": int(db_incident.assigned_to_id) if db_incident.assigned_to_id else None,
             "created_at": db_incident.created_at.isoformat() if db_incident.created_at else None,
             "updated_at": db_incident.updated_at.isoformat() if db_incident.updated_at else None,
             "verified_at": db_incident.verified_at.isoformat() if db_incident.verified_at else None,
-            "resolved_at": db_incident.resolved_at.isoformat() if db_incident.resolved_at else None
+            "resolved_at": db_incident.resolved_at.isoformat() if db_incident.resolved_at else None,
+            "assigned_at": db_incident.assigned_at.isoformat() if db_incident.assigned_at else None
         }
         
         return incident_dict
         
     except Exception as e:
         await db.rollback()
-        print(f"❌ Incident creation error: {str(e)}")
+        print(f"Incident creation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to create incident: {str(e)}")
 
 @router.get("/", response_model=None)
@@ -191,10 +227,12 @@ async def get_incidents(
                 "photo_url": str(incident.photo_url) if incident.photo_url else None,
                 "reporter_id": int(incident.reporter_id),
                 "verified_by_id": int(incident.verified_by_id) if incident.verified_by_id else None,
+                "assigned_to_id": int(incident.assigned_to_id) if incident.assigned_to_id else None,
                 "created_at": incident.created_at.isoformat() if incident.created_at else None,
                 "updated_at": incident.updated_at.isoformat() if incident.updated_at else None,
                 "verified_at": incident.verified_at.isoformat() if incident.verified_at else None,
-                "resolved_at": incident.resolved_at.isoformat() if incident.resolved_at else None
+                "resolved_at": incident.resolved_at.isoformat() if incident.resolved_at else None,
+                "assigned_at": incident.assigned_at.isoformat() if incident.assigned_at else None
             }
             incidents_data.append(incident_dict)
         
@@ -210,7 +248,7 @@ async def get_incidents(
         return response_dict
         
     except Exception as e:
-        print(f"❌ Get incidents error: {str(e)}")
+        print(f"Get incidents error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get incidents: {str(e)}")
 
 @router.get("/test")
@@ -268,10 +306,12 @@ async def get_incident(
         "photo_url": str(incident.photo_url) if incident.photo_url else None,
         "reporter_id": int(incident.reporter_id),
         "verified_by_id": int(incident.verified_by_id) if incident.verified_by_id else None,
+        "assigned_to_id": int(incident.assigned_to_id) if incident.assigned_to_id else None,
         "created_at": incident.created_at.isoformat() if incident.created_at else None,
         "updated_at": incident.updated_at.isoformat() if incident.updated_at else None,
         "verified_at": incident.verified_at.isoformat() if incident.verified_at else None,
-        "resolved_at": incident.resolved_at.isoformat() if incident.resolved_at else None
+        "resolved_at": incident.resolved_at.isoformat() if incident.resolved_at else None,
+        "assigned_at": incident.assigned_at.isoformat() if incident.assigned_at else None
     }
     
     return incident_dict
@@ -347,4 +387,109 @@ async def resolve_incident(
     await db.refresh(incident)
     
     return {"message": "Incident resolved successfully"}
+
+
+@router.put("/{incident_id}/assign")
+async def assign_incident(
+    incident_id: int,
+    assignment_data: dict,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Assign an incident to a rescue team member (Admin/Authority only)"""
+    if current_user.role not in [UserRole.ADMIN, UserRole.AUTHORITY]:
+        raise HTTPException(status_code=403, detail="Only Admin/Authority can assign incidents")
+    
+    result = await db.execute(select(Incident).where(Incident.id == incident_id))
+    incident = result.scalar_one_or_none()
+    
+    if not incident:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    
+    rescue_team_id = assignment_data.get("assigned_to_id")
+    if not rescue_team_id:
+        raise HTTPException(status_code=400, detail="assigned_to_id is required")
+    
+    # Verify the rescue team member exists and has RESCUE_TEAM role
+    rescue_user_result = await db.execute(select(User).where(User.id == rescue_team_id))
+    rescue_user = rescue_user_result.scalar_one_or_none()
+    
+    if not rescue_user:
+        raise HTTPException(status_code=404, detail="Rescue team member not found")
+    if rescue_user.role != UserRole.RESCUE_TEAM:
+        raise HTTPException(status_code=400, detail="User is not a rescue team member")
+    
+    incident.assigned_to_id = rescue_team_id
+    incident.assigned_at = datetime.utcnow()
+    if incident.status == IncidentStatus.PENDING:
+        incident.status = IncidentStatus.VERIFIED
+    
+    await db.commit()
+    await db.refresh(incident)
+    
+    return {"message": f"Incident assigned to rescue team member #{rescue_team_id}"}
+
+
+@router.get("/assigned/me", response_model=None)
+async def get_my_assigned_incidents(
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Get incidents assigned to the current rescue team member"""
+    if current_user.role != UserRole.RESCUE_TEAM:
+        raise HTTPException(status_code=403, detail="Only rescue team members can view assigned incidents")
+    
+    try:
+        query = select(Incident).where(Incident.assigned_to_id == current_user.id)
+        
+        # Count
+        count_query = select(func.count(Incident.id)).where(Incident.assigned_to_id == current_user.id)
+        total_result = await db.execute(count_query)
+        total = total_result.scalar()
+        
+        # Paginate
+        query = query.order_by(desc(Incident.created_at))
+        query = query.offset((page - 1) * size).limit(size)
+        
+        result = await db.execute(query)
+        incidents = result.scalars().all()
+        
+        incidents_data = []
+        for incident in incidents:
+            incident_dict = {
+                "id": int(incident.id),
+                "reference_id": str(incident.reference_id),
+                "hazard_type": format_hazard_type(incident.hazard_type),
+                "location": str(incident.location),
+                "latitude": float(incident.latitude) if incident.latitude else None,
+                "longitude": float(incident.longitude) if incident.longitude else None,
+                "description": str(incident.description),
+                "urgency": format_urgency(incident.urgency),
+                "status": format_status(incident.status),
+                "contact_info": str(incident.contact_info) if incident.contact_info else None,
+                "photo_url": str(incident.photo_url) if incident.photo_url else None,
+                "reporter_id": int(incident.reporter_id),
+                "verified_by_id": int(incident.verified_by_id) if incident.verified_by_id else None,
+                "assigned_to_id": int(incident.assigned_to_id) if incident.assigned_to_id else None,
+                "created_at": incident.created_at.isoformat() if incident.created_at else None,
+                "updated_at": incident.updated_at.isoformat() if incident.updated_at else None,
+                "verified_at": incident.verified_at.isoformat() if incident.verified_at else None,
+                "resolved_at": incident.resolved_at.isoformat() if incident.resolved_at else None,
+                "assigned_at": incident.assigned_at.isoformat() if incident.assigned_at else None
+            }
+            incidents_data.append(incident_dict)
+        
+        return {
+            "incidents": incidents_data,
+            "total": int(total),
+            "page": int(page),
+            "size": int(size),
+            "has_next": bool((page * size) < total),
+            "has_prev": bool(page > 1)
+        }
+    except Exception as e:
+        print(f"Get assigned incidents error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get assigned incidents: {str(e)}")
 

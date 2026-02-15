@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "300306001033",
+    "project_id": "ocean-sentinels-fc414",
+    "storage_bucket": "ocean-sentinels-fc414.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:300306001033:android:785971f62d89898dc0aa58",
+        "android_client_info": {
+          "package_name": "com.oceansentinels.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBjQjmgFX-EEBzc5q1E0iHLmKNdyH2jBkk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

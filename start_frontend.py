@@ -14,11 +14,11 @@ def start_frontend_server():
     PORT = 3000
     DIRECTORY = os.path.dirname(os.path.abspath(__file__))
     
-    print("🌐 Starting Ocean Hazard Frontend Server...")
-    print(f"📁 Serving files from: {DIRECTORY}")
-    print(f"🚀 Server will be available at: http://localhost:{PORT}")
-    print("📱 Access the app at: http://localhost:3000/pages/index.html")
-    print("📊 My Reports page: http://localhost:3000/pages/my-reports.html")
+    print("Starting Ocean Hazard Frontend Server...")
+    print(f"Serving files from: {DIRECTORY}")
+    print(f"Server will be available at: http://localhost:{PORT}")
+    print("Access the app at: http://localhost:3000/pages/index.html")
+    print("My Reports page: http://localhost:3000/pages/my-reports.html")
     print("Press Ctrl+C to stop the server")
     print("=" * 60)
     
@@ -28,7 +28,7 @@ def start_frontend_server():
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
-            print("\n👋 Frontend server stopped by user")
+            print("\nFrontend server stopped by user")
             sys.exit(0)
 
 if __name__ == "__main__":

@@ -1,36 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Incident Reports - Ocean Sentinels</title>
-    
+
     <link rel="stylesheet" href="../styles/styles.css">
-    <link rel="stylesheet" href="../styles/report-enhancements.css">
-    
-        <link rel="stylesheet" href="../styles/styles.css">
     <link rel="stylesheet" href="../styles/report-enhancements.css">
     <link rel="stylesheet" href="../styles/reports-dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    
+
     <!-- Vercel Web Analytics -->
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
-    
+
     <style>
         /* Use same CSS variables as index page */
         :root {
-            --primary-color: #005A9C; /* Deep Blue */
-            --secondary-color: #FFFFFF; /* White */
-            --accent-color: #FFC107; /* Warning Yellow/Gold */
+            --primary-color: #005A9C;
+            /* Deep Blue */
+            --secondary-color: #FFFFFF;
+            /* White */
+            --accent-color: #FFC107;
+            /* Warning Yellow/Gold */
             --text-dark: #212529;
             --text-light: #f8f9fa;
             --section-bg: #f8f9fa;
             --font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
         }
-        
+
         .role-based-header {
             background: var(--section-bg, #f8f9fa);
             color: var(--text-dark, #212529);
@@ -39,9 +40,9 @@
             margin-bottom: 20px;
             text-align: center;
             border: 1px solid #e9ecef;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .role-badge {
             display: inline-block;
             padding: 5px 15px;
@@ -51,56 +52,57 @@
             margin-top: 10px;
             font-size: 14px;
         }
-        
+
         /* Match index page body styling */
         body {
             background-color: var(--secondary-color, #FFFFFF);
             font-family: var(--font-family);
             color: var(--text-dark);
         }
-        
+
         .page-container {
             background-color: var(--secondary-color, #FFFFFF);
             padding: 20px;
         }
-        
+
         .filters-section {
             background: white;
             padding: 20px;
             border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
-        
+
         .filter-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 15px;
             margin-bottom: 15px;
         }
-        
-        .filter-grid input, .filter-grid select {
+
+        .filter-grid input,
+        .filter-grid select {
             padding: 10px;
             border: 1px solid #ddd;
             border-radius: 4px;
         }
-        
+
         .reports-container {
             min-height: 400px;
         }
-        
+
         .loading-state {
             text-align: center;
             padding: 50px;
             color: #7f8c8d;
         }
-        
+
         .empty-state {
             text-align: center;
             padding: 50px;
             color: #7f8c8d;
         }
-        
+
         .error-state {
             text-align: center;
             padding: 50px;
@@ -109,42 +111,42 @@
             border-radius: 8px;
             margin: 20px 0;
         }
-        
+
         .report-card {
             background: white;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s, box-shadow 0.2s;
         }
-        
+
         .report-card:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
-        
+
         .report-header {
             display: flex;
-            justify-content: between;
+            justify-content: space-between;
             align-items: center;
             margin-bottom: 15px;
         }
-        
+
         .report-title {
             font-size: 18px;
             font-weight: bold;
             color: #2c3e50;
             margin: 0;
         }
-        
+
         .report-meta {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 10px;
             margin-bottom: 15px;
         }
-        
+
         .meta-item {
             display: flex;
             align-items: center;
@@ -152,13 +154,13 @@
             color: #7f8c8d;
             font-size: 14px;
         }
-        
+
         .report-actions {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
         }
-        
+
         .btn-action {
             padding: 8px 15px;
             border: none;
@@ -167,26 +169,26 @@
             font-size: 14px;
             transition: background 0.2s;
         }
-        
+
         .btn-view {
             background: var(--primary-color, #005A9C);
             color: white;
         }
-        
+
         .btn-verify {
             background: #28a745;
             color: white;
         }
-        
+
         .btn-assign {
             background: var(--accent-color, #FFC107);
             color: var(--text-dark, #212529);
         }
-        
+
         .btn-action:hover {
             opacity: 0.8;
         }
-        
+
         .pagination {
             display: flex;
             justify-content: center;
@@ -194,7 +196,7 @@
             gap: 10px;
             margin-top: 20px;
         }
-        
+
         .pagination button {
             padding: 8px 12px;
             border: 1px solid #ddd;
@@ -202,18 +204,19 @@
             cursor: pointer;
             border-radius: 4px;
         }
-        
+
         .pagination button:hover:not(:disabled) {
             background: var(--primary-color, #005A9C);
             color: white;
         }
-        
+
         .pagination button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
     </style>
 </head>
+
 <body>
 
     <header class="main-header">
@@ -224,6 +227,15 @@
                 <li><a href="analytics.html">Analytics</a></li>
                 <li><a href="reports.html" class="active">Incident Reports</a></li>
                 <li><a href="my-reports.html">My Reports</a></li>
+                <li id="nav-admin-console" style="display: none;">
+                    <a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Admin</a>
+                </li>
+                <li id="nav-rescue-console" style="display: none;">
+                    <a href="rescue-console.html"><i class="fas fa-life-ring"></i> Rescue Console</a>
+                </li>
+                <li id="nav-authority-console" style="display: none;">
+                    <a href="authority-console.html"><i class="fas fa-shield-alt"></i> Authority</a>
+                </li>
                 <li><a href="#">About Us</a></li>
             </ul>
             <div class="nav-actions">
@@ -236,7 +248,7 @@
     <main class="page-container">
         <!-- Page title (simple, no box) -->
         <h1 id="page-title">Incident Reports Dashboard</h1>
-        
+
         <!-- Page description and role badge -->
         <div class="role-based-header">
             <p id="page-description">Monitor and manage incident reports across India's coastal regions</p>
@@ -289,7 +301,7 @@
                 <i class="fas fa-spinner fa-spin fa-2x"></i>
                 <p>Loading incident reports...</p>
             </div>
-            
+
             <div id="error-state" class="error-state" style="display: none;">
                 <i class="fas fa-exclamation-triangle fa-2x"></i>
                 <h3>Error Loading Reports</h3>
@@ -298,13 +310,13 @@
                     <i class="fas fa-retry"></i> Try Again
                 </button>
             </div>
-            
+
             <div id="empty-state" class="empty-state" style="display: none;">
                 <i class="fas fa-inbox fa-2x"></i>
                 <h3>No Reports Found</h3>
                 <p>No incident reports match your current filters.</p>
             </div>
-            
+
             <div id="reports-grid" class="reports-grid">
                 <!-- Dynamic reports will be loaded here -->
             </div>
@@ -344,7 +356,8 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; 2025 Ocean Sentinels Professional Portal, Ministry of Earth Sciences, Government of India. All rights reserved.</p>
+            <p>&copy; 2025 Ocean Sentinels Professional Portal, Ministry of Earth Sciences, Government of India. All
+                rights reserved.</p>
         </div>
     </footer>
 
@@ -364,4 +377,5 @@
     <script defer src="/_vercel/speed-insights/script.js"></script>
 
 </body>
+
 </html>

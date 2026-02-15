@@ -16,13 +16,13 @@ load_dotenv(".env")
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
     # Startup
-    print("🚀 Starting Ocean Hazard Backend...")
-    print("✅ Ocean Hazard Backend is ready!")
+    print("Starting Ocean Hazard Backend...")
+    print("Ocean Hazard Backend is ready!")
     
     yield
     
     # Shutdown
-    print("🛑 Shutting down Ocean Hazard Backend...")
+    print("Shutting down Ocean Hazard Backend...")
 
 # Create FastAPI application
 app = FastAPI(

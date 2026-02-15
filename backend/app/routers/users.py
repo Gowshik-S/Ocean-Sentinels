@@ -9,10 +9,81 @@ from typing import List
 
 from app.database import get_db
 from app.models.user import User, UserRole
-from app.schemas.user import UserResponse, UserUpdate
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.routers.auth import get_current_user, get_current_active_user
+from app.core.security import get_password_hash
 
 router = APIRouter()
+
+
+@router.post("/create", response_model=None)
+async def admin_create_user(
+    user_data: UserCreate,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """Create a new user with any role (Admin only)"""
+    if current_user.role != UserRole.ADMIN:
+        raise HTTPException(
+            status_code=403,
+            detail="Access denied: Only administrators can create users with special roles"
+        )
+
+    # Validate role
+    allowed_roles = ["public", "admin", "authority", "rescue_team"]
+    role_value = user_data.role.value if hasattr(user_data.role, 'value') else str(user_data.role)
+    if role_value not in allowed_roles:
+        raise HTTPException(status_code=400, detail=f"Invalid role: {role_value}")
+
+    try:
+        # Check if username already exists
+        result = await db.execute(select(User).where(User.username == user_data.username))
+        if result.scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Username already registered")
+
+        # Check if email already exists
+        result = await db.execute(select(User).where(User.email == user_data.email))
+        if result.scalar_one_or_none():
+            raise HTTPException(status_code=400, detail="Email already registered")
+
+        hashed_password = get_password_hash(user_data.password)
+
+        db_user = User(
+            username=user_data.username,
+            email=user_data.email,
+            hashed_password=hashed_password,
+            first_name=user_data.first_name,
+            last_name=user_data.last_name,
+            phone=user_data.phone,
+            location=user_data.location,
+            role=role_value
+        )
+
+        db.add(db_user)
+        await db.commit()
+        await db.refresh(db_user)
+
+        return {
+            "id": db_user.id,
+            "username": db_user.username,
+            "email": db_user.email,
+            "first_name": db_user.first_name,
+            "last_name": db_user.last_name,
+            "phone": db_user.phone,
+            "location": db_user.location,
+            "role": db_user.role.value if hasattr(db_user.role, 'value') else str(db_user.role),
+            "is_active": db_user.is_active,
+            "is_verified": db_user.is_verified,
+            "created_at": db_user.created_at,
+            "last_login": db_user.last_login
+        }
+    except HTTPException:
+        await db.rollback()
+        raise
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to create user: {str(e)}")
+
 
 @router.get("/me", response_model=None)
 async def get_current_user_info(current_user: User = Depends(get_current_active_user)):

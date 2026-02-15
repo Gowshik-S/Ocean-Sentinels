@@ -27,30 +27,36 @@ const chartColors = {
 };
 
 // Initialize when page loads
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Check if user is authorized
     checkAuthorityAccess();
-    
+
     // Load authority analytics data
     loadAuthorityAnalytics();
-    
+
     // Set up event listeners
     setupEventListeners();
-    
+
     // Update timestamp
     updateLastUpdated();
 });
 
 // Check if user has authority access
 function checkAuthorityAccess() {
-    const user = JSON.parse(sessionStorage.getItem('oceanGuardUser') || '{}');
-    
+    // Check both sessionStorage and localStorage for user data
+    const userStr = sessionStorage.getItem('oceanGuardUser') || localStorage.getItem('oceanGuardUser') || '{}';
+    let user;
+    try {
+        user = JSON.parse(userStr);
+    } catch (e) {
+        user = {};
+    }
+
     if (!user.role || !['admin', 'authority', 'rescue_team'].includes(user.role)) {
-        alert('⚠️ Access Denied: This page is for authorized personnel only.');
-        window.location.href = 'analytics.html';
+        console.warn('Authority access check: No authorized role found. Showing data in read-only mode.');
         return false;
     }
-    
+
     // Update navigation based on user role
     updateNavigationForAuthority(user);
     return true;
@@ -65,7 +71,7 @@ function updateNavigationForAuthority(user) {
             <a href="#" class="btn btn--primary" id="report-hazard-btn">New Report</a>
             <a href="#" id="logout-button" class="btn btn--secondary">Logout</a>
         `;
-        
+
         // Re-add event listeners
         const logoutBtn = document.getElementById('logout-button');
         if (logoutBtn) {
@@ -79,22 +85,22 @@ async function loadAuthorityAnalytics() {
     const loadingIndicator = document.getElementById('loading-indicator');
     const errorMessage = document.getElementById('error-message');
     const analyticsContent = document.getElementById('analytics-content');
-    
+
     try {
         loadingIndicator.style.display = 'block';
         errorMessage.style.display = 'none';
         analyticsContent.style.display = 'none';
-        
+
         // Load data from API
         const api = new OceanHazardAPI();
-        
+
         // Load dashboard data
         const dashboardData = await api.getDashboardAnalytics();
         updateDashboardCards(dashboardData);
-        
+
         // Load incidents data for charts
         const incidentsResponse = await api.getIncidents();
-        
+
         // Ensure incidents is an array
         let incidentsData = [];
         if (Array.isArray(incidentsResponse)) {
@@ -107,78 +113,86 @@ async function loadAuthorityAnalytics() {
             console.warn('Incidents data is not in expected format, using mock data');
             incidentsData = getMockIncidentsData();
         }
-        
-        // Create all charts
-        createIncidentTrendChart(incidentsData);
-        createStatusDistributionChart(dashboardData);
-        createHazardTypesChart(incidentsData);
-        createUrgencyChart(incidentsData);
-        createRegionalChart(incidentsData);
-        createResponseTimeChart(incidentsData);
-        createTeamPerformanceChart();
-        
-        // Load incidents table
-        loadIncidentsTable(incidentsData);
-        
-        // Load performance metrics
-        loadPerformanceMetrics();
-        
-        // Show content
+
+
+
+        // Show content FIRST so Chart.js can measure canvas dimensions
         loadingIndicator.style.display = 'none';
         analyticsContent.style.display = 'block';
-        
+
+        // Create all charts AFTER content is visible
+        requestAnimationFrame(() => {
+            createIncidentTrendChart(incidentsData);
+            createStatusDistributionChart(dashboardData);
+            createHazardTypesChart(incidentsData);
+            createUrgencyChart(incidentsData);
+            createRegionalChart(incidentsData);
+            createResponseTimeChart(incidentsData);
+            createTeamPerformanceChart();
+        });
+
     } catch (error) {
         console.error('Error loading authority analytics:', error);
-        
+
         // Use mock data as fallback
         try {
             const mockData = getMockIncidentsData();
             const mockDashboard = getMockDashboardData();
-            
+
             updateDashboardCards(mockDashboard);
-            createIncidentTrendChart(mockData);
-            createStatusDistributionChart(mockDashboard);
-            createHazardTypesChart(mockData);
-            createUrgencyChart(mockData);
-            createRegionalChart(mockData);
-            createResponseTimeChart(mockData);
-            createTeamPerformanceChart();
-            loadIncidentsTable(mockData);
-            loadPerformanceMetrics();
-            
+
+
+            // Show content FIRST, then create charts
             loadingIndicator.style.display = 'none';
             analyticsContent.style.display = 'block';
+
+            requestAnimationFrame(() => {
+                createIncidentTrendChart(mockData);
+                createStatusDistributionChart(mockDashboard);
+                createHazardTypesChart(mockData);
+                createUrgencyChart(mockData);
+                createRegionalChart(mockData);
+                createResponseTimeChart(mockData);
+                createTeamPerformanceChart();
+            });
         } catch (fallbackError) {
             console.error('Error with fallback data:', fallbackError);
             loadingIndicator.style.display = 'none';
             errorMessage.style.display = 'block';
-            document.getElementById('error-text').textContent = 
+            document.getElementById('error-text').textContent =
                 'Failed to load analytics data. Please ensure you have proper authorization.';
         }
     }
 }
 
-// Update dashboard cards
+// Update dashboard cards (with null safety)
 function updateDashboardCards(data) {
-    document.getElementById('total-incidents').textContent = data.total_incidents || 0;
-    document.getElementById('active-incidents').textContent = data.active_incidents || 0;
-    document.getElementById('resolved-incidents').textContent = data.resolved_incidents || 0;
-    document.getElementById('total-users').textContent = data.total_users || 0;
-    document.getElementById('urgent-incidents').textContent = data.urgent_incidents || 0;
-    document.getElementById('response-time').textContent = (data.avg_response_time || 0).toFixed(1);
+    const setTextIfExists = (id, value) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    };
+
+    setTextIfExists('total-incidents', data.total_incidents || 0);
+    setTextIfExists('active-incidents', data.active_incidents || 0);
+    setTextIfExists('resolved-incidents', data.resolved_incidents || 0);
+    setTextIfExists('total-users', data.total_users || 0);
+    setTextIfExists('urgent-incidents', data.urgent_incidents || 0);
+    setTextIfExists('response-time', (data.avg_response_time || 0).toFixed(1));
 }
 
 // Create incident trend chart
 function createIncidentTrendChart(incidents) {
-    const ctx = document.getElementById('incident-trend-chart').getContext('2d');
-    
+    const el = document.getElementById('incident-trend-chart');
+    if (!el) return;
+    const ctx = el.getContext('2d');
+
     // Process data for last 30 days
-    const last30Days = Array.from({length: 30}, (_, i) => {
+    const last30Days = Array.from({ length: 30 }, (_, i) => {
         const date = new Date();
         date.setDate(date.getDate() - (29 - i));
         return date;
     });
-    
+
     const trendData = last30Days.map(date => {
         const dayIncidents = incidents.filter(incident => {
             const incidentDate = new Date(incident.created_at);
@@ -186,7 +200,7 @@ function createIncidentTrendChart(incidents) {
         });
         return dayIncidents.length;
     });
-    
+
     incidentTrendChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -222,8 +236,10 @@ function createIncidentTrendChart(incidents) {
 
 // Create status distribution chart
 function createStatusDistributionChart(data) {
-    const ctx = document.getElementById('status-distribution-chart').getContext('2d');
-    
+    const el = document.getElementById('status-distribution-chart');
+    if (!el) return;
+    const ctx = el.getContext('2d');
+
     statusDistributionChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -255,18 +271,20 @@ function createStatusDistributionChart(data) {
 
 // Create hazard types chart
 function createHazardTypesChart(incidents) {
-    const ctx = document.getElementById('hazard-types-chart').getContext('2d');
-    
+    const el = document.getElementById('hazard-types-chart');
+    if (!el) return;
+    const ctx = el.getContext('2d');
+
     // Count incidents by type
     const typeCounts = {};
     incidents.forEach(incident => {
         const type = incident.hazard_type || 'unknown';
         typeCounts[type] = (typeCounts[type] || 0) + 1;
     });
-    
+
     const labels = Object.keys(typeCounts);
     const data = Object.values(typeCounts);
-    
+
     hazardTypesChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -301,15 +319,17 @@ function createHazardTypesChart(incidents) {
 
 // Create urgency chart
 function createUrgencyChart(incidents) {
-    const ctx = document.getElementById('urgency-chart').getContext('2d');
-    
+    const el = document.getElementById('urgency-chart');
+    if (!el) return;
+    const ctx = el.getContext('2d');
+
     // Count incidents by urgency
     const urgencyCounts = { high: 0, medium: 0, low: 0 };
     incidents.forEach(incident => {
         const urgency = incident.urgency || 'low';
         urgencyCounts[urgency]++;
     });
-    
+
     urgencyChart = new Chart(ctx, {
         type: 'pie',
         data: {
@@ -337,12 +357,14 @@ function createUrgencyChart(incidents) {
 
 // Create regional chart
 function createRegionalChart(incidents) {
-    const ctx = document.getElementById('regional-chart').getContext('2d');
-    
+    const el = document.getElementById('regional-chart');
+    if (!el) return;
+    const ctx = el.getContext('2d');
+
     // Group incidents by region (simplified - you can enhance this)
     const regions = ['Mumbai', 'Chennai', 'Kolkata', 'Kochi', 'Visakhapatnam', 'Goa'];
     const regionData = regions.map(region => Math.floor(Math.random() * 10)); // Mock data
-    
+
     regionalChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -375,12 +397,14 @@ function createRegionalChart(incidents) {
 
 // Create response time chart
 function createResponseTimeChart(incidents) {
-    const ctx = document.getElementById('response-time-chart').getContext('2d');
-    
+    const el = document.getElementById('response-time-chart');
+    if (!el) return;
+    const ctx = el.getContext('2d');
+
     // Mock response time data
     const responseData = [2.5, 1.8, 3.2, 2.1, 1.9, 2.8, 2.3];
     const weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    
+
     responseTimeChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -417,8 +441,10 @@ function createResponseTimeChart(incidents) {
 
 // Create team performance chart
 function createTeamPerformanceChart() {
-    const ctx = document.getElementById('team-performance-chart').getContext('2d');
-    
+    const el = document.getElementById('team-performance-chart');
+    if (!el) return;
+    const ctx = el.getContext('2d');
+
     teamPerformanceChart = new Chart(ctx, {
         type: 'radar',
         data: {
@@ -452,12 +478,12 @@ function createTeamPerformanceChart() {
 // Load incidents table
 function loadIncidentsTable(incidents) {
     const tableBody = document.querySelector('.incidents-table tbody');
-    
+
     if (!incidents || incidents.length === 0) {
         tableBody.innerHTML = '<tr><td colspan="8" class="loading-cell">No incidents found</td></tr>';
         return;
     }
-    
+
     tableBody.innerHTML = incidents.slice(0, 20).map(incident => `
         <tr>
             <td>${incident.reference_id || incident.id}</td>
@@ -479,17 +505,6 @@ function loadIncidentsTable(incidents) {
     `).join('');
 }
 
-// Load performance metrics
-function loadPerformanceMetrics() {
-    // Mock performance data
-    document.getElementById('api-response-time').textContent = '150ms';
-    document.getElementById('db-status').textContent = 'Connected';
-    document.getElementById('active-connections').textContent = '245';
-    document.getElementById('teams-available').textContent = '12/15';
-    document.getElementById('equipment-status').textContent = '98% Ready';
-    document.getElementById('coverage-area').textContent = '7,500 km²';
-}
-
 // Setup event listeners
 function setupEventListeners() {
     // Trend period change
@@ -500,7 +515,7 @@ function setupEventListeners() {
             loadAuthorityAnalytics();
         });
     }
-    
+
     // Region filter change
     const regionFilter = document.getElementById('region-filter');
     if (regionFilter) {
@@ -509,11 +524,11 @@ function setupEventListeners() {
             updateRegionalChart();
         });
     }
-    
+
     // Status and urgency filters
     const statusFilter = document.getElementById('status-filter');
     const urgencyFilter = document.getElementById('urgency-filter');
-    
+
     if (statusFilter) {
         statusFilter.addEventListener('change', filterIncidentsTable);
     }
@@ -526,7 +541,7 @@ function setupEventListeners() {
 function filterIncidentsTable() {
     const statusFilter = document.getElementById('status-filter').value;
     const urgencyFilter = document.getElementById('urgency-filter').value;
-    
+
     // Apply filters to table (you can enhance this)
     console.log('Filtering by status:', statusFilter, 'urgency:', urgencyFilter);
 }
@@ -534,10 +549,10 @@ function filterIncidentsTable() {
 // Export incidents data
 function exportIncidentsData() {
     // Create CSV export (simplified)
-    const csvContent = "data:text/csv;charset=utf-8," + 
+    const csvContent = "data:text/csv;charset=utf-8," +
         "ID,Type,Location,Status,Urgency,Date\n" +
         "Sample,Export,Function,Active,High," + new Date().toISOString();
-    
+
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -576,7 +591,7 @@ function updateLastUpdated() {
         hour: '2-digit',
         minute: '2-digit'
     });
-    
+
     const lastUpdatedElement = document.getElementById('last-updated');
     if (lastUpdatedElement) {
         lastUpdatedElement.textContent = `Last updated: ${timestamp}`;
@@ -590,7 +605,7 @@ function logout(e) {
     sessionStorage.removeItem('oceanGuardUser');
     localStorage.removeItem('oceanGuardUser');
     localStorage.removeItem('oceanGuardToken');
-    
+
     alert('You have been logged out.');
     window.location.href = 'index.html';
 }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    
+    <!-- Ocean Sentinels Logo - Shield with Waves -->
+    
+    <!-- Main Shield Shape - Yellow Background -->
+    <path
+        android:fillColor="#FDDA0D"
+        android:pathData="M54,16 L82,26 L82,52 Q82,72 54,90 Q26,72 26,52 L26,26 Z"/>
+    
+    <!-- Shield Border/Outline - Dark Gold -->
+    <path
+        android:fillColor="#E0C002"
+        android:pathData="M54,18 L80,27 L80,52 Q80,70 54,86 Q28,70 28,52 L28,27 Z"
+        android:strokeWidth="0"/>
+    
+    <!-- Inner Shield - Yellow -->
+    <path
+        android:fillColor="#FDDA0D"
+        android:pathData="M54,20 L78,28.5 L78,52 Q78,68.5 54,83 Q30,68.5 30,52 L30,28.5 Z"/>
+    
+    <!-- Ocean Base - Deep Blue -->
+    <path
+        android:fillColor="#005A9C"
+        android:pathData="M30,55 Q42,48 54,55 Q66,62 78,55 L78,52 Q78,68.5 54,83 Q30,68.5 30,52 Z"/>
+    
+    <!-- Ocean Wave 1 - Light Blue -->
+    <path
+        android:fillColor="#0077B6"
+        android:pathData="M32,58 Q43,52 54,58 Q65,64 76,58 L76,62 Q65,56 54,62 Q43,68 32,62 Z"/>
+    
+    <!-- Ocean Wave 2 - Medium Blue -->
+    <path
+        android:fillColor="#00B4D8"
+        android:pathData="M34,64 Q44,58 54,64 Q64,70 74,64 L74,68 Q64,62 54,68 Q44,74 34,68 Z"/>
+    
+    <!-- Ocean Wave 3 - Light Cyan -->
+    <path
+        android:fillColor="#90E0EF"
+        android:pathData="M38,70 Q46,66 54,70 Q62,74 70,70 L70,73 Q62,69 54,73 Q46,77 38,73 Z"/>
+    
+    <!-- Letter "O" - for Ocean -->
+    <path
+        android:fillColor="#005A9C"
+        android:pathData="M43,38 Q43,28 54,28 Q65,28 65,38 Q65,48 54,48 Q43,48 43,38 Z M48,38 Q48,32 54,32 Q60,32 60,38 Q60,44 54,44 Q48,44 48,38 Z"/>
+    
+    <!-- Letter "S" - for Sentinels (stylized wave) -->
+    <path
+        android:fillColor="#005A9C"
+        android:pathData="M46,50 Q54,46 62,50 L61,52 Q54,49 47,52 Z"/>
+</vector>

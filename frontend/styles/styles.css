@@ -6,6 +6,9 @@
     --text-dark: #212529;
     --text-light: #f8f9fa;
     --section-bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --border-color: #dee2e6;
+    --shadow-color: rgba(0,0,0,0.1);
     --font-family: 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
 }
 

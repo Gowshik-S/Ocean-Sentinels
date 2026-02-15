@@ -26,13 +26,33 @@
             // Show "Incident Reports" link only for admin, authority, rescue_team
             if (user && ['admin', 'authority', 'rescue_team'].includes(user.role)) {
                 navReportsLink.style.display = 'block';
-                console.log('✅ Showing Incident Reports link for role:', user.role);
             } else {
                 navReportsLink.style.display = 'none';
-                console.log('❌ Hiding Incident Reports link. User role:', user?.role || 'not logged in');
             }
-        } else {
-            console.warn('Navigation reports link (#nav-reports) not found on this page');
+        }
+
+        // Show/hide role-specific console links
+        const navAdminConsole = document.getElementById('nav-admin-console');
+        const navRescueConsole = document.getElementById('nav-rescue-console');
+        const navAuthorityConsole = document.getElementById('nav-authority-console');
+
+        // Hide all console links first
+        if (navAdminConsole) navAdminConsole.style.display = 'none';
+        if (navRescueConsole) navRescueConsole.style.display = 'none';
+        if (navAuthorityConsole) navAuthorityConsole.style.display = 'none';
+
+        if (user) {
+            switch (user.role) {
+                case 'admin':
+                    if (navAdminConsole) navAdminConsole.style.display = 'block';
+                    break;
+                case 'rescue_team':
+                    if (navRescueConsole) navRescueConsole.style.display = 'block';
+                    break;
+                case 'authority':
+                    if (navAuthorityConsole) navAuthorityConsole.style.display = 'block';
+                    break;
+            }
         }
 
         // Update user welcome message if present
@@ -52,20 +72,17 @@
         // Listen for storage changes (e.g., when user logs in on another tab)
         window.addEventListener('storage', function(e) {
             if (e.key === 'oceanGuardUser' || e.key === null) {
-                console.log('Storage changed, updating navigation...');
                 updateNavigationBasedOnRole();
             }
         });
 
         // Listen for custom login event
         window.addEventListener('userLoggedIn', function(e) {
-            console.log('User logged in event received:', e.detail);
             updateNavigationBasedOnRole();
         });
 
         // Listen for custom logout event
         window.addEventListener('userLoggedOut', function() {
-            console.log('User logged out event received');
             updateNavigationBasedOnRole();
         });
     }
@@ -79,6 +96,4 @@
     } else {
         initNavigation();
     }
-
-    console.log('🧭 Navigation manager loaded');
 })();

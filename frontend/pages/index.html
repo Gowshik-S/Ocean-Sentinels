@@ -34,6 +34,16 @@
                 <li id="nav-reports" style="display: none;">
                     <a href="reports.html">Incident Reports</a>
                 </li>
+                <!-- Role-specific console links -->
+                <li id="nav-admin-console" style="display: none;">
+                    <a href="admin-dashboard.html"><i class="fas fa-tachometer-alt"></i> Admin</a>
+                </li>
+                <li id="nav-rescue-console" style="display: none;">
+                    <a href="rescue-console.html"><i class="fas fa-life-ring"></i> Rescue Console</a>
+                </li>
+                <li id="nav-authority-console" style="display: none;">
+                    <a href="authority-console.html"><i class="fas fa-shield-alt"></i> Authority</a>
+                </li>
                 <li><a href="#about-us">About Us</a></li>
             </ul>
             <div class="nav-actions">
@@ -65,6 +75,10 @@
             <div class="hero-content">
                 <h1 class="hero-title">Ocean Sentinels: Your Shield on the Shoreline.</h1>
                 <p class="hero-subtitle">Report real-time ocean hazards, alert rescue teams, and help protect our coastal communities.</p>
+                <div id="gps-location-bar" style="display:none; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border-radius: 8px; padding: 10px 16px; margin-bottom: 12px; align-items: center; gap: 10px; color: white;">
+                    <i class="fas fa-map-marker-alt" style="color: #FFC107;"></i>
+                    <span id="gps-location-text" style="font-size: 0.95rem;">Detecting your location...</span>
+                </div>
                 <div class="hero-cta">
                     <a href="#report-hazard" class="btn btn--primary btn--large">REPORT A HAZARD NOW</a>
                     <a href="#" class="link-cta">View the Live Map →</a>
@@ -195,8 +209,8 @@
         </div>
         <div class="footer-bottom">
             <div class="footer-links">
-                <a href="#">Privacy Policy</a> |
-                <a href="#">Terms of Service</a> |
+                <a href="terms.html">Privacy Policy</a> |
+                <a href="terms.html">Terms of Service</a> |
                 <a href="#">Accessibility</a> |
                 <a href="#">RTI</a> |
                 <a href="#">Sitemap</a> |
@@ -353,7 +367,7 @@
                         <label class="checkbox-label">
                             <input type="checkbox" id="agree-terms" required>
                             <span class="checkmark"></span>
-                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                            I agree to the <a href="terms.html">Terms of Service</a> and <a href="terms.html">Privacy Policy</a>
                         </label>
                     </div>
                     <div class="form-options">
@@ -418,13 +432,13 @@
                     </label>
                     <select id="modal-hazard-type" name="hazard-type" required>
                         <option value="">Select hazard type</option>
-                        <option value="high-waves">🌊 High Waves</option>
-                        <option value="flooding">🌊 Coastal Flooding</option>
-                        <option value="tsunami">🌊 Tsunami Sighting</option>
-                        <option value="lost-vessel">🚢 Lost Fishing Boat</option>
-                        <option value="debris">🗑️ Marine Debris</option>
-                        <option value="oil-spill">⚫ Oil Spill</option>
-                        <option value="other">❓ Other Emergency</option>
+                        <option value="high-waves">High Waves</option>
+                        <option value="flooding">Coastal Flooding</option>
+                        <option value="tsunami">Tsunami Sighting</option>
+                        <option value="lost-vessel">Lost Fishing Boat</option>
+                        <option value="debris">Marine Debris</option>
+                        <option value="oil-spill">Oil Spill</option>
+                        <option value="other">Other Emergency</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -490,6 +504,29 @@
     <script src="../scripts/navigation-manager.js?v=1.0"></script>
     <script src="../scripts/script.js?v=2.1" defer></script>
     
+    <!-- GPS Auto-Detect -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const bar = document.getElementById('gps-location-bar');
+        const text = document.getElementById('gps-location-text');
+        if (navigator.geolocation && bar && text) {
+            bar.style.display = 'inline-flex';
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    const lat = pos.coords.latitude.toFixed(4);
+                    const lng = pos.coords.longitude.toFixed(4);
+                    try {
+                        const resp = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw`);
+                        const data = await resp.json();
+                        text.textContent = data.features?.[0]?.place_name || `${lat}, ${lng}`;
+                    } catch { text.textContent = `${lat}, ${lng}`; }
+                },
+                () => { text.textContent = 'Location unavailable'; }
+            );
+        }
+    });
+    </script>
+
     <!-- Mapbox Map Initialization -->
     <script>
     // Initialize Mapbox map

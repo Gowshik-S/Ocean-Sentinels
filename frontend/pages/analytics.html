@@ -1,1098 +1,367 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Analytics - Ocean Sentinels | Government of India</title>
-    
+
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231e40af'/%3E%3Cpath d='M6 16 Q11 12 16 16 Q21 20 26 16' stroke='white' stroke-width='2' fill='none'/%3E%3Cpath d='M6 20 Q11 16 16 20 Q21 24 26 20' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E">
-    
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231e40af'/%3E%3Cpath d='M6 16 Q11 12 16 16 Q21 20 26 16' stroke='white' stroke-width='2' fill='none'/%3E%3Cpath d='M6 20 Q11 16 16 20 Q21 24 26 20' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E">
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../styles/styles.css">
-    
+
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-    <!-- Vercel Web Analytics -->
-    <script>
-        window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/insights/script.js"></script>
-    
+
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #003366 0%, #005A9C 50%, #004a80 100%);
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
         .loading-page {
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, #005A9C, #004a80);
             color: white;
             text-align: center;
+            padding: 2rem;
         }
-        
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid #FFC107;
+
+        /* Animated wave background */
+        .loading-page::before {
+            content: '';
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 200%;
+            height: 120px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 320'%3E%3Cpath fill='rgba(255,255,255,0.05)' d='M0,192L60,186.7C120,181,240,171,360,186.7C480,203,600,245,720,240C840,235,960,181,1080,165.3C1200,149,1320,171,1380,181.3L1440,192L1440,320L1380,320C1320,320,1200,320,1080,320C960,320,840,320,720,320C600,320,480,320,360,320C240,320,120,320,60,320L0,320Z'/%3E%3C/svg%3E") repeat-x;
+            animation: waveMove 8s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes waveMove {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .loading-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Government emblem area */
+        .emblem-area {
+            margin-bottom: 2rem;
+        }
+
+        .emblem-icon {
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 2rem;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-        
-        .loading-subtitle {
-            font-size: 1rem;
-            opacity: 0.8;
-            margin-bottom: 2rem;
-        }
-        
-        .access-info {
             background: rgba(255, 255, 255, 0.1);
-            padding: 1.5rem;
-            border-radius: 10px;
+            border: 2px solid rgba(255, 193, 7, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
             backdrop-filter: blur(10px);
-            max-width: 500px;
         }
-        
+
+        .emblem-icon i {
+            font-size: 2rem;
+            color: #FFC107;
+        }
+
+        /* Loading spinner */
+        .loading-spinner {
+            width: 56px;
+            height: 56px;
+            border: 3px solid rgba(255, 255, 255, 0.15);
+            border-top: 3px solid #FFC107;
+            border-right: 3px solid rgba(255, 193, 7, 0.5);
+            border-radius: 50%;
+            animation: spin 1s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+            margin: 0 auto 2rem;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-text {
+            font-size: 1.4rem;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .loading-subtitle {
+            font-size: 0.95rem;
+            opacity: 0.7;
+            margin-bottom: 2.5rem;
+        }
+
+        /* Access info card */
+        .access-info {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 1.8rem 2rem;
+            border-radius: 12px;
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            max-width: 460px;
+            width: 100%;
+        }
+
         .access-info h3 {
             margin-bottom: 1rem;
             color: #FFC107;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
-        
+
         .access-info ul {
             text-align: left;
             list-style: none;
             padding: 0;
         }
-        
+
         .access-info li {
-            margin: 0.5rem 0;
-            padding-left: 1.5rem;
+            margin: 0.6rem 0;
+            padding: 0.5rem 0 0.5rem 2rem;
             position: relative;
+            font-size: 0.9rem;
+            opacity: 0.9;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
-        
-        .access-info li::before {
-            content: "→";
+
+        .access-info li:last-child {
+            border-bottom: none;
+        }
+
+        .access-info li i {
             position: absolute;
             left: 0;
+            top: 50%;
+            transform: translateY(-50%);
             color: #FFC107;
-            font-weight: bold;
+            font-size: 0.85rem;
+            width: 1.5rem;
+            text-align: center;
+        }
+
+        /* Redirect status indicator */
+        .redirect-status {
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            opacity: 0.5;
+        }
+
+        .redirect-status .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #FFC107;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .redirect-status .dot:nth-child(2) {
+            animation-delay: 0.3s;
+        }
+
+        .redirect-status .dot:nth-child(3) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.3;
+                transform: scale(0.8);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        /* Error state */
+        .error-state {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .error-state i {
+            font-size: 2.5rem;
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+
+        .error-state h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .error-state p {
+            opacity: 0.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-state .btn-retry {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            background: #FFC107;
+            color: #003366;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .error-state .btn-retry:hover {
+            background: #e0a800;
+            transform: translateY(-1px);
         }
     </style>
 </head>
+
 <body>
     <div class="loading-page">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">Loading Analytics Dashboard</div>
-        <div class="loading-subtitle">Checking your access level...</div>
-        
-        <div class="access-info">
-            <h3>Ocean Sentinels Analytics</h3>
-            <ul>
-                <li><strong>Public Access:</strong> General coastal safety information</li>
-                <li><strong>Authority Access:</strong> Advanced analytics and controls</li>
-                <li><strong>Admin Access:</strong> Full system management</li>
-            </ul>
+        <div class="loading-content" id="loading-content">
+            <div class="emblem-area">
+                <div class="emblem-icon">
+                    <i class="fas fa-water"></i>
+                </div>
+            </div>
+
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Ocean Sentinels Analytics</div>
+            <div class="loading-subtitle">Determining your access level...</div>
+
+            <div class="access-info">
+                <h3>Access Levels</h3>
+                <ul>
+                    <li><i class="fas fa-globe"></i> <strong>Public:</strong> General coastal safety information</li>
+                    <li><i class="fas fa-shield-alt"></i> <strong>Authority:</strong> Advanced analytics and response
+                        controls</li>
+                    <li><i class="fas fa-user-shield"></i> <strong>Admin:</strong> Full system management</li>
+                </ul>
+            </div>
+
+            <div class="redirect-status">
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span class="dot"></span>
+                <span>Redirecting</span>
+            </div>
+        </div>
+
+        <!-- Error state (shown if redirect fails) -->
+        <div class="error-state" id="error-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <h3>Unable to Determine Access</h3>
+            <p>We couldn't verify your session. You will be redirected to public analytics.</p>
+            <a href="public-analytics.html" class="btn-retry">
+                <i class="fas fa-chart-bar"></i> Go to Public Analytics
+            </a>
         </div>
     </div>
 
     <script>
         /**
          * Analytics Router - Redirects users based on their role
-         * Checks user authentication and role, then redirects to appropriate analytics page
+         * Checks user authentication and role, then redirects to the appropriate analytics page.
          */
-        
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🌊 Analytics Router: Checking user access...');
-            
-            // Add a small delay for better UX
+
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Analytics Router: Checking user access...');
+
+            // Brief delay for visual feedback
             setTimeout(() => {
                 redirectBasedOnRole();
-            }, 1000);
+            }, 1200);
         });
-        
+
         function redirectBasedOnRole() {
             try {
-                // Get user data from session storage
+                // Get user data from session/local storage
                 const userSessionData = sessionStorage.getItem('oceanGuardUser');
                 const userLocalData = localStorage.getItem('oceanGuardUser');
                 const userData = userSessionData || userLocalData;
-                
+
                 if (userData) {
                     const user = JSON.parse(userData);
                     const userRole = user.role ? user.role.toUpperCase() : null;
-                    
-                    console.log('👤 User found:', user.name || 'Unknown');
-                    console.log('🎭 User role:', userRole);
-                    
-                    // Check role and redirect accordingly
+
+                    console.log('User found:', user.name || 'Unknown', '| Role:', userRole);
+
+                    // Authority-level roles get the full dashboard
                     if (userRole === 'ADMIN' || userRole === 'AUTHORITY' || userRole === 'RESCUE_TEAM') {
-                        console.log('🏛️ Redirecting to Authority Analytics...');
+                        console.log('Redirecting to Authority Analytics...');
                         window.location.href = 'authority-analytics.html';
                     } else if (userRole === 'PUBLIC' || userRole === 'CITIZEN') {
-                        console.log('👥 Redirecting to Public Analytics...');
+                        console.log('Redirecting to Public Analytics...');
                         window.location.href = 'public-analytics.html';
                     } else {
-                        console.log('❓ Unknown role, redirecting to public analytics...');
+                        console.log('Unknown role, defaulting to public analytics...');
                         window.location.href = 'public-analytics.html';
                     }
                 } else {
-                    console.log('🔓 No user session found, redirecting to public analytics...');
+                    console.log('No user session found, redirecting to public analytics...');
                     window.location.href = 'public-analytics.html';
                 }
-                
+
             } catch (error) {
-                console.error('❌ Error checking user role:', error);
-                console.log('🔄 Fallback: Redirecting to public analytics...');
-                window.location.href = 'public-analytics.html';
+                console.error('Error checking user role:', error);
+                // Show error state with manual link
+                document.getElementById('loading-content').style.display = 'none';
+                document.getElementById('error-state').style.display = 'flex';
+
+                // Auto-redirect after 3 seconds anyway
+                setTimeout(() => {
+                    window.location.href = 'public-analytics.html';
+                }, 3000);
             }
         }
     </script>
 </body>
-</html>
 
-    <!-- ======================= Navigation ======================= -->
-    <header class="main-header">
-        <nav class="navbar">
-            <a href="index.html" class="nav-logo">Ocean Sentinels</a>
-            <ul class="nav-menu">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="analytics.html" class="active">Analytics</a></li>
-                <li><a href="my-reports.html">My Reports</a></li>
-                <!-- Incident Reports - Only visible for Admin, Authority, Rescue Team -->
-                <li id="nav-reports" style="display: none;">
-                    <a href="reports.html">Incident Reports</a>
-                </li>
-                <li><a href="#about-us">About Us</a></li>
-            </ul>
-            <div class="nav-actions">
-                <!-- This will be dynamically updated by your main script.js -->
-                <a href="#" class="btn btn--secondary" id="login-btn">Login</a>
-                <a href="#" class="btn btn--primary" id="report-hazard-btn">Report Hazard</a>
-            </div>
-        </nav>
-    </header>
-
-    <!-- Analytics Dashboard -->
-    <main class="analytics-main">
-        
-        <!-- Loading Indicator -->
-        <div id="loading-indicator" class="loading-container">
-            <div class="loading-spinner"></div>
-            <p>Loading analytics data...</p>
-        </div>
-
-        <!-- Error Message -->
-        <div id="error-message" class="error-container" style="display: none;">
-            <div class="error-content">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Unable to Load Analytics</h3>
-                <p id="error-text">Please check your connection and try again.</p>
-                <button onclick="loadAnalytics()" class="btn btn--primary">Retry</button>
-            </div>
-        </div>
-
-        <!-- Main Analytics Content -->
-        <div id="analytics-content" style="display: none;">
-            
-            <!-- Overview Cards -->
-            <section class="overview-section">
-                <h2>Public Dashboard Overview</h2>
-                <div class="stats-grid">
-                    <div class="stat-card primary">
-                        <div class="stat-icon">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="total-incidents">0</h3>
-                            <p>Total Incidents</p>
-                        </div>
-                    </div>
-                    
-
-                    <div class="stat-card success">
-                        <div class="stat-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="resolved-incidents">0</h3>
-                            <p>Resolved This Month</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card info">
-                        <div class="stat-icon">
-                            <i class="fas fa-shield"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="safety-score">0</h3>
-                            <p>Safety Index</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-                    
-                    <div class="stat-card success">
-                        <div class="stat-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="resolved-incidents">0</h3>
-                            <p>Resolved Incidents</p>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-card info">
-                        <div class="stat-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 id="avg-response-time">0h</h3>
-                            <p>Avg Response Time</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Charts Section -->
-            <section class="charts-section">
-                <div class="charts-grid">
-                    
-                    <!-- Incidents by Type Chart -->
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <h3>Incidents by Type</h3>
-                            <div class="chart-controls">
-                                <select id="type-chart-period">
-                                    <option value="all">All Time</option>
-                                    <option value="30">Last 30 Days</option>
-                                    <option value="7">Last 7 Days</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="incidentsTypeChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Incidents Timeline Chart -->
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <h3>Incidents Timeline</h3>
-                            <div class="chart-controls">
-                                <select id="timeline-chart-period">
-                                    <option value="30">Last 30 Days</option>
-                                    <option value="7">Last 7 Days</option>
-                                    <option value="90">Last 3 Months</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="incidentsTimelineChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Status Distribution Chart -->
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <h3>Status Distribution</h3>
-                        </div>
-                        <div class="chart-wrapper">
-                            <canvas id="statusDistributionChart"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="chart-container">
-                        <div class="chart-header">
-                            <h3>Recent Activity</h3>
-                        </div>
-                        <div class="activity-list" id="recent-activity">
-                            <div class="activity-item">
-                                <div class="activity-icon pending">
-                                    <i class="fas fa-exclamation-circle"></i>
-                                </div>
-                                <div class="activity-content">
-                                    <p class="activity-text">Loading recent activities...</p>
-                                    <span class="activity-time">Just now</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </section>
-
-            <!-- Data Tables Section -->
-            <section class="tables-section">
-                <div class="table-container">
-                    <div class="table-header">
-                        <h3>Recent Incidents</h3>
-                        <div class="table-controls">
-                            <input type="text" id="search-incidents" placeholder="Search incidents..." class="search-input">
-                            <button onclick="exportData()" class="btn btn--secondary">
-                                <i class="fas fa-download"></i> Export
-                            </button>
-                        </div>
-                    </div>
-                    <div class="table-wrapper">
-                        <table id="incidents-table" class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Reference ID</th>
-                                    <th>Type</th>
-                                    <th>Location</th>
-                                    <th>Status</th>
-                                    <th>Urgency</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="7" class="loading-cell">Loading incidents...</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-        </div>
-    </main>
-
-
-        <!-- ======================= Master Filters ======================= -->
-        <section class="filters-container">
-            <div class="filter-item">
-                <label for="date-range">Date Range</label>
-                <input type="date" id="date-range-start">
-                <span>to</span>
-                <input type="date" id="date-range-end">
-            </div>
-            <div class="filter-item">
-                <label for="region-filter">Region</label>
-                <select id="region-filter">
-                    <option>All Regions</option>
-                    <option>Tamil Nadu</option>
-                    <option>Goa</option>
-                    <option>Andaman Islands</option>
-                </select>
-            </div>
-            <div class="filter-item">
-                <label for="hazard-filter">Hazard Type</label>
-                <select id="hazard-filter">
-                    <option>All Hazard Types</option>
-                    <option>High Waves</option>
-                    <option>Flooding</option>
-                    <option>Debris</option>
-                </select>
-            </div>
-        </section>
-
-        <!-- ======================= KPI Summary Cards ======================= -->
-        <section class="kpi-grid">
-            <div class="kpi-card primary">
-                <div class="kpi-header">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span class="kpi-category">Active Incidents</span>
-                </div>
-                <div class="kpi-value" id="kpi-active-incidents">0</div>
-                <div class="kpi-label">Currently Under Monitoring</div>
-                <div class="kpi-trend" id="kpi-active-trend">
-                    <i class="fas fa-clock"></i> Live data
-                </div>
-            </div>
-            <div class="kpi-card success">
-                <div class="kpi-header">
-                    <i class="fas fa-file-alt"></i>
-                    <span class="kpi-category">Total Reports</span>
-                </div>
-                <div class="kpi-value" id="kpi-total-reports">0</div>
-                <div class="kpi-label">Total Reports Filed</div>
-                <div class="kpi-trend" id="kpi-total-trend">
-                    <i class="fas fa-database"></i> From database
-                </div>
-            </div>
-            <div class="kpi-card warning">
-                <div class="kpi-header">
-                    <i class="fas fa-clock"></i>
-                    <span class="kpi-category">Response Time</span>
-                </div>
-                <div class="kpi-value" id="kpi-response-time">0h</div>
-                <div class="kpi-label">Average Response Time</div>
-                <div class="kpi-trend" id="kpi-response-trend">
-                    <i class="fas fa-chart-line"></i> Calculated
-                </div>
-            </div>
-            <div class="kpi-card info">
-                <div class="kpi-header">
-                    <i class="fas fa-check-circle"></i>
-                    <span class="kpi-category">Resolved</span>
-                </div>
-                <div class="kpi-value" id="kpi-resolved-incidents">0</div>
-                <div class="kpi-label">Successfully Resolved</div>
-                <div class="kpi-trend" id="kpi-resolved-trend">
-                    <i class="fas fa-thumbs-up"></i> Real data
-                </div>
-            </div>
-        </section>
-
-        <!-- ======================= Recent Activity ======================= -->
-        <section class="activity-section">
-            <div class="section-header">
-                <h2>Recent Activity</h2>
-                <div class="activity-filters">
-                    <button class="filter-btn active" data-filter="all">All</button>
-                    <button class="filter-btn" data-filter="pending">Pending</button>
-                    <button class="filter-btn" data-filter="resolved">Resolved</button>
-                </div>
-            </div>
-            <div id="recent-activity" class="activity-list">
-                <p>Loading recent activity...</p>
-            </div>
-        </section>
-
-        <!-- ======================= Incidents Table ======================= -->
-        <section class="incidents-table-section">
-            <div class="section-header">
-                <h2>Recent Incidents</h2>
-                <div class="table-controls">
-                    <select id="status-filter">
-                        <option value="all">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="verified">Verified</option>
-                        <option value="resolved">Resolved</option>
-                    </select>
-                </div>
-            </div>
-            <div class="table-wrapper">
-                <table id="incidents-table" class="incidents-table">
-                    <thead>
-                        <tr>
-                            <th>Reference ID</th>
-                            <th>Type</th>
-                            <th>Location</th>
-                            <th>Status</th>
-                            <th>Urgency</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td colspan="7" class="loading-cell">Loading incidents...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
-    </main>
-
-    <!-- Enhanced Login/Register Modal -->
-    <div id="auth-modal" class="modal">
-        <div class="modal-content auth-modal-content">
-            <span class="close-button">&times;</span>
-            
-            <!-- Modal Header -->
-            <div class="auth-header">
-                <div class="auth-logo">
-                    <i class="fas fa-lock"></i>
-                    <h2>Ocean Sentinels Portal</h2>
-                </div>
-                <p>Secure access to India's coastal safety network</p>
-            </div>
-
-            <!-- Tab Navigation -->
-            <div class="auth-tabs">
-                <button class="auth-tab active" data-tab="login">Login</button>
-                <button class="auth-tab" data-tab="register">Register</button>
-            </div>
-
-            <!-- Login Section -->
-            <div id="login-section" class="auth-section active">
-                <h3>Sign In to Your Account</h3>
-                <form id="login-form">
-                    <div class="form-group">
-                        <label for="login-username">
-                            <i class="fas fa-user"></i> Username or Email
-                        </label>
-                        <input type="text" id="login-username" name="username" required placeholder="Enter your username">
-                    </div>
-                    <div class="form-group">
-                        <label for="login-password">
-                            <i class="fas fa-lock"></i> Password
-                        </label>
-                        <input type="password" id="login-password" name="password" required placeholder="Enter your password">
-                        <div class="password-toggle">
-                            <i class="fas fa-eye" id="toggle-login-password"></i>
-                        </div>
-                    </div>
-                    <div class="form-options">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="remember-me">
-                            <span class="checkmark"></span>
-                            Remember me
-                        </label>
-                        <a href="#" class="forgot-password">Forgot Password?</a>
-                    </div>
-                    <button type="submit" class="btn btn--primary btn--large auth-btn">
-                        <i class="fas fa-sign-in-alt"></i> Sign In
-                    </button>
-                </form>
-                <div class="demo-credentials">
-                    <p><strong>Demo Credentials:</strong></p>
-                    <p>👤 Citizen: <code>user</code> or <code>citizen</code></p>
-                    <p>🏛️ Authority: <code>admin</code> or <code>rescue</code></p>
-                </div>
-            </div>
-
-            <!-- Registration Section -->
-            <div id="register-section" class="auth-section">
-                <h3>Create New Account</h3>
-                
-                <!-- Registration Type Selection -->
-                <div class="registration-types">
-                    <div class="reg-type-card active" data-type="public">
-                        <div class="reg-type-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <h4>Public Registration</h4>
-                        <p>For citizens and general public</p>
-                    </div>
-                    <div class="reg-type-card disabled" data-type="authority">
-                        <div class="reg-type-icon">
-                            <i class="fas fa-key"></i>
-                        </div>
-                        <h4>Authority Registration</h4>
-                        <p>Contact administrator for access</p>
-                        <div class="disabled-overlay">
-                            <i class="fas fa-lock"></i>
-                            <span>By Invitation Only</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Public Registration Form -->
-                <form id="register-form" class="public-registration">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="reg-firstname">
-                                <i class="fas fa-user"></i> First Name
-                            </label>
-                            <input type="text" id="reg-firstname" name="firstname" required placeholder="Enter first name">
-                        </div>
-                        <div class="form-group">
-                            <label for="reg-lastname">
-                                <i class="fas fa-user"></i> Last Name
-                            </label>
-                            <input type="text" id="reg-lastname" name="lastname" required placeholder="Enter last name">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-email">
-                            <i class="fas fa-envelope"></i> Email Address
-                        </label>
-                        <input type="email" id="reg-email" name="email" required placeholder="Enter your email">
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-phone">
-                            <i class="fas fa-phone"></i> Phone Number
-                        </label>
-                        <input type="tel" id="reg-phone" name="phone" required placeholder="Enter your phone number">
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-location">
-                            <i class="fas fa-map-marker-alt"></i> Location
-                        </label>
-                        <select id="reg-location" name="location" required>
-                            <option value="">Select your coastal region</option>
-                            <option value="west-coast">West Coast (Maharashtra, Goa, Karnataka, Kerala)</option>
-                            <option value="east-coast">East Coast (West Bengal, Odisha, Andhra Pradesh, Tamil Nadu)</option>
-                            <option value="andaman">Andaman & Nicobar Islands</option>
-                            <option value="lakshadweep">Lakshadweep</option>
-                        </select>
-                    </div>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="reg-password">
-                                <i class="fas fa-lock"></i> Password
-                            </label>
-                            <input type="password" id="reg-password" name="password" required placeholder="Create password">
-                            <div class="password-toggle">
-                                <i class="fas fa-eye" id="toggle-reg-password"></i>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="reg-confirm-password">
-                                <i class="fas fa-lock"></i> Confirm Password
-                            </label>
-                            <input type="password" id="reg-confirm-password" name="confirm-password" required placeholder="Confirm password">
-                        </div>
-                    </div>
-                    <div class="form-options">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="agree-terms" required>
-                            <span class="checkmark"></span>
-                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
-                        </label>
-                    </div>
-                    <div class="form-options">
-                        <label class="checkbox-label">
-                            <input type="checkbox" id="newsletter">
-                            <span class="checkmark"></span>
-                            Subscribe to safety alerts and updates
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn--primary btn--large auth-btn">
-                        <i class="fas fa-user-plus"></i> Create Account
-                    </button>
-                </form>
-            </div>
-        </div>
-    </div>
-
-    <!-- Report Hazard Modal -->
-    <div id="report-modal" class="modal">
-        <div class="modal-content report-modal-content">
-            <span class="close-button" id="close-report-modal">&times;</span>
-            
-            <!-- Report Modal Header -->
-            <div class="report-header">
-                <div class="report-logo">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <h2>Report Ocean Hazard</h2>
-                </div>
-                <p>Help us keep our coasts safe by reporting hazards immediately</p>
-            </div>
-
-            <!-- Report Form -->
-            <form id="hazard-report-modal-form" class="hazard-form">
-                <div class="form-group">
-                    <label for="modal-hazard-type">
-                        <i class="fas fa-exclamation-circle"></i> Hazard Type *
-                    </label>
-                    <select id="modal-hazard-type" name="hazard-type" required>
-                        <option value="">Select hazard type</option>
-                        <option value="high-waves">🌊 High Waves</option>
-                        <option value="flooding">🌊 Coastal Flooding</option>
-                        <option value="tsunami">🌊 Tsunami Sighting</option>
-                        <option value="lost-vessel">🚢 Lost Fishing Boat</option>
-                        <option value="debris">🗑️ Marine Debris</option>
-                        <option value="oil-spill">⚫ Oil Spill</option>
-                        <option value="other">❓ Other Emergency</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="modal-location">
-                        <i class="fas fa-map-marker-alt"></i> Location *
-                    </label>
-                    <input type="text" id="modal-location" name="location" placeholder="Enter exact location or coordinates" required>
-                    <button type="button" class="btn btn--secondary btn--small" id="get-location">
-                        <i class="fas fa-crosshairs"></i> Use My Location
-                    </button>
-                </div>
-                <div class="form-group">
-                    <label for="modal-description">
-                        <i class="fas fa-align-left"></i> Description *
-                    </label>
-                    <textarea id="modal-description" name="description" placeholder="Describe the hazard in detail - what you see, how severe it is, any immediate dangers" rows="4" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label for="modal-photo">
-                        <i class="fas fa-camera"></i> Photo Evidence (Optional)
-                    </label>
-                    <input type="file" id="modal-photo" name="photo" accept="image/*">
-                    <p class="help-text">Photos help authorities assess the situation quickly</p>
-                </div>
-                <div class="form-group">
-                    <label for="modal-contact">
-                        <i class="fas fa-phone"></i> Contact Information (Optional)
-                    </label>
-                    <input type="tel" id="modal-contact" name="contact" placeholder="Phone number for follow-up if needed">
-                </div>
-                <div class="urgency-level">
-                    <label>Urgency Level:</label>
-                    <div class="urgency-options">
-                        <label class="radio-label">
-                            <input type="radio" name="urgency" value="low" checked>
-                            <span>🟡 Low</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="urgency" value="medium">
-                            <span>🟠 Medium</span>
-                        </label>
-                        <label class="radio-label">
-                            <input type="radio" name="urgency" value="high">
-                            <span>🔴 High</span>
-                        </label>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn--primary btn--large report-submit-btn">
-                    <i class="fas fa-paper-plane"></i> Submit Report
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- ======================= Enhanced Footer ======================= -->
-    <footer class="main-footer" id="about-us">
-        <div class="footer-content">
-            <div class="footer-section">
-                <h4>Ocean Sentinels Analytics</h4>
-                <p>Advanced coastal monitoring and analytics platform providing real-time insights for informed decision-making in coastal safety and disaster management.</p>
-                <div class="footer-social">
-                    <a href="#"><i class="fab fa-twitter"></i></a>
-                    <a href="#"><i class="fab fa-facebook"></i></a>
-                    <a href="#"><i class="fab fa-linkedin"></i></a>
-                    <a href="#"><i class="fab fa-youtube"></i></a>
-                </div>
-            </div>
-            <div class="footer-section">
-                <h4>Government Departments</h4>
-                <ul>
-                    <li><a href="#">Ministry of Earth Sciences</a></li>
-                    <li><a href="#">Indian National Centre for Ocean Information Services (INCOIS)</a></li>
-                    <li><a href="#">Indian Coast Guard</a></li>
-                    <li><a href="#">National Disaster Response Force</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>Quick Links</h4>
-                <ul>
-                    <li><a href="#">Emergency Contacts</a></li>
-                    <li><a href="#">Weather Updates</a></li>
-                    <li><a href="#">Safety Guidelines</a></li>
-                    <li><a href="#">Training Programs</a></li>
-                    <li><a href="#">Coastal Management</a></li>
-                </ul>
-            </div>
-            <div class="footer-section">
-                <h4>Contact Information</h4>
-                <div class="contact-info">
-                    <p><i class="fas fa-phone"></i> Emergency: 1078</p>
-                    <p><i class="fas fa-phone"></i> Helpline: 1800-123-4567</p>
-                    <p><i class="fas fa-envelope"></i> support@oceanguard.gov.in</p>
-                    <p><i class="fas fa-map-marker-alt"></i> Ministry of Earth Sciences, New Delhi - 110003</p>
-                </div>
-            </div>
-        </div>
-        <div class="footer-logos">
-            <div class="govt-logos">
-                <img src="gov_of_india.png" alt="Government of India">
-                <span>Government of India</span>
-            </div>
-            <div class="footer-certifications">
-                <span>ISO 27001 Certified</span> | <span>STQC Empaneled</span> | <span>Digital India Initiative</span>
-            </div>
-        </div>
-        <div class="footer-bottom">
-            <div class="footer-links">
-                <a href="#">Privacy Policy</a> |
-                <a href="#">Terms of Service</a> |
-                <a href="#">Accessibility</a> |
-                <a href="#">RTI</a> |
-                <a href="#">Sitemap</a> |
-                <a href="#">Help</a>
-            </div>
-            <p>&copy; 2025 Ocean Sentinels, Ministry of Earth Sciences, Government of India. All rights reserved.</p>
-       a     <p class="footer-update">Website last updated: 27 Sep 2025 | Best viewed in Chrome, Firefox, Safari</p>
-        </div>
-    </footer>
-
-    <!-- Scripts -->
-    <script src="../scripts/api-client.js?v=2.1"></script>
-    <script src="../scripts/navigation-manager.js"></script>
-    <script src="../scripts/analytics.js?v=2.1"></script>
-    <script src="../scripts/script.js?v=2.1"></script>
-
-    <style>
-        /* Additional styles for analytics page */
-        .loading-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 400px;
-            color: #666;
-        }
-
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .error-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 400px;
-        }
-
-        .error-content {
-            text-align: center;
-            padding: 40px;
-            background: #fff;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .error-content i {
-            font-size: 3rem;
-            color: #dc3545;
-            margin-bottom: 20px;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid;
-        }
-
-        .stat-card.primary { border-left-color: #007bff; }
-        .stat-card.warning { border-left-color: #ffc107; }
-        .stat-card.success { border-left-color: #28a745; }
-        .stat-card.info { border-left-color: #17a2b8; }
-
-        .stat-icon {
-            font-size: 2rem;
-            margin-right: 15px;
-            opacity: 0.8;
-        }
-
-        .stat-card.primary .stat-icon { color: #007bff; }
-        .stat-card.warning .stat-icon { color: #ffc107; }
-        .stat-card.success .stat-icon { color: #28a745; }
-        .stat-card.info .stat-icon { color: #17a2b8; }
-
-        .stat-content h3 {
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 0;
-            color: #333;
-        }
-
-        .stat-content p {
-            margin: 5px 0 0 0;
-            color: #666;
-            font-size: 0.9rem;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .chart-container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .chart-header h3 {
-            margin: 0;
-            color: #333;
-        }
-
-        .chart-controls select {
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background: white;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            height: 300px;
-        }
-
-        .activity-list {
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .activity-item {
-            display: flex;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid #eee;
-        }
-
-        .activity-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            color: white;
-        }
-
-        .activity-icon.pending { background: #ffc107; }
-        .activity-icon.resolved { background: #28a745; }
-        .activity-icon.verified { background: #007bff; }
-
-        .activity-content {
-            flex: 1;
-        }
-
-        .activity-text {
-            margin: 0;
-            color: #333;
-            font-size: 0.9rem;
-        }
-
-        .activity-time {
-            color: #666;
-            font-size: 0.8rem;
-        }
-
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .table-header {
-            padding: 20px;
-            background: #f8f9fa;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #eee;
-        }
-
-        .table-controls {
-            display: flex;
-            gap: 10px;
-        }
-
-        .search-input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            width: 200px;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .data-table th,
-        .data-table td {
-            padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
-        .data-table th {
-            background: #f8f9fa;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .loading-cell {
-            text-align: center;
-            color: #666;
-            font-style: italic;
-        }
-
-        .status-badge, .urgency-badge {
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .status-badge.pending { background: #fff3cd; color: #856404; }
-        .status-badge.resolved { background: #d1edff; color: #084298; }
-
-        .urgency-badge.high { background: #f8d7da; color: #721c24; }
-        .urgency-badge.critical { background: #d1ecf1; color: #0c5460; }
-
-        @media (max-width: 768px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .table-header {
-                flex-direction: column;
-                gap: 15px;
-                align-items: stretch;
-            }
-            
-            .table-controls {
-                flex-direction: column;
-            }
-            
-            .search-input {
-                width: 100%;
-            }
-        }
-    </style>
-
-    <!-- Analytics Tracking Script -->
-    <script src="../scripts/analytics-tracker.js"></script>
-
-    <!-- Vercel Speed Insights -->
-    <script>
-        window.si = window.si || function () { (window.siq = window.siq || []).push(arguments); };
-    </script>
-    <script defer src="/_vercel/speed-insights/script.js"></script>
-
-</body>
 </html>

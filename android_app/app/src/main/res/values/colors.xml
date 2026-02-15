@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Ocean Sentinels Color Palette - Based on app.assets design files -->
+    
+    <!-- Primary Colors - Yellow/Gold from designs (#FDDA0D, #E0C002) -->
+    <color name="primary">#FDDA0D</color>
+    <color name="primary_dark">#E0C002</color>
+    <color name="primary_light">#FFE54C</color>
+    <color name="on_primary">#111111</color>
+    
+    <!-- Secondary Colors - Deep Blue for contrast -->
+    <color name="secondary">#005A9C</color>
+    <color name="secondary_dark">#003D6B</color>
+    <color name="secondary_light">#3D8BC9</color>
+    <color name="on_secondary">#FFFFFF</color>
+    
+    <!-- Accent Colors -->
+    <color name="accent">#FDDA0D</color>
+    <color name="accent_variant">#FFE54C</color>
+    
+    <!-- Background Colors -->
+    <color name="background">#FFFFFF</color>
+    <color name="background_secondary">#F8F9FA</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="surface_variant">#E9ECEF</color>
+    <color name="on_background">#111111</color>
+    <color name="on_surface">#111111</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#111111</color>
+    <color name="text_secondary">#6C757D</color>
+    <color name="text_hint">#ADB5BD</color>
+    <color name="text_disabled">#CED4DA</color>
+    <color name="text_on_primary">#111111</color>
+    <color name="text_on_secondary">#FFFFFF</color>
+    <color name="text_light">#F8F9FA</color>
+    
+    <!-- Status Colors from Alerts screen design -->
+    <color name="success">#32BA23</color>
+    <color name="success_light">#D4EDDA</color>
+    <color name="on_success">#FFFFFF</color>
+    
+    <color name="warning">#E97612</color>
+    <color name="warning_light">#FFF3CD</color>
+    <color name="on_warning">#FFFFFF</color>
+    
+    <color name="error">#E12828</color>
+    <color name="error_light">#F8D7DA</color>
+    <color name="on_error">#FFFFFF</color>
+    
+    <color name="info">#5867F1</color>
+    <color name="info_light">#E8EAFD</color>
+    <color name="on_info">#FFFFFF</color>
+    
+    <!-- Additional Colors from designs -->
+    <color name="purple">#5867F1</color>
+    <color name="green">#32BA23</color>
+    <color name="orange">#E97612</color>
+    <color name="red">#E12828</color>
+    <color name="placeholder_gray">#D9D9D9</color>
+    
+    <!-- Urgency Level Colors -->
+    <color name="urgency_low">#32BA23</color>
+    <color name="urgency_low_bg">#D4EDDA</color>
+    <color name="urgency_medium">#E97612</color>
+    <color name="urgency_medium_bg">#FFF3CD</color>
+    <color name="urgency_high">#E97612</color>
+    <color name="urgency_high_bg">#FFE5D0</color>
+    <color name="urgency_critical">#E12828</color>
+    <color name="urgency_critical_bg">#F8D7DA</color>
+    
+    <!-- Incident Status Colors -->
+    <color name="status_pending">#5867F1</color>
+    <color name="status_pending_bg">#E8EAFD</color>
+    <color name="status_verified">#5867F1</color>
+    <color name="status_verified_bg">#E8EAFD</color>
+    <color name="status_in_progress">#E97612</color>
+    <color name="status_in_progress_bg">#FFF3CD</color>
+    <color name="status_resolved">#32BA23</color>
+    <color name="status_resolved_bg">#D4EDDA</color>
+    <color name="status_closed">#6C757D</color>
+    <color name="status_closed_bg">#E9ECEF</color>
+    
+    <!-- Hazard Type Colors -->
+    <color name="hazard_high_waves">#0077B6</color>
+    <color name="hazard_strong_currents">#00B4D8</color>
+    <color name="hazard_flooding">#48CAE4</color>
+    <color name="hazard_tsunami">#DC3545</color>
+    <color name="hazard_debris">#6C757D</color>
+    <color name="hazard_erosion">#8B5E3C</color>
+    <color name="hazard_storm">#7C3AED</color>
+    <color name="hazard_other">#495057</color>
+    
+    <!-- Map Colors -->
+    <color name="map_marker_default">#FDDA0D</color>
+    <color name="map_marker_urgent">#E12828</color>
+    <color name="map_cluster">#FDDA0D</color>
+    
+    <!-- Card Colors -->
+    <color name="card_background">#FFFFFF</color>
+    <color name="card_border">#E9ECEF</color>
+    <color name="card_shadow">#1A000000</color>
+    
+    <!-- Divider -->
+    <color name="divider">#DEE2E6</color>
+    
+    <!-- Ripple -->
+    <color name="ripple">#1AFDDA0D</color>
+    
+    <!-- Scrim -->
+    <color name="scrim">#80000000</color>
+    
+    <!-- Transparent -->
+    <color name="transparent">#00000000</color>
+    
+    <!-- Gradient Start/End -->
+    <color name="gradient_ocean_start">#FDDA0D</color>
+    <color name="gradient_ocean_end">#E0C002</color>
+    <color name="gradient_sunset_start">#FDDA0D</color>
+    <color name="gradient_sunset_end">#E97612</color>
+    
+    <!-- Splash Screen -->
+    <color name="splash_background">#FDDA0D</color>
+    
+    <!-- ========================================== -->
+    <!-- DARK MODE COLORS                          -->
+    <!-- Professional dark theme for night use      -->
+    <!-- ========================================== -->
+    
+    <!-- Dark Mode Background Colors -->
+    <color name="dark_background">#0D1117</color>
+    <color name="dark_background_elevated">#161B22</color>
+    <color name="dark_surface">#1C2128</color>
+    <color name="dark_surface_variant">#21262D</color>
+    <color name="dark_surface_elevated">#2D333B</color>
+    
+    <!-- Dark Mode Primary -->
+    <color name="dark_primary">#FFE066</color>
+    <color name="dark_primary_variant">#FDDA0D</color>
+    <color name="dark_on_primary">#1C2128</color>
+    
+    <!-- Dark Mode Secondary -->
+    <color name="dark_secondary">#58A6FF</color>
+    <color name="dark_secondary_variant">#388BFD</color>
+    <color name="dark_on_secondary">#0D1117</color>
+    
+    <!-- Dark Mode Text -->
+    <color name="dark_text_primary">#F0F3F6</color>
+    <color name="dark_text_secondary">#8B949E</color>
+    <color name="dark_text_tertiary">#6E7681</color>
+    <color name="dark_text_disabled">#484F58</color>
+    <color name="dark_text_link">#58A6FF</color>
+    
+    <!-- Dark Mode Status Colors -->
+    <color name="dark_success">#3FB950</color>
+    <color name="dark_success_light">#238636</color>
+    <color name="dark_warning">#D29922</color>
+    <color name="dark_warning_light">#9E6A03</color>
+    <color name="dark_error">#F85149</color>
+    <color name="dark_error_light">#DA3633</color>
+    <color name="dark_info">#79C0FF</color>
+    <color name="dark_info_light">#388BFD</color>
+    
+    <!-- Dark Mode Borders -->
+    <color name="dark_border">#30363D</color>
+    <color name="dark_border_muted">#21262D</color>
+    <color name="dark_divider">#30363D</color>
+    
+    <!-- Dark Mode Card -->
+    <color name="dark_card_background">#161B22</color>
+    <color name="dark_card_border">#30363D</color>
+    
+    <!-- Dark Mode Additional Colors -->
+    <color name="dark_purple">#A371F7</color>
+    <color name="dark_green">#3FB950</color>
+    <color name="dark_orange">#D29922</color>
+    <color name="dark_red">#F85149</color>
+    
+    <!-- Dark Mode Urgency -->
+    <color name="dark_urgency_low">#3FB950</color>
+    <color name="dark_urgency_low_bg">#238636</color>
+    <color name="dark_urgency_medium">#D29922</color>
+    <color name="dark_urgency_medium_bg">#9E6A03</color>
+    <color name="dark_urgency_high">#DB6D28</color>
+    <color name="dark_urgency_high_bg">#762D0A</color>
+    <color name="dark_urgency_critical">#F85149</color>
+    <color name="dark_urgency_critical_bg">#8B1A10</color>
+    
+    <!-- Dark Mode Status -->
+    <color name="dark_status_pending">#A371F7</color>
+    <color name="dark_status_pending_bg">#3D1F79</color>
+    <color name="dark_status_verified">#58A6FF</color>
+    <color name="dark_status_verified_bg">#0C2D6B</color>
+    <color name="dark_status_in_progress">#D29922</color>
+    <color name="dark_status_in_progress_bg">#533D00</color>
+    <color name="dark_status_resolved">#3FB950</color>
+    <color name="dark_status_resolved_bg">#1A4721</color>
+    <color name="dark_status_closed">#8B949E</color>
+    <color name="dark_status_closed_bg">#21262D</color>
+</resources>

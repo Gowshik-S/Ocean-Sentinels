@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rescue Console - Ocean Sentinels</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231e40af'/%3E%3Cpath d='M6 16 Q11 12 16 16 Q21 20 26 16' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="../styles/analytics.css">
+    <style>
+        .console-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .console-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .console-header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .console-header p {
+            color: #6c757d;
+        }
+
+        .console-section {
+            background: var(--card-bg, white);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px var(--shadow-color, rgba(0, 0, 0, 0.1));
+            border: 1px solid var(--border-color, #dee2e6);
+        }
+
+        .console-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 16px;
+            font-size: 1.3rem;
+        }
+
+        .job-card {
+            background: var(--section-bg, #f8f9fa);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .job-card:hover {
+            transform: translateX(4px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .job-card h4 {
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .job-card .meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 12px;
+        }
+
+        .job-card .meta i {
+            color: var(--primary-color);
+            width: 16px;
+        }
+
+        .job-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .job-actions button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-deploy {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-deploy:hover {
+            background: #004a80;
+        }
+
+        .btn-resolve {
+            background: var(--accent-color);
+            color: var(--text-dark);
+        }
+
+        .btn-resolve:hover {
+            background: #e0a800;
+        }
+
+        .btn-verify-job {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-verify-job:hover {
+            background: #004a80;
+        }
+
+        .gps-location {
+            background: var(--section-bg, #f8f9fa);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .gps-location i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .gps-location .location-text {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .gps-location .location-coords {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="main-header">
+        <nav class="navbar">
+            <a href="index.html" class="nav-logo">Ocean Sentinels</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="analytics.html">Analytics</a></li>
+                <li id="nav-reports" style="display: none;"><a href="reports.html">Incident Reports</a></li>
+                <li id="nav-admin-console" style="display: none;"><a href="admin-dashboard.html">Admin</a></li>
+                <li id="nav-rescue-console" style="display: none;"><a href="rescue-console.html" class="active"><i
+                            class="fas fa-life-ring"></i> Rescue Console</a></li>
+                <li id="nav-authority-console" style="display: none;"><a href="authority-console.html">Authority</a>
+                </li>
+            </ul>
+            <div class="nav-actions">
+                <span class="welcome-user" id="welcome-message">Welcome, Rescue Team</span>
+                <a href="index.html" class="btn btn--secondary" id="logout-btn">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="console-container">
+        <div class="console-header">
+            <h1><i class="fas fa-life-ring"></i> Rescue Team Console</h1>
+            <p>Manage your assigned incidents and respond to emergencies</p>
+        </div>
+
+        <!-- GPS Location -->
+        <div class="gps-location" id="gps-location">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+                <div class="location-text" id="detected-location">Detecting location...</div>
+                <div class="location-coords" id="detected-coords"></div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card primary">
+                <div class="stat-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="assigned-count">0</h3>
+                    <p>Assigned Jobs</p>
+                </div>
+            </div>
+            <div class="stat-card warning">
+                <div class="stat-icon">
+                    <i class="fas fa-spinner"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="active-count">0</h3>
+                    <p>In Progress</p>
+                </div>
+            </div>
+            <div class="stat-card success">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3 id="resolved-count">0</h3>
+                    <p>Resolved</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Assigned Jobs -->
+        <div class="console-section">
+            <h2><i class="fas fa-tasks"></i> My Assigned Incidents</h2>
+            <div id="assigned-jobs">
+                <p style="text-align:center; color: #6c757d;"><i class="fas fa-spinner fa-spin"></i> Loading assigned
+                    incidents...</p>
+            </div>
+        </div>
+
+        <!-- All Available Incidents -->
+        <div class="console-section">
+            <h2><i class="fas fa-exclamation-triangle"></i> All Active Incidents</h2>
+            <div id="all-incidents">
+                <p style="text-align:center; color: #6c757d;"><i class="fas fa-spinner fa-spin"></i> Loading
+                    incidents...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-bottom">
+            <p>&copy; 2025 Ocean Sentinels Rescue Console, Ministry of Earth Sciences, Government of India.</p>
+        </div>
+    </footer>
+
+    <script src="../scripts/api-client.js"></script>
+    <script src="../scripts/navigation-manager.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const api = new OceanHazardAPI();
+
+            // Check access
+            const user = JSON.parse(localStorage.getItem('oceanGuardUser') || sessionStorage.getItem('oceanGuardUser') || 'null');
+            if (!user || (user.role !== 'rescue_team' && user.role !== 'admin')) {
+                alert('Access denied. This page is for rescue teams only.');
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // GPS auto-detect
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    async (pos) => {
+                        const lat = pos.coords.latitude.toFixed(4);
+                        const lng = pos.coords.longitude.toFixed(4);
+                        document.getElementById('detected-coords').textContent = `${lat}, ${lng}`;
+
+                        // Reverse geocode
+                        try {
+                            const resp = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw`);
+                            const data = await resp.json();
+                            const place = data.features?.[0]?.place_name || `${lat}, ${lng}`;
+                            document.getElementById('detected-location').textContent = place;
+                        } catch {
+                            document.getElementById('detected-location').textContent = `${lat}, ${lng}`;
+                        }
+                    },
+                    () => {
+                        document.getElementById('detected-location').textContent = 'Location unavailable';
+                    }
+                );
+            }
+
+            // Load assigned incidents
+            try {
+                const assigned = await api.getAssignedIncidents();
+                const assignedList = Array.isArray(assigned) ? assigned : [];
+
+                const activeJobs = assignedList.filter(i => !['resolved', 'closed'].includes(i.status));
+                const resolvedJobs = assignedList.filter(i => ['resolved', 'closed'].includes(i.status));
+
+                document.getElementById('assigned-count').textContent = activeJobs.length;
+                document.getElementById('active-count').textContent = assignedList.filter(i => i.status === 'in_progress' || i.status === 'deployed').length;
+                document.getElementById('resolved-count').textContent = resolvedJobs.length;
+
+                const container = document.getElementById('assigned-jobs');
+                if (assignedList.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color: #6c757d;">No incidents assigned to you yet.</p>';
+                } else {
+                    container.innerHTML = assignedList.map(job => `
+                    <div class="job-card">
+                        <h4>${job.hazard_type || 'Unknown Hazard'} - ${job.reference_id || job.id}</h4>
+                        <div class="meta">
+                            <span><i class="fas fa-map-marker-alt"></i> ${job.location || 'N/A'}</span>
+                            <span><i class="fas fa-clock"></i> ${new Date(job.created_at).toLocaleDateString()}</span>
+                            <span><i class="fas fa-signal"></i> ${(job.status || 'unknown').toUpperCase()}</span>
+                            <span><i class="fas fa-exclamation-circle"></i> ${job.urgency || 'N/A'}</span>
+                        </div>
+                        <p style="margin-bottom: 12px; color: var(--text-dark);">${job.description || 'No description'}</p>
+                        <div class="job-actions">
+                            ${job.status === 'verified' || job.status === 'active' ? `<button class="btn-deploy" onclick="deployToJob('${job.id}')"><i class="fas fa-rocket"></i> Deploy</button>` : ''}
+                            ${job.status === 'in_progress' || job.status === 'deployed' ? `<button class="btn-resolve" onclick="resolveJob('${job.id}')"><i class="fas fa-check-circle"></i> Resolve</button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                }
+            } catch (error) {
+                document.getElementById('assigned-jobs').innerHTML = `<p style="text-align:center; color: #dc3545;">Failed to load assigned incidents: ${error.message}</p>`;
+            }
+
+            // Load all incidents
+            try {
+                const all = await api.getIncidents();
+                const allList = Array.isArray(all) ? all : (all.incidents || all.items || []);
+                const activeIncidents = allList.filter(i => !['resolved', 'closed'].includes(i.status));
+
+                const container = document.getElementById('all-incidents');
+                if (activeIncidents.length === 0) {
+                    container.innerHTML = '<p style="text-align:center; color: #6c757d;">No active incidents.</p>';
+                } else {
+                    container.innerHTML = activeIncidents.slice(0, 20).map(inc => `
+                    <div class="job-card" style="border-left-color: ${inc.urgency === 'high' ? '#dc3545' : inc.urgency === 'medium' ? '#FFC107' : '#6c757d'};">
+                        <h4>${inc.hazard_type || 'Unknown'} - ${inc.reference_id || inc.id}</h4>
+                        <div class="meta">
+                            <span><i class="fas fa-map-marker-alt"></i> ${inc.location || 'N/A'}</span>
+                            <span><i class="fas fa-signal"></i> ${(inc.status || 'unknown').toUpperCase()}</span>
+                            <span><i class="fas fa-exclamation-circle"></i> Urgency: ${inc.urgency || 'N/A'}</span>
+                        </div>
+                        <div class="job-actions">
+                            ${inc.status === 'pending' ? `<button class="btn-verify-job" onclick="verifyJob('${inc.id}')"><i class="fas fa-search"></i> Verify</button>` : ''}
+                            ${inc.status === 'verified' ? `<button class="btn-deploy" onclick="deployToJob('${inc.id}')"><i class="fas fa-rocket"></i> Deploy</button>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+                }
+            } catch (error) {
+                document.getElementById('all-incidents').innerHTML = `<p style="text-align:center; color: #dc3545;">Failed to load incidents: ${error.message}</p>`;
+            }
+
+            // Logout
+            document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('oceanGuardToken');
+                localStorage.removeItem('oceanGuardUser');
+                sessionStorage.clear();
+                window.location.href = 'index.html';
+            });
+        });
+
+        async function deployToJob(id) {
+            if (!confirm('Deploy to this incident?')) return;
+            try {
+                const api = new OceanHazardAPI();
+                await api.deployResponse(id);
+                alert('Deployed successfully!');
+                location.reload();
+            } catch (e) { alert('Deploy failed: ' + e.message); }
+        }
+
+        async function resolveJob(id) {
+            if (!confirm('Mark this incident as resolved?')) return;
+            try {
+                const api = new OceanHazardAPI();
+                await api.resolveIncident(id);
+                alert('Incident resolved!');
+                location.reload();
+            } catch (e) { alert('Resolve failed: ' + e.message); }
+        }
+
+        async function verifyJob(id) {
+            if (!confirm('Verify this incident?')) return;
+            try {
+                const api = new OceanHazardAPI();
+                await api.verifyIncident(id);
+                alert('Incident verified!');
+                location.reload();
+            } catch (e) { alert('Verify failed: ' + e.message); }
+        }
+    </script>
+</body>
+
+</html>

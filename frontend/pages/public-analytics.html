@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Public Analytics - Ocean Sentinels | Government of India</title>
-    
+
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231e40af'/%3E%3Cpath d='M6 16 Q11 12 16 16 Q21 20 26 16' stroke='white' stroke-width='2' fill='none'/%3E%3Cpath d='M6 20 Q11 16 16 20 Q21 24 26 20' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E">
-    
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231e40af'/%3E%3Cpath d='M6 16 Q11 12 16 16 Q21 20 26 16' stroke='white' stroke-width='2' fill='none'/%3E%3Cpath d='M6 20 Q11 16 16 20 Q21 24 26 20' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E">
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../styles/styles.css">
     <link rel="stylesheet" href="../styles/analytics.css">
-    
+
     <!-- Mapbox CSS for maps -->
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
-    
+
     <!-- Leaflet CSS for mini maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    
+
     <!-- Chart.js for dynamic charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+
     <!-- Vercel Web Analytics -->
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
 </head>
+
 <body>
 
     <!-- Government Header -->
@@ -48,19 +51,18 @@
     <!-- ======================= Navigation ======================= -->
     <header class="main-header">
         <nav class="navbar">
-                            <a href="index.html" class="nav-logo">Ocean Sentinels</a>
+            <a href="index.html" class="nav-logo">Ocean Sentinels</a>
             <ul class="nav-menu">
                 <li><a href="index.html">Home</a></li>
                 <li><a href="analytics.html" class="active">Analytics</a></li>
                 <li><a href="my-reports.html">My Reports</a></li>
-                <!-- Incident Reports - Only visible for Admin, Authority, Rescue Team -->
-                <li id="nav-reports" style="display: none;">
-                    <a href="reports.html">Incident Reports</a>
+                <li id="nav-reports" style="display: none;"><a href="reports.html">Incident Reports</a></li>
+                <li id="nav-admin-console" style="display: none;"><a href="admin-dashboard.html">Admin</a></li>
+                <li id="nav-rescue-console" style="display: none;"><a href="rescue-console.html">Rescue</a></li>
+                <li id="nav-authority-console" style="display: none;"><a href="authority-console.html">Authority</a>
                 </li>
-                <li><a href="#about-us">About Us</a></li>
             </ul>
             <div class="nav-actions">
-                <!-- This will be dynamically updated by your main script.js -->
                 <a href="#" class="btn btn--secondary" id="login-btn">Login</a>
                 <a href="#" class="btn btn--primary" id="report-hazard-btn">Report Hazard</a>
             </div>
@@ -69,7 +71,7 @@
 
     <!-- Analytics Dashboard -->
     <main class="analytics-main">
-        
+
         <!-- Loading Indicator -->
         <div id="loading-indicator" class="loading-container">
             <div class="loading-spinner"></div>
@@ -88,7 +90,7 @@
 
         <!-- Main Analytics Content -->
         <div id="analytics-content" style="display: none;">
-            
+
             <!-- Overview Cards -->
             <section class="overview-section">
                 <h2>Public Dashboard Overview</h2>
@@ -102,7 +104,7 @@
                             <p>Total Incidents</p>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card success">
                         <div class="stat-icon">
                             <i class="fas fa-check-circle"></i>
@@ -112,7 +114,7 @@
                             <p>Resolved This Month</p>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card info">
                         <div class="stat-icon">
                             <i class="fas fa-shield"></i>
@@ -131,17 +133,23 @@
                 <div class="charts-grid">
                     <div class="chart-container">
                         <h3>Monthly Incident Trends</h3>
-                        <canvas id="incidents-timeline-chart"></canvas>
+                        <div class="chart-wrapper" style="position: relative; flex: 1; width: 100%;">
+                            <canvas id="incidents-timeline-chart"></canvas>
+                        </div>
                     </div>
-                    
+
                     <div class="chart-container">
                         <h3>Incident Types Distribution</h3>
-                        <canvas id="incidents-type-chart"></canvas>
+                        <div class="chart-wrapper" style="position: relative; flex: 1; width: 100%;">
+                            <canvas id="incidents-type-chart"></canvas>
+                        </div>
                     </div>
 
                     <div class="chart-container">
                         <h3>Safety Status Overview</h3>
-                        <canvas id="status-distribution-chart"></canvas>
+                        <div class="chart-wrapper" style="position: relative; flex: 1; width: 100%;">
+                            <canvas id="status-distribution-chart"></canvas>
+                        </div>
                     </div>
 
                     <div class="chart-container">
@@ -162,7 +170,7 @@
                     <p class="section-subtitle">General information for public awareness</p>
                 </div>
                 <div class="table-container">
-                    <table class="incidents-table">
+                    <table id="incidents-table" class="incidents-table">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -187,7 +195,7 @@
     <div id="auth-modal" class="modal">
         <div class="modal-content auth-modal-content">
             <span class="close-button">&times;</span>
-            
+
             <!-- Modal Header -->
             <div class="auth-header">
                 <div class="auth-logo">
@@ -211,13 +219,15 @@
                         <label for="login-username">
                             <i class="fas fa-user"></i> Username or Email
                         </label>
-                        <input type="text" id="login-username" name="username" required placeholder="Enter your username">
+                        <input type="text" id="login-username" name="username" required
+                            placeholder="Enter your username">
                     </div>
                     <div class="form-group">
                         <label for="login-password">
                             <i class="fas fa-lock"></i> Password
                         </label>
-                        <input type="password" id="login-password" name="password" required placeholder="Enter your password">
+                        <input type="password" id="login-password" name="password" required
+                            placeholder="Enter your password">
                         <div class="password-toggle">
                             <i class="fas fa-eye" id="toggle-login-password"></i>
                         </div>
@@ -236,15 +246,15 @@
                 </form>
                 <div class="demo-credentials">
                     <p><strong>Demo Credentials:</strong></p>
-                    <p>👤 Citizen: <code>user</code> or <code>citizen</code></p>
-                    <p>🏛️ Authority: <code>admin</code> or <code>rescue</code></p>
+                    <p><i class="fas fa-user"></i> Citizen: <code>user</code> or <code>citizen</code></p>
+                    <p><i class="fas fa-landmark"></i> Authority: <code>admin</code> or <code>rescue</code></p>
                 </div>
             </div>
 
             <!-- Registration Section -->
             <div id="register-section" class="auth-section">
                 <h3>Create New Account</h3>
-                
+
                 <!-- Registration Type Selection -->
                 <div class="registration-types">
                     <div class="reg-type-card active" data-type="public">
@@ -273,43 +283,47 @@
                             <label for="firstname">
                                 <i class="fas fa-user"></i> First Name
                             </label>
-                            <input type="text" id="firstname" name="firstname" required placeholder="Enter your first name">
+                            <input type="text" id="firstname" name="firstname" required
+                                placeholder="Enter your first name">
                         </div>
                         <div class="form-group">
                             <label for="lastname">
                                 <i class="fas fa-user"></i> Last Name
                             </label>
-                            <input type="text" id="lastname" name="lastname" required placeholder="Enter your last name">
+                            <input type="text" id="lastname" name="lastname" required
+                                placeholder="Enter your last name">
                         </div>
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="email">
                             <i class="fas fa-envelope"></i> Email Address
                         </label>
                         <input type="email" id="email" name="email" required placeholder="Enter your email address">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="phone">
                             <i class="fas fa-phone"></i> Phone Number
                         </label>
                         <input type="tel" id="phone" name="phone" required placeholder="Enter your phone number">
                     </div>
-                    
+
                     <div class="form-group">
                         <label for="location">
                             <i class="fas fa-map-marker-alt"></i> Location
                         </label>
-                        <input type="text" id="location" name="location" required placeholder="Enter your city/location">
+                        <input type="text" id="location" name="location" required
+                            placeholder="Enter your city/location">
                     </div>
-                    
+
                     <div class="form-row">
                         <div class="form-group">
                             <label for="password">
                                 <i class="fas fa-lock"></i> Password
                             </label>
-                            <input type="password" id="password" name="password" required placeholder="Create a password">
+                            <input type="password" id="password" name="password" required
+                                placeholder="Create a password">
                             <div class="password-toggle">
                                 <i class="fas fa-eye" id="toggle-register-password"></i>
                             </div>
@@ -318,13 +332,14 @@
                             <label for="confirm-password">
                                 <i class="fas fa-lock"></i> Confirm Password
                             </label>
-                            <input type="password" id="confirm-password" name="confirm-password" required placeholder="Confirm your password">
+                            <input type="password" id="confirm-password" name="confirm-password" required
+                                placeholder="Confirm your password">
                             <div class="password-toggle">
                                 <i class="fas fa-eye" id="toggle-confirm-password"></i>
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="form-options">
                         <label class="checkbox-label">
                             <input type="checkbox" id="terms" required>
@@ -332,7 +347,7 @@
                             I agree to the <a href="#" class="terms-link">Terms of Service</a>
                         </label>
                     </div>
-                    
+
                     <button type="submit" class="btn btn--primary btn--large auth-btn">
                         <i class="fas fa-user-plus"></i> Create Account
                     </button>
@@ -345,7 +360,7 @@
     <div id="report-modal" class="modal">
         <div class="modal-content report-modal-content">
             <span class="close-button">&times;</span>
-            
+
             <!-- Report Header -->
             <div class="report-header">
                 <div class="report-logo">
@@ -354,7 +369,7 @@
                 </div>
                 <p>Help keep India's coastline safe</p>
             </div>
-            
+
             <!-- Report Form -->
             <form id="hazard-report-modal-form" class="hazard-form">
                 <div class="form-group">
@@ -373,7 +388,7 @@
                         <option value="other">Other</option>
                     </select>
                 </div>
-                
+
                 <div class="urgency-level">
                     <label>
                         <i class="fas fa-thermometer-half"></i> Urgency Level
@@ -405,25 +420,27 @@
                         </label>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="modal-location">
                         <i class="fas fa-map-marker-alt"></i> Location
                     </label>
-                    <input type="text" id="modal-location" name="location" required placeholder="Enter location or coordinates">
+                    <input type="text" id="modal-location" name="location" required
+                        placeholder="Enter location or coordinates">
                     <button type="button" class="btn btn--small" id="get-location">
                         <i class="fas fa-crosshairs"></i> Use My Location
                     </button>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="modal-description">
                         <i class="fas fa-align-left"></i> Description
                     </label>
-                    <textarea id="modal-description" name="description" required placeholder="Describe the hazard situation in detail..."></textarea>
+                    <textarea id="modal-description" name="description" required
+                        placeholder="Describe the hazard situation in detail..."></textarea>
                     <p class="help-text">Provide as much detail as possible to help authorities respond effectively</p>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="modal-contact">
                         <i class="fas fa-phone"></i> Contact Information
@@ -431,7 +448,7 @@
                     <input type="text" id="modal-contact" name="contact" placeholder="Phone number or email (optional)">
                     <p class="help-text">Optional: Provide contact info if authorities need to reach you</p>
                 </div>
-                
+
                 <button type="submit" class="btn btn--primary btn--large">
                     <i class="fas fa-paper-plane"></i> Submit Report
                 </button>
@@ -444,7 +461,8 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h4>Ocean Sentinels</h4>
-                <p>A citizen-centric coastal safety platform under the Digital India initiative, ensuring comprehensive coastal security through community participation and advanced monitoring systems.</p>
+                <p>A citizen-centric coastal safety platform under the Digital India initiative, ensuring comprehensive
+                    coastal security through community participation and advanced monitoring systems.</p>
                 <div class="footer-social">
                     <a href="#"><i class="fab fa-twitter"></i></a>
                     <a href="#"><i class="fab fa-facebook"></i></a>
@@ -454,7 +472,7 @@
             </div>
             <div class="footer-section">
                 <h4>Government Departments</h4>
-                <ul>    
+                <ul>
                     <li><a href="#">Ministry of Earth Sciences</a></li>
                     <li><a href="#">Indian National Centre for Ocean Information Services (INCOIS)</a></li>
                     <li><a href="#">Indian Coast Guard</a></li>
@@ -507,10 +525,10 @@
     <!-- JavaScript Files -->
     <!-- Mapbox GL JS -->
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
-    
+
     <!-- Leaflet JS for mini maps -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
+
     <script src="../scripts/api-client.js"></script>
     <script src="../scripts/navigation-manager.js"></script>
     <script src="../scripts/script.js"></script>
@@ -523,4 +541,5 @@
     <script defer src="/_vercel/speed-insights/script.js"></script>
 
 </body>
+
 </html>

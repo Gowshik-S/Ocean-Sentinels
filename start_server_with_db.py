@@ -19,7 +19,7 @@ load_dotenv("backend/env.local")
 from app.main import app
 
 if __name__ == "__main__":
-    print("🌊 Starting Ocean Hazard Server with Database...")
+    print("Starting Ocean Hazard Server with Database...")
     print("=" * 50)
     print(f"Database URL: {os.getenv('DATABASE_URL', 'Not set')}")
     print(f"Server will run on: http://127.0.0.1:8002")

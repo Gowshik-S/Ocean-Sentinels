@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Authority Analytics Dashboard - Ocean Sentinels | Government of India</title>
-    
+
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231e40af'/%3E%3Cpath d='M6 16 Q11 12 16 16 Q21 20 26 16' stroke='white' stroke-width='2' fill='none'/%3E%3Cpath d='M6 20 Q11 16 16 20 Q21 24 26 20' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E">
-    
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231e40af'/%3E%3Cpath d='M6 16 Q11 12 16 16 Q21 20 26 16' stroke='white' stroke-width='2' fill='none'/%3E%3Cpath d='M6 20 Q11 16 16 20 Q21 24 26 20' stroke='white' stroke-width='1.5' fill='none'/%3E%3C/svg%3E">
+
     <!-- Stylesheets -->
     <link rel="stylesheet" href="../styles/styles.css">
     <link rel="stylesheet" href="../styles/analytics.css">
-    
+
     <!-- Mapbox CSS for maps -->
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
-    
+
     <!-- Leaflet CSS for mini maps -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-    
+
     <!-- Chart.js for dynamic charts -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
+
     <!-- Vercel Web Analytics -->
     <script>
         window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
     </script>
     <script defer src="/_vercel/insights/script.js"></script>
 </head>
+
 <body>
 
     <!-- Government Header -->
@@ -53,14 +56,13 @@
                 <li><a href="index.html">Home</a></li>
                 <li><a href="analytics.html" class="active">Analytics</a></li>
                 <li><a href="my-reports.html">My Reports</a></li>
-                <!-- Incident Reports - Only visible for Admin, Authority, Rescue Team -->
-                <li id="nav-reports" style="display: none;">
-                    <a href="reports.html">Incident Reports</a>
+                <li id="nav-reports" style="display: none;"><a href="reports.html">Incident Reports</a></li>
+                <li id="nav-admin-console" style="display: none;"><a href="admin-dashboard.html">Admin</a></li>
+                <li id="nav-rescue-console" style="display: none;"><a href="rescue-console.html">Rescue</a></li>
+                <li id="nav-authority-console" style="display: none;"><a href="authority-console.html">Authority</a>
                 </li>
-                <li><a href="#about-us">About Us</a></li>
             </ul>
             <div class="nav-actions">
-                <!-- This will be dynamically updated by your main script.js -->
                 <a href="#" class="btn btn--secondary" id="login-btn">Login</a>
                 <a href="#" class="btn btn--primary" id="report-hazard-btn">Report Hazard</a>
             </div>
@@ -69,7 +71,7 @@
 
     <!-- Authority Analytics Dashboard -->
     <main class="analytics-main">
-        
+
         <!-- Loading Indicator -->
         <div id="loading-indicator" class="loading-container">
             <div class="loading-spinner"></div>
@@ -88,7 +90,7 @@
 
         <!-- Main Authority Analytics Content -->
         <div id="analytics-content" style="display: none;">
-            
+
             <!-- Overview Cards for Authorities -->
             <section class="overview-section">
                 <h2>Authority Dashboard Overview</h2>
@@ -102,7 +104,7 @@
                             <p>Total Incidents</p>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card warning">
                         <div class="stat-icon">
                             <i class="fas fa-fire"></i>
@@ -112,7 +114,7 @@
                             <p>Active Incidents</p>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card success">
                         <div class="stat-icon">
                             <i class="fas fa-check-circle"></i>
@@ -122,7 +124,7 @@
                             <p>Resolved Incidents</p>
                         </div>
                     </div>
-                    
+
                     <div class="stat-card info">
                         <div class="stat-icon">
                             <i class="fas fa-users"></i>
@@ -158,7 +160,7 @@
             <!-- Advanced Charts Section -->
             <section class="charts-section">
                 <h2>Advanced Analytics</h2>
-                
+
                 <!-- First Row of Charts -->
                 <div class="charts-row">
                     <div class="chart-container">
@@ -174,7 +176,7 @@
                         </div>
                         <canvas id="incident-trend-chart"></canvas>
                     </div>
-                    
+
                     <div class="chart-container">
                         <div class="chart-header">
                             <h3>Incident Status Distribution</h3>
@@ -191,7 +193,7 @@
                         </div>
                         <canvas id="hazard-types-chart"></canvas>
                     </div>
-                    
+
                     <div class="chart-container">
                         <div class="chart-header">
                             <h3>Urgency Level Distribution</h3>
@@ -226,7 +228,7 @@
                         </div>
                         <canvas id="response-time-chart"></canvas>
                     </div>
-                    
+
                     <div class="chart-container">
                         <div class="chart-header">
                             <h3>Team Performance</h3>
@@ -236,81 +238,9 @@
                 </div>
             </section>
 
-            <!-- Recent Incidents Table (Authority View) -->
-            <section class="incidents-section">
-                <div class="section-header">
-                    <h2>Recent Incidents</h2>
-                    <div class="section-controls">
-                        <select id="status-filter">
-                            <option value="">All Status</option>
-                            <option value="pending">Pending</option>
-                            <option value="active">Active</option>
-                            <option value="resolved">Resolved</option>
-                        </select>
-                        <select id="urgency-filter">
-                            <option value="">All Urgency</option>
-                            <option value="high">High</option>
-                            <option value="medium">Medium</option>
-                            <option value="low">Low</option>
-                        </select>
-                        <button class="btn btn--secondary" onclick="exportIncidentsData()">
-                            <i class="fas fa-download"></i> Export Data
-                        </button>
-                    </div>
-                </div>
-                <div class="table-container">
-                    <table class="incidents-table">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Type</th>
-                                <th>Location</th>
-                                <th>Status</th>
-                                <th>Urgency</th>
-                                <th>Reporter</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td colspan="8" class="loading-cell">Loading incidents...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
 
-            <!-- Performance Metrics Section -->
-            <section class="performance-section">
-                <h2>Performance Metrics</h2>
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <h4>System Health</h4>
-                            <span class="metric-status status-good">
-                                <i class="fas fa-check-circle"></i> Operational
-                            </span>
-                        </div>
-                        <div class="metric-details">
-                            <p>API Response Time: <span id="api-response-time">Loading...</span></p>
-                            <p>Database Status: <span id="db-status">Loading...</span></p>
-                            <p>Active Connections: <span id="active-connections">Loading...</span></p>
-                        </div>
-                    </div>
-                    
-                    <div class="metric-card">
-                        <div class="metric-header">
-                            <h4>Resource Utilization</h4>
-                        </div>
-                        <div class="metric-details">
-                            <p>Rescue Teams Available: <span id="teams-available">Loading...</span></p>
-                            <p>Equipment Status: <span id="equipment-status">Loading...</span></p>
-                            <p>Coverage Area: <span id="coverage-area">Loading...</span></p>
-                        </div>
-                    </div>
-                </div>
-            </section>
+
+
         </div>
     </main>
 
@@ -318,7 +248,7 @@
     <div id="auth-modal" class="modal">
         <div class="modal-content auth-modal-content">
             <span class="close-button">&times;</span>
-            
+
             <!-- Modal Header -->
             <div class="auth-header">
                 <div class="auth-logo">
@@ -342,13 +272,15 @@
                         <label for="login-username">
                             <i class="fas fa-user"></i> Username or Email
                         </label>
-                        <input type="text" id="login-username" name="username" required placeholder="Enter your username">
+                        <input type="text" id="login-username" name="username" required
+                            placeholder="Enter your username">
                     </div>
                     <div class="form-group">
                         <label for="login-password">
                             <i class="fas fa-lock"></i> Password
                         </label>
-                        <input type="password" id="login-password" name="password" required placeholder="Enter your password">
+                        <input type="password" id="login-password" name="password" required
+                            placeholder="Enter your password">
                         <div class="password-toggle">
                             <i class="fas fa-eye" id="toggle-login-password"></i>
                         </div>
@@ -367,8 +299,8 @@
                 </form>
                 <div class="demo-credentials">
                     <p><strong>Authority Demo Credentials:</strong></p>
-                    <p>🏛️ Authority: <code>admin</code> or <code>rescue</code></p>
-                    <p>👤 Citizen: <code>user</code> or <code>citizen</code></p>
+                    <p><i class="fas fa-landmark"></i> Authority: <code>admin</code> or <code>rescue</code></p>
+                    <p><i class="fas fa-user"></i> Citizen: <code>user</code> or <code>citizen</code></p>
                 </div>
             </div>
 
@@ -387,7 +319,7 @@
     <div id="report-modal" class="modal">
         <div class="modal-content report-modal-content">
             <span class="close-button">&times;</span>
-            
+
             <!-- Report Header -->
             <div class="report-header">
                 <div class="report-logo">
@@ -396,7 +328,7 @@
                 </div>
                 <p>Help keep India's coastline safe</p>
             </div>
-            
+
             <!-- Report Form -->
             <form id="hazard-report-modal-form" class="hazard-form">
                 <div class="form-group">
@@ -415,7 +347,7 @@
                         <option value="other">Other</option>
                     </select>
                 </div>
-                
+
                 <div class="urgency-level">
                     <label>
                         <i class="fas fa-thermometer-half"></i> Urgency Level
@@ -447,25 +379,27 @@
                         </label>
                     </div>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="modal-location">
                         <i class="fas fa-map-marker-alt"></i> Location
                     </label>
-                    <input type="text" id="modal-location" name="location" required placeholder="Enter location or coordinates">
+                    <input type="text" id="modal-location" name="location" required
+                        placeholder="Enter location or coordinates">
                     <button type="button" class="btn btn--small" id="get-location">
                         <i class="fas fa-crosshairs"></i> Use My Location
                     </button>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="modal-description">
                         <i class="fas fa-align-left"></i> Description
                     </label>
-                    <textarea id="modal-description" name="description" required placeholder="Describe the hazard situation in detail..."></textarea>
+                    <textarea id="modal-description" name="description" required
+                        placeholder="Describe the hazard situation in detail..."></textarea>
                     <p class="help-text">Provide as much detail as possible to help authorities respond effectively</p>
                 </div>
-                
+
                 <div class="form-group">
                     <label for="modal-contact">
                         <i class="fas fa-phone"></i> Contact Information
@@ -473,7 +407,7 @@
                     <input type="text" id="modal-contact" name="contact" placeholder="Phone number or email (optional)">
                     <p class="help-text">Optional: Provide contact info if authorities need to reach you</p>
                 </div>
-                
+
                 <button type="submit" class="btn btn--primary btn--large">
                     <i class="fas fa-paper-plane"></i> Submit Report
                 </button>
@@ -486,7 +420,8 @@
         <div class="footer-content">
             <div class="footer-section">
                 <h4>Ocean Sentinels</h4>
-                <p>A citizen-centric coastal safety platform under the Digital India initiative, ensuring comprehensive coastal security through community participation and advanced monitoring systems.</p>
+                <p>A citizen-centric coastal safety platform under the Digital India initiative, ensuring comprehensive
+                    coastal security through community participation and advanced monitoring systems.</p>
                 <div class="footer-social">
                     <a href="#"><i class="fab fa-twitter"></i></a>
                     <a href="#"><i class="fab fa-facebook"></i></a>
@@ -496,7 +431,7 @@
             </div>
             <div class="footer-section">
                 <h4>Government Departments</h4>
-                <ul>    
+                <ul>
                     <li><a href="#">Ministry of Earth Sciences</a></li>
                     <li><a href="#">Indian National Centre for Ocean Information Services (INCOIS)</a></li>
                     <li><a href="#">Indian Coast Guard</a></li>
@@ -549,10 +484,10 @@
     <!-- JavaScript Files -->
     <!-- Mapbox GL JS -->
     <script src='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js'></script>
-    
+
     <!-- Leaflet JS for mini maps -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    
+
     <script src="../scripts/api-client.js"></script>
     <script src="../scripts/navigation-manager.js"></script>
     <script src="../scripts/script.js"></script>
@@ -565,4 +500,5 @@
     <script defer src="/_vercel/speed-insights/script.js"></script>
 
 </body>
+
 </html>

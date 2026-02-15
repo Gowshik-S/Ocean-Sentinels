@@ -26,24 +26,24 @@ from sqlalchemy import text
 async def lifespan(app: FastAPI):
     """Application lifespan events"""
     # Startup
-    print("🚀 Starting Ocean Hazard Backend...")
-    print(f"📊 Settings: HOST={settings.HOST}, PORT={settings.PORT}")
-    print(f"🔗 Database URL: {settings.DATABASE_URL[:50]}..." if settings.DATABASE_URL else "❌ No DATABASE_URL")
+    print("Starting Ocean Hazard Backend...")
+    print(f"Settings: HOST={settings.HOST}, PORT={settings.PORT}")
+    print(f"Database URL: {settings.DATABASE_URL[:50]}..." if settings.DATABASE_URL else "No DATABASE_URL")
     
     try:
         # Create database tables
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
-        print("✅ Database tables created successfully")
-        print("🌊 Ocean Hazard Backend is ready!")
+        print("Database tables created successfully")
+        print("Ocean Hazard Backend is ready!")
     except Exception as e:
-        print(f"❌ Database connection failed: {e}")
-        print("⚠️  Continuing without database (app will have limited functionality)")
+        print(f"Database connection failed: {e}")
+        print("Continuing without database (app will have limited functionality)")
     
     yield
     
     # Shutdown
-    print("🛑 Shutting down Ocean Hazard Backend...")
+    print("Shutting down Ocean Hazard Backend...")
 
 # Create FastAPI application
 app = FastAPI(
@@ -90,7 +90,7 @@ async def health_check():
             await conn.execute(text("SELECT 1"))
         db_status = "connected"
     except Exception as e:
-        print(f"⚠️  Database health check failed: {e}")
+        print(f"Database health check failed: {e}")
         db_status = f"error: {str(e)}"
     
     return {

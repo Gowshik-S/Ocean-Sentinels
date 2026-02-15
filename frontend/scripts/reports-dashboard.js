@@ -22,25 +22,25 @@ class ReportsManager {
     async init() {
         try {
             console.log('🚀 Initializing Reports Dashboard...');
-            
+
             // Check authentication and role access
             await this.checkRoleAccess();
             console.log('✅ Role access verified');
-            
+
             // Setup UI based on user role
             this.setupRoleBasedUI();
             console.log('✅ UI setup complete');
-            
+
             // Load reports data
             await this.loadReports();
             console.log('✅ Reports loaded');
-            
+
             // Setup event listeners
             this.setupEventListeners();
             console.log('✅ Event listeners setup complete');
-            
+
             console.log('🎉 Reports Dashboard initialized successfully!');
-            
+
         } catch (error) {
             console.error('❌ Failed to initialize Reports Dashboard:', error);
             this.showError('Failed to initialize dashboard: ' + error.message);
@@ -95,7 +95,7 @@ class ReportsManager {
                 if (pageTitle) pageTitle.textContent = 'Admin - Incident Reports Dashboard';
                 if (pageDescription) pageDescription.textContent = 'Complete oversight and management of all incident reports';
                 if (roleBadge) {
-                    roleBadge.textContent = '👨‍💼 Administrator';
+                    roleBadge.textContent = 'Administrator';
                     roleBadge.style.background = 'rgba(231, 76, 60, 0.3)';
                 }
                 break;
@@ -104,7 +104,7 @@ class ReportsManager {
                 if (pageTitle) pageTitle.textContent = 'Rescue Team - Incident Response Dashboard';
                 if (pageDescription) pageDescription.textContent = 'Manage and respond to emergency incidents in your area';
                 if (roleBadge) {
-                    roleBadge.textContent = '🚁 Rescue Team';
+                    roleBadge.textContent = 'Rescue Team';
                     roleBadge.style.background = 'rgba(230, 126, 34, 0.3)';
                 }
                 break;
@@ -113,7 +113,7 @@ class ReportsManager {
                 if (pageTitle) pageTitle.textContent = 'Authority - Incident Oversight Dashboard';
                 if (pageDescription) pageDescription.textContent = 'Monitor and coordinate incident response activities';
                 if (roleBadge) {
-                    roleBadge.textContent = '🏛️ Authority';
+                    roleBadge.textContent = 'Authority';
                     roleBadge.style.background = 'rgba(52, 152, 219, 0.3)';
                 }
                 break;
@@ -122,7 +122,7 @@ class ReportsManager {
                 if (pageTitle) pageTitle.textContent = 'Incident Reports Dashboard';
                 if (pageDescription) pageDescription.textContent = 'Monitor and manage incident reports';
                 if (roleBadge) {
-                    roleBadge.textContent = '👤 User';
+                    roleBadge.textContent = 'User';
                     roleBadge.style.background = 'rgba(149, 165, 166, 0.3)';
                 }
                 break;
@@ -135,7 +135,7 @@ class ReportsManager {
 
             // Use the API client instead of direct fetch
             const response = await this.api.getIncidents();
-            
+
             console.log('📊 API Response:', response);
 
             // Handle different response formats
@@ -205,7 +205,7 @@ class ReportsManager {
 
         // Apply filters
         this.filteredReports = this.reports.filter(report => {
-            const matchesSearch = !this.filters.search || 
+            const matchesSearch = !this.filters.search ||
                 report.title?.toLowerCase().includes(this.filters.search) ||
                 report.location?.toLowerCase().includes(this.filters.search) ||
                 report.description?.toLowerCase().includes(this.filters.search) ||
@@ -227,7 +227,7 @@ class ReportsManager {
         document.getElementById('status-filter').value = '';
         document.getElementById('hazard-filter').value = '';
         document.getElementById('urgency-filter').value = '';
-        
+
         this.filters = { search: '', status: '', hazard_type: '', urgency: '' };
         this.filteredReports = [...this.reports];
         this.currentPage = 1;
@@ -260,10 +260,10 @@ class ReportsManager {
     createReportCard(report) {
         const card = document.createElement('div');
         card.className = `report-card report-card--${report.urgency || 'medium'}`;
-        
+
         const statusClass = this.getStatusClass(report.status);
         const urgencyClass = this.getUrgencyClass(report.urgency);
-        
+
         card.innerHTML = `
             <div class="report-header">
                 <h3 class="report-title">${report.hazard_type || 'Untitled Report'}</h3>
@@ -306,13 +306,13 @@ class ReportsManager {
                 ${this.getActionButtons(report)}
             </div>
         `;
-        
+
         return card;
     }
 
     getActionButtons(report) {
         let buttons = '';
-        
+
         // Role-based action buttons
         switch (this.currentUser.role) {
             case 'admin':
@@ -325,7 +325,7 @@ class ReportsManager {
                     </button>
                 `;
                 break;
-                
+
             case 'authority':
                 if (report.status === 'pending') {
                     buttons += `
@@ -335,7 +335,7 @@ class ReportsManager {
                     `;
                 }
                 break;
-                
+
             case 'rescue_team':
                 // Verify incident (for pending incidents)
                 if (report.status === 'pending') {
@@ -363,7 +363,7 @@ class ReportsManager {
                 }
                 break;
         }
-        
+
         return buttons;
     }
 
@@ -392,7 +392,7 @@ class ReportsManager {
 
     formatDate(dateString) {
         if (!dateString) return 'Unknown date';
-        
+
         try {
             const date = new Date(dateString);
             return date.toLocaleString('en-IN', {
@@ -409,7 +409,7 @@ class ReportsManager {
 
     updatePagination() {
         const totalPages = Math.ceil(this.filteredReports.length / this.reportsPerPage);
-        
+
         document.getElementById('page-info').textContent = `Page ${this.currentPage} of ${totalPages}`;
         document.getElementById('prev-btn').disabled = this.currentPage <= 1;
         document.getElementById('next-btn').disabled = this.currentPage >= totalPages;
@@ -464,16 +464,64 @@ class ReportsManager {
         }
     }
 
-    verifyReport(reportId) {
-        alert(`Verify report functionality will be implemented here for report ID: ${reportId}`);
+    async verifyReport(reportId) {
+        if (!confirm('Verify this incident report?')) return;
+        try {
+            const response = await this.api.verifyIncident(reportId);
+            await this.showSuccessMessage(response.message || 'Incident verified');
+            this.loadReports();
+        } catch (e) {
+            this.showError('Failed to verify: ' + e.message);
+        }
     }
 
-    assignReport(reportId) {
-        alert(`Assign report functionality will be implemented here for report ID: ${reportId}`);
+    async assignReport(reportId) {
+        try {
+            // Fetch rescue teams
+            const users = await this.api.getUsers();
+            const rescueTeams = users.filter(u => u.role === 'RESCUE_TEAM' || u.role === 'rescue_team');
+
+            if (rescueTeams.length === 0) {
+                alert('No rescue teams available.');
+                return;
+            }
+
+            // Build selection list
+            let teamList = 'Select a Rescue Team:\n\n';
+            rescueTeams.forEach((t, i) => {
+                teamList += `${i + 1}. ${t.first_name} ${t.last_name} (${t.email})${t.location ? ' - ' + t.location : ''}\n`;
+            });
+            teamList += '\nEnter the number:';
+
+            const choice = prompt(teamList);
+            if (!choice) return;
+
+            const idx = parseInt(choice) - 1;
+            if (isNaN(idx) || idx < 0 || idx >= rescueTeams.length) {
+                alert('Invalid selection.');
+                return;
+            }
+
+            const selectedTeam = rescueTeams[idx];
+            if (!confirm(`Assign this incident to ${selectedTeam.first_name} ${selectedTeam.last_name}?`)) return;
+
+            await this.api.assignIncident(reportId, selectedTeam.id);
+            await this.showSuccessMessage('Incident assigned successfully!');
+            this.loadReports();
+        } catch (e) {
+            this.showError('Failed to assign: ' + e.message);
+        }
     }
 
-    approveReport(reportId) {
-        alert(`Approve report functionality will be implemented here for report ID: ${reportId}`);
+    async approveReport(reportId) {
+        if (!confirm('Approve this incident?')) return;
+        try {
+            const response = await this.api.verifyIncident(reportId);
+            await this.showSuccessMessage(response.message || 'Incident approved');
+            this.loadReports();
+        } catch (e) {
+            this.showError('Failed to approve: ' + e.message);
+        }
     }
 
     async verifyIncident(reportId) {
@@ -536,9 +584,9 @@ class ReportsManager {
         successDiv.className = 'alert alert-success';
         successDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 1000; padding: 15px; background: #d4edda; color: #155724; border: 1px solid #c3e6cb; border-radius: 4px;';
         successDiv.textContent = message;
-        
+
         document.body.appendChild(successDiv);
-        
+
         // Remove after 3 seconds
         setTimeout(() => {
             if (successDiv.parentNode) {

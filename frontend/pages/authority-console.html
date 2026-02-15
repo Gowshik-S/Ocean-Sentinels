@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authority Console - Ocean Sentinels</title>
+    <link rel="stylesheet" href="../styles/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='15' fill='%231e40af'/%3E%3Cpath d='M6 16 Q11 12 16 16 Q21 20 26 16' stroke='white' stroke-width='2' fill='none'/%3E%3C/svg%3E">
+    <style>
+        .console-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        .console-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .console-header h1 {
+            color: var(--primary-color);
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        .console-header p {
+            color: #6c757d;
+        }
+        .console-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        .console-stat-card {
+            background: linear-gradient(135deg, #005A9C, #0077cc);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 90, 156, 0.2);
+        }
+        .console-stat-card .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+        .console-stat-card .stat-label {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+        .console-section {
+            background: var(--card-bg, white);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 10px var(--shadow-color, rgba(0,0,0,0.1));
+            border: 1px solid var(--border-color, #dee2e6);
+        }
+        .console-section h2 {
+            color: var(--primary-color);
+            margin-bottom: 16px;
+            font-size: 1.3rem;
+        }
+        .incident-card {
+            background: var(--section-bg, #f8f9fa);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.2s;
+        }
+        .incident-card:hover {
+            transform: translateX(4px);
+        }
+        .incident-card h4 {
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+        .incident-card .meta {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-bottom: 12px;
+        }
+        .incident-card .meta i {
+            color: var(--primary-color);
+            width: 16px;
+        }
+        .incident-actions {
+            display: flex;
+            gap: 8px;
+        }
+        .incident-actions button {
+            padding: 6px 14px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+        .incident-actions button:hover { opacity: 0.85; }
+        .btn-approve {
+            background: #28a745;
+            color: white;
+        }
+        .btn-monitor {
+            background: #17a2b8;
+            color: white;
+        }
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .filter-bar select, .filter-bar input {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color, #ddd);
+            border-radius: 6px;
+            background: var(--card-bg, white);
+            color: var(--text-dark);
+        }
+        .gps-location {
+            background: var(--section-bg, #f8f9fa);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .gps-location i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+        .gps-location .location-text {
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+        .gps-location .location-coords {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <header class="main-header">
+        <nav class="navbar">
+            <a href="index.html" class="nav-logo">Ocean Sentinels</a>
+            <ul class="nav-menu">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="analytics.html">Analytics</a></li>
+                <li id="nav-reports" style="display: none;"><a href="reports.html">Incident Reports</a></li>
+                <li id="nav-admin-console" style="display: none;"><a href="admin-dashboard.html">Admin</a></li>
+                <li id="nav-rescue-console" style="display: none;"><a href="rescue-console.html">Rescue</a></li>
+                <li id="nav-authority-console" style="display: none;"><a href="authority-console.html" class="active"><i class="fas fa-shield-alt"></i> Authority</a></li>
+            </ul>
+            <div class="nav-actions">
+                <span class="welcome-user" id="welcome-message">Welcome, Authority</span>
+                <a href="index.html" class="btn btn--secondary" id="logout-btn">Logout</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="console-container">
+        <div class="console-header">
+            <h1><i class="fas fa-shield-alt"></i> Authority Console</h1>
+            <p>Monitor and oversee incident response across your jurisdiction</p>
+        </div>
+
+        <!-- GPS Location -->
+        <div class="gps-location" id="gps-location">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+                <div class="location-text" id="detected-location">Detecting location...</div>
+                <div class="location-coords" id="detected-coords"></div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="console-stats">
+            <div class="console-stat-card">
+                <div class="stat-number" id="total-incidents">0</div>
+                <div class="stat-label">Total Incidents</div>
+            </div>
+            <div class="console-stat-card" style="background: linear-gradient(135deg, #ffc107, #e0a800);">
+                <div class="stat-number" id="pending-count" style="color: #212529;">0</div>
+                <div class="stat-label" style="color: #212529;">Pending Review</div>
+            </div>
+            <div class="console-stat-card" style="background: linear-gradient(135deg, #fd7e14, #e65100);">
+                <div class="stat-number" id="active-count">0</div>
+                <div class="stat-label">Active</div>
+            </div>
+            <div class="console-stat-card" style="background: linear-gradient(135deg, #28a745, #1e7e34);">
+                <div class="stat-number" id="resolved-count">0</div>
+                <div class="stat-label">Resolved</div>
+            </div>
+        </div>
+
+        <!-- Incident Oversight -->
+        <div class="console-section">
+            <h2><i class="fas fa-clipboard-list"></i> Incident Oversight</h2>
+            <div class="filter-bar">
+                <select id="status-filter" onchange="filterIncidents()">
+                    <option value="">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="verified">Verified</option>
+                    <option value="in_progress">In Progress</option>
+                    <option value="resolved">Resolved</option>
+                </select>
+                <select id="urgency-filter" onchange="filterIncidents()">
+                    <option value="">All Urgency</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                </select>
+                <button class="btn btn--primary" onclick="loadAllIncidents()" style="padding: 8px 16px;">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+            <div id="incidents-list">
+                <p style="text-align:center; color: #6c757d;"><i class="fas fa-spinner fa-spin"></i> Loading incidents...</p>
+            </div>
+        </div>
+
+        <!-- Rescue Teams Overview -->
+        <div class="console-section">
+            <h2><i class="fas fa-users"></i> Rescue Teams</h2>
+            <div id="rescue-teams-list">
+                <p style="text-align:center; color: #6c757d;"><i class="fas fa-spinner fa-spin"></i> Loading teams...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="main-footer">
+        <div class="footer-bottom">
+            <p>&copy; 2025 Ocean Sentinels Authority Console, Ministry of Earth Sciences, Government of India.</p>
+        </div>
+    </footer>
+
+    <script src="../scripts/api-client.js"></script>
+    <script src="../scripts/navigation-manager.js"></script>
+    <script>
+    let allIncidents = [];
+    
+    document.addEventListener('DOMContentLoaded', async () => {
+        const api = new OceanHazardAPI();
+        
+        // Check access
+        const user = JSON.parse(localStorage.getItem('oceanGuardUser') || sessionStorage.getItem('oceanGuardUser') || 'null');
+        if (!user || (user.role !== 'authority' && user.role !== 'admin')) {
+            alert('Access denied. This page is for authorities only.');
+            window.location.href = 'index.html';
+            return;
+        }
+
+        // GPS auto-detect
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (pos) => {
+                    const lat = pos.coords.latitude.toFixed(4);
+                    const lng = pos.coords.longitude.toFixed(4);
+                    document.getElementById('detected-coords').textContent = `${lat}, ${lng}`;
+                    try {
+                        const resp = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw`);
+                        const data = await resp.json();
+                        const place = data.features?.[0]?.place_name || `${lat}, ${lng}`;
+                        document.getElementById('detected-location').textContent = place;
+                    } catch {
+                        document.getElementById('detected-location').textContent = `${lat}, ${lng}`;
+                    }
+                },
+                () => {
+                    document.getElementById('detected-location').textContent = 'Location unavailable';
+                }
+            );
+        }
+
+        await loadAllIncidents();
+        await loadRescueTeams();
+
+        // Logout
+        document.getElementById('logout-btn')?.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('oceanGuardToken');
+            localStorage.removeItem('oceanGuardUser');
+            sessionStorage.clear();
+            window.location.href = 'index.html';
+        });
+    });
+
+    async function loadAllIncidents() {
+        const api = new OceanHazardAPI();
+        try {
+            const result = await api.getIncidents();
+            allIncidents = Array.isArray(result) ? result : (result.incidents || result.items || []);
+            
+            // Update stats
+            document.getElementById('total-incidents').textContent = allIncidents.length;
+            document.getElementById('pending-count').textContent = allIncidents.filter(i => i.status === 'pending').length;
+            document.getElementById('active-count').textContent = allIncidents.filter(i => ['in_progress','deployed','verified','active'].includes(i.status)).length;
+            document.getElementById('resolved-count').textContent = allIncidents.filter(i => ['resolved','closed'].includes(i.status)).length;
+
+            filterIncidents();
+        } catch (error) {
+            document.getElementById('incidents-list').innerHTML = `<p style="color:#dc3545; text-align:center;">Failed: ${error.message}</p>`;
+        }
+    }
+
+    function filterIncidents() {
+        const statusFilter = document.getElementById('status-filter').value;
+        const urgencyFilter = document.getElementById('urgency-filter').value;
+        
+        let filtered = allIncidents;
+        if (statusFilter) filtered = filtered.filter(i => i.status === statusFilter);
+        if (urgencyFilter) filtered = filtered.filter(i => i.urgency === urgencyFilter);
+
+        const container = document.getElementById('incidents-list');
+        if (filtered.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color: #6c757d;">No incidents match filters.</p>';
+            return;
+        }
+
+        container.innerHTML = filtered.map(inc => {
+            const urgencyColor = { high: '#dc3545', medium: '#fd7e14', low: '#ffc107' }[inc.urgency] || '#6c757d';
+            return `
+                <div class="incident-card" style="border-left-color: ${urgencyColor};">
+                    <h4>${inc.hazard_type || 'Unknown'} - ${inc.reference_id || inc.id}</h4>
+                    <div class="meta">
+                        <span><i class="fas fa-map-marker-alt"></i> ${inc.location || 'N/A'}</span>
+                        <span><i class="fas fa-clock"></i> ${new Date(inc.created_at).toLocaleDateString()}</span>
+                        <span><i class="fas fa-signal"></i> ${(inc.status || 'unknown').toUpperCase()}</span>
+                        <span style="color: ${urgencyColor}; font-weight: bold;"><i class="fas fa-exclamation-circle"></i> ${(inc.urgency || 'N/A').toUpperCase()}</span>
+                    </div>
+                    <p style="margin-bottom: 12px; color: var(--text-dark);">${(inc.description || 'No description').substring(0, 150)}</p>
+                    <div class="incident-actions">
+                        ${inc.status === 'pending' ? `<button class="btn-approve" onclick="approveIncident('${inc.id}')"><i class="fas fa-check"></i> Approve</button>` : ''}
+                        <button class="btn-monitor" onclick="viewDetails('${inc.id}')"><i class="fas fa-eye"></i> Details</button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    async function loadRescueTeams() {
+        const api = new OceanHazardAPI();
+        try {
+            const users = await api.getUsers();
+            const teams = users.filter(u => u.role === 'RESCUE_TEAM' || u.role === 'rescue_team');
+            
+            const container = document.getElementById('rescue-teams-list');
+            if (teams.length === 0) {
+                container.innerHTML = '<p style="text-align:center; color: #6c757d;">No rescue teams registered.</p>';
+                return;
+            }
+            container.innerHTML = teams.map(t => `
+                <div class="incident-card">
+                    <h4><i class="fas fa-life-ring"></i> ${t.first_name} ${t.last_name}</h4>
+                    <div class="meta">
+                        <span><i class="fas fa-envelope"></i> ${t.email}</span>
+                        <span><i class="fas fa-phone"></i> ${t.phone || 'N/A'}</span>
+                        <span><i class="fas fa-map-marker-alt"></i> ${t.location || 'N/A'}</span>
+                        <span style="color: ${t.is_active ? '#28a745' : '#dc3545'}; font-weight: bold;">
+                            <i class="fas fa-circle"></i> ${t.is_active ? 'Active' : 'Inactive'}
+                        </span>
+                    </div>
+                </div>
+            `).join('');
+        } catch (error) {
+            document.getElementById('rescue-teams-list').innerHTML = `<p style="color:#dc3545; text-align:center;">Failed: ${error.message}</p>`;
+        }
+    }
+
+    async function approveIncident(id) {
+        if (!confirm('Approve this incident?')) return;
+        try {
+            const api = new OceanHazardAPI();
+            await api.verifyIncident(id);
+            alert('Incident approved!');
+            await loadAllIncidents();
+        } catch (e) { alert('Failed: ' + e.message); }
+    }
+
+    function viewDetails(id) {
+        const inc = allIncidents.find(i => i.id == id);
+        if (inc) {
+            alert(`Incident Details:\n\nType: ${inc.hazard_type}\nID: ${inc.reference_id || inc.id}\nLocation: ${inc.location}\nStatus: ${inc.status}\nUrgency: ${inc.urgency}\n\nDescription: ${inc.description}`);
+        }
+    }
+    </script>
+</body>
+</html>
