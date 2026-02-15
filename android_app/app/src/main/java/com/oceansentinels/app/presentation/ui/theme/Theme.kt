@@ -115,15 +115,17 @@ fun OceanSentinelsTheme(
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
-            val window = (view.context as Activity).window
-            // Use primary color for light theme, dark background for dark theme
-            window.statusBarColor = if (darkTheme) {
-                DarkModeColors.Background.toArgb()
-            } else {
-                colorScheme.primary.toArgb()
+            val activity = view.context as? Activity
+            activity?.window?.let { window ->
+                // Use primary color for light theme, dark background for dark theme
+                window.statusBarColor = if (darkTheme) {
+                    DarkModeColors.Background.toArgb()
+                } else {
+                    colorScheme.primary.toArgb()
+                }
+                // Light status bar = dark icons (for light backgrounds), dark status bar = light icons
+                WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
             }
-            // Light status bar icons for dark theme, dark icons for light theme with yellow header
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = darkTheme
         }
     }
 

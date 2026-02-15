@@ -59,9 +59,14 @@ class DeviceIdentifier @Inject constructor(
         var fp = prefs.getString(KEY_DEVICE_FINGERPRINT, null)
         if (fp == null) {
             val deviceId = getDeviceId()
-            val androidId = Settings.Secure.getString(
-                context.contentResolver, Settings.Secure.ANDROID_ID
-            ) ?: "unknown"
+            val androidId = try {
+                Settings.Secure.getString(
+                    context.contentResolver, Settings.Secure.ANDROID_ID
+                )
+            } catch (e: Exception) {
+                Timber.w(e, "$TAG: Failed to read ANDROID_ID")
+                null
+            } ?: UUID.randomUUID().toString().replace("-", "").take(16)
             fp = generateFingerprint(deviceId, androidId)
             prefs.edit().putString(KEY_DEVICE_FINGERPRINT, fp).apply()
             Timber.i("$TAG: Generated device fingerprint: $fp")

@@ -91,7 +91,10 @@ class MeshForegroundService : Service() {
         super.onCreate()
         Timber.i("$TAG: Service created")
 
-        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        connectivityManager = getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+
+        // Initialize hasInternet with actual state before async callback
+        hasInternet = isInternetAvailable()
 
         createNotificationChannel()
         registerNetworkCallback()

@@ -233,8 +233,9 @@ fun MeshNetworkScreen(
                         onLongitudeChange = { longitude = it },
                         isSending = sendState is MeshSendState.Sending,
                         onSubmit = {
+                            val hazard = selectedHazardType ?: return@QuickReportForm
                             viewModel.reportHazard(
-                                hazardType = selectedHazardType!!,
+                                hazardType = hazard,
                                 location = "$latitude, $longitude",
                                 latitude = latitude.toDoubleOrNull(),
                                 longitude = longitude.toDoubleOrNull(),

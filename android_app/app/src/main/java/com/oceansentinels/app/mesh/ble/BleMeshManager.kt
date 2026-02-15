@@ -102,6 +102,8 @@ class BleMeshManager(private val context: Context) {
     /** Timeout (ms) to clear stale incomplete buffers */
     private val bufferTimestamps = ConcurrentHashMap<String, Long>()
     private val BUFFER_STALE_TIMEOUT_MS = 10_000L
+    /** Lock for synchronized fragment reassembly across GATT server/client callbacks */
+    private val bufferLock = Any()
 
     // ==================== Callbacks ====================
 
@@ -255,36 +257,42 @@ class BleMeshManager(private val context: Context) {
 
     private val gattServerCallback = object : BluetoothGattServerCallback() {
         override fun onConnectionStateChange(device: BluetoothDevice, status: Int, newState: Int) {
-            when (newState) {
-                BluetoothProfile.STATE_CONNECTED -> {
-                    Timber.i("$TAG: Device connected to server: ${device.address}")
-                    val peer = MeshPeer(
-                        address = device.address,
-                        name = device.name,
-                        rssi = 0,
-                        isCodedPhy = false,
-                        primaryPhy = BluetoothDevice.PHY_LE_1M,
-                        secondaryPhy = 0,
-                        lastSeenMillis = System.currentTimeMillis(),
-                        isConnected = true,
-                        hasOceanService = true
-                    )
-                    discoveredPeers[device.address] = peer
-                    updatePeerCounts()
-                    onPeerConnected?.invoke(peer)
-                }
-                BluetoothProfile.STATE_DISCONNECTED -> {
-                    Timber.i("$TAG: Device disconnected from server: ${device.address}")
-                    // Keep peer in discovered list (mark disconnected) so both
-                    // devices maintain symmetric visibility of each other.
-                    discoveredPeers[device.address]?.let { peer ->
-                        discoveredPeers[device.address] = peer.copy(isConnected = false)
+            try {
+                when (newState) {
+                    BluetoothProfile.STATE_CONNECTED -> {
+                        Timber.i("$TAG: Device connected to server: ${device.address}")
+                        val peer = MeshPeer(
+                            address = device.address,
+                            name = device.name,
+                            rssi = 0,
+                            isCodedPhy = false,
+                            primaryPhy = BluetoothDevice.PHY_LE_1M,
+                            secondaryPhy = 0,
+                            lastSeenMillis = System.currentTimeMillis(),
+                            isConnected = true,
+                            hasOceanService = true
+                        )
+                        discoveredPeers[device.address] = peer
+                        updatePeerCounts()
+                        onPeerConnected?.invoke(peer)
                     }
-                    incomingBuffers.remove(device.address)
-                    bufferTimestamps.remove(device.address)
-                    updatePeerCounts()
-                    onPeerDisconnected?.invoke(device.address)
+                    BluetoothProfile.STATE_DISCONNECTED -> {
+                        Timber.i("$TAG: Device disconnected from server: ${device.address}")
+                        // Keep peer in discovered list (mark disconnected) so both
+                        // devices maintain symmetric visibility of each other.
+                        discoveredPeers[device.address]?.let { peer ->
+                            discoveredPeers[device.address] = peer.copy(isConnected = false)
+                        }
+                        synchronized(bufferLock) {
+                            incomingBuffers.remove(device.address)
+                            bufferTimestamps.remove(device.address)
+                        }
+                        updatePeerCounts()
+                        onPeerDisconnected?.invoke(device.address)
+                    }
                 }
+            } catch (e: Exception) {
+                Timber.e(e, "$TAG: Error in GATT server connection state change")
             }
         }
 
@@ -302,37 +310,40 @@ class BleMeshManager(private val context: Context) {
                 val address = device.address
                 val now = System.currentTimeMillis()
 
-                // Check for stale buffer and reset if timed out
-                val lastWrite = bufferTimestamps[address] ?: 0L
-                if (now - lastWrite > BUFFER_STALE_TIMEOUT_MS) {
-                    incomingBuffers.remove(address)
+                val parsedMessage = synchronized(bufferLock) {
+                    // Check for stale buffer and reset if timed out
+                    val lastWrite = bufferTimestamps[address] ?: 0L
+                    if (now - lastWrite > BUFFER_STALE_TIMEOUT_MS) {
+                        incomingBuffers.remove(address)
+                    }
+
+                    val buffer = incomingBuffers.getOrPut(address) { java.io.ByteArrayOutputStream() }
+                    buffer.write(value)
+                    bufferTimestamps[address] = now
+
+                    // Try to parse the accumulated data as a complete JSON message
+                    val accumulated = buffer.toByteArray()
+                    val json = String(accumulated, Charsets.UTF_8).trim()
+
+                    // Quick check: valid JSON object starts with { and ends with }
+                    if (json.startsWith("{") && json.endsWith("}")) {
+                        val message = parseMeshMessage(json)
+                        if (message != null) {
+                            incomingBuffers.remove(address)
+                            bufferTimestamps.remove(address)
+                            message // return parsed message
+                        } else if (json.count { it == '{' } == json.count { it == '}' }) {
+                            Timber.w("$TAG: Malformed JSON from $address, clearing buffer")
+                            incomingBuffers.remove(address)
+                            bufferTimestamps.remove(address)
+                            null
+                        } else null
+                    } else null
                 }
 
-                val buffer = incomingBuffers.getOrPut(address) { java.io.ByteArrayOutputStream() }
-                buffer.write(value)
-                bufferTimestamps[address] = now
-
-                // Try to parse the accumulated data as a complete JSON message
-                val accumulated = buffer.toByteArray()
-                val json = String(accumulated, Charsets.UTF_8).trim()
-
-                // Quick check: valid JSON object starts with { and ends with }
-                if (json.startsWith("{") && json.endsWith("}")) {
-                    val message = parseMeshMessage(json)
-                    if (message != null) {
-                        // Successfully parsed — clear buffer and process
-                        incomingBuffers.remove(address)
-                        bufferTimestamps.remove(address)
-                        handleIncomingData(message, address)
-                    }
-                    // If parsing failed despite matching braces, clear buffer to avoid
-                    // accumulating garbage (corrupt data)
-                    else if (json.count { it == '{' } == json.count { it == '}' }) {
-                        Timber.w("$TAG: Malformed JSON from $address, clearing buffer")
-                        incomingBuffers.remove(address)
-                        bufferTimestamps.remove(address)
-                    }
-                    // else: unbalanced braces → still waiting for more data
+                // Handle outside synchronized block to avoid holding lock during callback
+                if (parsedMessage != null) {
+                    handleIncomingData(parsedMessage, address)
                 }
 
                 if (responseNeeded) {
@@ -632,53 +643,59 @@ class BleMeshManager(private val context: Context) {
 
     private val gattClientCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-            when (newState) {
-                BluetoothProfile.STATE_CONNECTED -> {
-                    Timber.i("$TAG: Connected to ${gatt.device.address}")
-                    connectedGatts[gatt.device.address] = gatt
-                    updatePeerCounts()
-                    gatt.discoverServices()
+            try {
+                when (newState) {
+                    BluetoothProfile.STATE_CONNECTED -> {
+                        Timber.i("$TAG: Connected to ${gatt.device.address}")
+                        connectedGatts[gatt.device.address] = gatt
+                        updatePeerCounts()
+                        gatt.discoverServices()
 
-                    // Request Coded PHY upgrade if supported
-                    if (isCodedPhySupported()) {
-                        val peerAddress = gatt.device.address
-                        handler.postDelayed({
-                            // Guard: only upgrade if still connected
-                            if (connectedGatts.containsKey(peerAddress)) {
-                                try {
-                                    gatt.setPreferredPhy(
-                                        BluetoothDevice.PHY_LE_CODED,
-                                        BluetoothDevice.PHY_LE_CODED,
-                                        BluetoothDevice.PHY_OPTION_S8
-                                    )
-                                } catch (e: Exception) {
-                                    Timber.w(e, "$TAG: Failed to set Coded PHY")
+                        // Request Coded PHY upgrade if supported
+                        if (isCodedPhySupported()) {
+                            val peerAddress = gatt.device.address
+                            handler.postDelayed({
+                                // Guard: only upgrade if still connected
+                                if (connectedGatts.containsKey(peerAddress)) {
+                                    try {
+                                        gatt.setPreferredPhy(
+                                            BluetoothDevice.PHY_LE_CODED,
+                                            BluetoothDevice.PHY_LE_CODED,
+                                            BluetoothDevice.PHY_OPTION_S8
+                                        )
+                                    } catch (e: Exception) {
+                                        Timber.w(e, "$TAG: Failed to set Coded PHY")
+                                    }
                                 }
-                            }
-                        }, 1000)
+                            }, 1000)
+                        }
+
+                        // Request larger MTU for better throughput
+                        gatt.requestMtu(517)
+
+                        discoveredPeers[gatt.device.address]?.let { peer ->
+                            discoveredPeers[gatt.device.address] = peer.copy(isConnected = true)
+                            onPeerConnected?.invoke(peer.copy(isConnected = true))
+                        }
                     }
+                    BluetoothProfile.STATE_DISCONNECTED -> {
+                        Timber.i("$TAG: Disconnected from ${gatt.device.address}")
+                        connectedGatts.remove(gatt.device.address)
+                        gatt.close()
+                        synchronized(bufferLock) {
+                            incomingBuffers.remove(gatt.device.address)
+                            bufferTimestamps.remove(gatt.device.address)
+                        }
+                        updatePeerCounts()
 
-                    // Request larger MTU for better throughput
-                    gatt.requestMtu(517)
-
-                    discoveredPeers[gatt.device.address]?.let { peer ->
-                        discoveredPeers[gatt.device.address] = peer.copy(isConnected = true)
-                        onPeerConnected?.invoke(peer.copy(isConnected = true))
+                        discoveredPeers[gatt.device.address]?.let { peer ->
+                            discoveredPeers[gatt.device.address] = peer.copy(isConnected = false)
+                        }
+                        onPeerDisconnected?.invoke(gatt.device.address)
                     }
                 }
-                BluetoothProfile.STATE_DISCONNECTED -> {
-                    Timber.i("$TAG: Disconnected from ${gatt.device.address}")
-                    connectedGatts.remove(gatt.device.address)
-                    gatt.close()
-                    incomingBuffers.remove(gatt.device.address)
-                    bufferTimestamps.remove(gatt.device.address)
-                    updatePeerCounts()
-
-                    discoveredPeers[gatt.device.address]?.let { peer ->
-                        discoveredPeers[gatt.device.address] = peer.copy(isConnected = false)
-                    }
-                    onPeerDisconnected?.invoke(gatt.device.address)
-                }
+            } catch (e: Exception) {
+                Timber.e(e, "$TAG: Error in GATT client connection state change")
             }
         }
 
@@ -732,33 +749,40 @@ class BleMeshManager(private val context: Context) {
             value: ByteArray
         ) {
             if (characteristic.uuid == MESH_CHARACTERISTIC_UUID) {
-                // Apply same fragment reassembly for client-side notifications
+                // Apply same synchronized fragment reassembly for client-side notifications
                 val address = gatt.device.address
                 val now = System.currentTimeMillis()
 
-                val lastWrite = bufferTimestamps[address] ?: 0L
-                if (now - lastWrite > BUFFER_STALE_TIMEOUT_MS) {
-                    incomingBuffers.remove(address)
+                val parsedMessage = synchronized(bufferLock) {
+                    val lastWrite = bufferTimestamps[address] ?: 0L
+                    if (now - lastWrite > BUFFER_STALE_TIMEOUT_MS) {
+                        incomingBuffers.remove(address)
+                    }
+
+                    val buffer = incomingBuffers.getOrPut(address) { java.io.ByteArrayOutputStream() }
+                    buffer.write(value)
+                    bufferTimestamps[address] = now
+
+                    val accumulated = buffer.toByteArray()
+                    val json = String(accumulated, Charsets.UTF_8).trim()
+
+                    if (json.startsWith("{") && json.endsWith("}")) {
+                        val message = parseMeshMessage(json)
+                        if (message != null) {
+                            incomingBuffers.remove(address)
+                            bufferTimestamps.remove(address)
+                            message
+                        } else if (json.count { it == '{' } == json.count { it == '}' }) {
+                            Timber.w("$TAG: Malformed JSON from $address, clearing buffer")
+                            incomingBuffers.remove(address)
+                            bufferTimestamps.remove(address)
+                            null
+                        } else null
+                    } else null
                 }
 
-                val buffer = incomingBuffers.getOrPut(address) { java.io.ByteArrayOutputStream() }
-                buffer.write(value)
-                bufferTimestamps[address] = now
-
-                val accumulated = buffer.toByteArray()
-                val json = String(accumulated, Charsets.UTF_8).trim()
-
-                if (json.startsWith("{") && json.endsWith("}")) {
-                    val message = parseMeshMessage(json)
-                    if (message != null) {
-                        incomingBuffers.remove(address)
-                        bufferTimestamps.remove(address)
-                        handleIncomingData(message, address)
-                    } else if (json.count { it == '{' } == json.count { it == '}' }) {
-                        Timber.w("$TAG: Malformed JSON from $address, clearing buffer")
-                        incomingBuffers.remove(address)
-                        bufferTimestamps.remove(address)
-                    }
+                if (parsedMessage != null) {
+                    handleIncomingData(parsedMessage, address)
                 }
             }
         }
@@ -806,43 +830,35 @@ class BleMeshManager(private val context: Context) {
 
             try {
                 val service = gatt.getService(MESH_SERVICE_UUID)
-                val characteristic = service?.getCharacteristic(MESH_CHARACTERISTIC_UUID)
+                if (service == null) {
+                    Timber.w("$TAG: GATT service not found on ${gatt.device.address}, skipping")
+                    return@forEach
+                }
+                val characteristic = service.getCharacteristic(MESH_CHARACTERISTIC_UUID)
+                if (characteristic == null) {
+                    Timber.w("$TAG: GATT characteristic not found on ${gatt.device.address}, skipping")
+                    return@forEach
+                }
 
-                if (characteristic != null) {
-                    // Get effective MTU payload size (MTU - 3 bytes GATT overhead)
-                    val mtu = peerMtu.getOrDefault(gatt.device.address, 23)
-                    val maxPayload = (mtu - 3).coerceAtLeast(20)
+                // Get effective MTU payload size (MTU - 3 bytes GATT overhead)
+                val mtu = peerMtu.getOrDefault(gatt.device.address, 23)
+                val maxPayload = (mtu - 3).coerceAtLeast(20)
 
-                    if (data.size <= maxPayload) {
-                        // Single write — fits in one packet
-                        characteristic.value = data
-                        characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                        if (gatt.writeCharacteristic(characteristic)) {
-                            sentCount++
-                            Timber.d("$TAG: Sent ${data.size}B to ${gatt.device.address}")
-                        }
-                    } else {
-                        // Chunked write — split into MTU-sized fragments
-                        val chunks = data.toList().chunked(maxPayload).map { it.toByteArray() }
-                        var allSent = true
-                        for ((i, chunk) in chunks.withIndex()) {
-                            characteristic.value = chunk
-                            characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                            if (!gatt.writeCharacteristic(characteristic)) {
-                                Timber.w("$TAG: Chunk $i/${chunks.size} failed for ${gatt.device.address}")
-                                allSent = false
-                                break
-                            }
-                            // Small delay between chunks to let GATT stack process
-                            if (i < chunks.size - 1) {
-                                Thread.sleep(50)
-                            }
-                        }
-                        if (allSent) {
-                            sentCount++
-                            Timber.d("$TAG: Sent ${data.size}B in ${chunks.size} chunks to ${gatt.device.address}")
-                        }
+                if (data.size <= maxPayload) {
+                    // Single write — fits in one packet
+                    characteristic.value = data
+                    characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                    if (gatt.writeCharacteristic(characteristic)) {
+                        sentCount++
+                        Timber.d("$TAG: Sent ${data.size}B to ${gatt.device.address}")
                     }
+                } else {
+                    // Chunked write — split into MTU-sized fragments
+                    // Uses handler.postDelayed instead of Thread.sleep to avoid ANR
+                    val chunks = data.toList().chunked(maxPayload).map { it.toByteArray() }
+                    val peerAddress = gatt.device.address
+                    writeChunksSequentially(gatt, characteristic, chunks, 0, peerAddress, message.messageId)
+                    sentCount++ // optimistic — individual chunk failures are logged
                 }
             } catch (e: Exception) {
                 Timber.e(e, "$TAG: Error sending to ${gatt.device.address}")
@@ -858,6 +874,44 @@ class BleMeshManager(private val context: Context) {
     }
 
     /**
+     * Write chunks sequentially with non-blocking delays.
+     * Uses handler.postDelayed instead of Thread.sleep to avoid ANR.
+     */
+    private fun writeChunksSequentially(
+        gatt: BluetoothGatt,
+        characteristic: BluetoothGattCharacteristic,
+        chunks: List<ByteArray>,
+        index: Int,
+        peerAddress: String,
+        messageId: String
+    ) {
+        if (index >= chunks.size) {
+            Timber.d("$TAG: All ${chunks.size} chunks sent to $peerAddress")
+            return
+        }
+        if (!connectedGatts.containsKey(peerAddress)) {
+            Timber.w("$TAG: Peer $peerAddress disconnected during chunked write")
+            return
+        }
+
+        try {
+            characteristic.value = chunks[index]
+            characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            if (gatt.writeCharacteristic(characteristic)) {
+                if (index < chunks.size - 1) {
+                    handler.postDelayed({
+                        writeChunksSequentially(gatt, characteristic, chunks, index + 1, peerAddress, messageId)
+                    }, 50)
+                }
+            } else {
+                Timber.w("$TAG: Chunk $index/${chunks.size} failed for $peerAddress")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "$TAG: Error writing chunk $index to $peerAddress")
+        }
+    }
+
+    /**
      * Send a message to a specific connected peer.
      */
     fun sendToPeer(message: MeshMessage, peerAddress: String): Boolean {
@@ -866,13 +920,19 @@ class BleMeshManager(private val context: Context) {
 
         try {
             val service = gatt.getService(MESH_SERVICE_UUID)
-            val characteristic = service?.getCharacteristic(MESH_CHARACTERISTIC_UUID)
-
-            if (characteristic != null) {
-                characteristic.value = data
-                characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
-                return gatt.writeCharacteristic(characteristic)
+            if (service == null) {
+                Timber.w("$TAG: GATT service not found on $peerAddress")
+                return false
             }
+            val characteristic = service.getCharacteristic(MESH_CHARACTERISTIC_UUID)
+            if (characteristic == null) {
+                Timber.w("$TAG: GATT characteristic not found on $peerAddress")
+                return false
+            }
+
+            characteristic.value = data
+            characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            return gatt.writeCharacteristic(characteristic)
         } catch (e: Exception) {
             Timber.e(e, "$TAG: Error sending to $peerAddress")
         }

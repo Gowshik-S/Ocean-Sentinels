@@ -56,6 +56,7 @@ android {
     }
     
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -151,6 +152,9 @@ dependencies {
 
     // Animation
     implementation(libs.lottie.compose)
+
+    // Core Library Desugaring (java.time support for API < 26)
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 
     // Testing
     testImplementation(libs.junit)

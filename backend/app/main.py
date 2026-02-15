@@ -35,6 +35,20 @@ async def lifespan(app: FastAPI):
         async with engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
         print("Database tables created successfully")
+        
+        # Auto-migrate: add missing columns to existing tables
+        async with engine.begin() as conn:
+            try:
+                await conn.execute(text(
+                    "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS mesh_message_id VARCHAR(128) UNIQUE"
+                ))
+                await conn.execute(text(
+                    "CREATE INDEX IF NOT EXISTS ix_incidents_mesh_message_id ON incidents (mesh_message_id)"
+                ))
+                print("Migration check complete: mesh_message_id column ensured")
+            except Exception as migrate_err:
+                print(f"Migration note (non-fatal): {migrate_err}")
+        
         print("Ocean Hazard Backend is ready!")
     except Exception as e:
         print(f"Database connection failed: {e}")
