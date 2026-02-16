@@ -459,7 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Prepare user data for API
             const userData = {
-                username: formData.get('email'), // Use email as username
+                username: formData.get('username') || formData.get('email'), // Use username field, fall back to email
                 email: formData.get('email'),
                 password: password,
                 first_name: formData.get('firstname'),

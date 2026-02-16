@@ -3,9 +3,11 @@ Ocean Hazard FastAPI Backend - Simple Version
 Main application entry point without database dependency
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Form
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
 from contextlib import asynccontextmanager
+from typing import Optional
 import uvicorn
 import os
 import hashlib
@@ -37,11 +39,11 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS middleware
+# CORS middleware - Allow all origins for development/deployment compatibility
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:5500", "http://localhost:5500"],
-    allow_credentials=True,
+    allow_origins=["*"],
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -74,12 +76,51 @@ DEMO_USER_PASS = os.environ.get("DEMO_USER_PASS", "")
 def _generate_token(role: str) -> str:
     return hashlib.sha256(f"{_secrets.token_hex(16)}-{role}".encode()).hexdigest()
 
+# In-memory user store for simple registration (no database)
+_registered_users = {}
+
+# Pydantic model for registration request body
+class SimpleUserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+    first_name: str
+    last_name: str
+    phone: Optional[str] = None
+    location: Optional[str] = None
+    role: Optional[str] = "public"
+
 # Simple authentication endpoint
 @app.post("/api/auth/login")
-async def login(username: str, password: str):
-    """Simple login endpoint — set DEMO_ADMIN_PASS and DEMO_USER_PASS env vars"""
+async def login(username: str = Form(...), password: str = Form(...)):
+    """Simple login endpoint — accepts form data (OAuth2 password flow compatible)"""
+    # First check in-memory registered users
+    username = username.strip()
+    if username in _registered_users:
+        stored = _registered_users[username]
+        stored_hash = hashlib.sha256(stored["password"].encode()).hexdigest()
+        input_hash = hashlib.sha256(password.encode()).hexdigest()
+        if stored_hash == input_hash:
+            return {
+                "access_token": _generate_token(stored.get("role", "public")),
+                "token_type": "bearer",
+                "user": {
+                    "id": stored.get("id", 100),
+                    "username": username,
+                    "email": stored.get("email", username),
+                    "role": stored.get("role", "public"),
+                    "first_name": stored.get("first_name", "User"),
+                    "last_name": stored.get("last_name", ""),
+                    "is_active": True,
+                    "is_verified": False
+                }
+            }
+        else:
+            raise HTTPException(status_code=401, detail="Incorrect username or password")
+
+    # Then check demo credentials from env vars
     if not DEMO_ADMIN_PASS and not DEMO_USER_PASS:
-        raise HTTPException(status_code=503, detail="Demo credentials not configured. Set DEMO_ADMIN_PASS / DEMO_USER_PASS env vars.")
+        raise HTTPException(status_code=401, detail="Invalid credentials")
     if username == DEMO_ADMIN_USER and password == DEMO_ADMIN_PASS:
         return {
             "access_token": _generate_token("admin"),
@@ -105,7 +146,63 @@ async def login(username: str, password: str):
             }
         }
     else:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Incorrect username or password")
+
+# Simple registration endpoint
+@app.post("/api/auth/register")
+async def register(user_data: SimpleUserCreate):
+    """Simple registration endpoint — stores users in memory (no database)"""
+    username = user_data.username.strip()
+    email = user_data.email.strip()
+
+    # Check if username already exists
+    if username in _registered_users:
+        raise HTTPException(status_code=400, detail="Username already registered")
+
+    # Check if email already exists
+    for stored_user in _registered_users.values():
+        if stored_user.get("email") == email:
+            raise HTTPException(status_code=400, detail="Email already registered")
+
+    # Validate password
+    if len(user_data.password) < 6:
+        raise HTTPException(status_code=422, detail="Password must be at least 6 characters long")
+
+    # Store user
+    user_id = len(_registered_users) + 100
+    _registered_users[username] = {
+        "id": user_id,
+        "username": username,
+        "email": email,
+        "password": user_data.password,
+        "first_name": user_data.first_name,
+        "last_name": user_data.last_name,
+        "phone": user_data.phone,
+        "location": user_data.location,
+        "role": "public",  # Always public for self-registration
+        "is_active": True,
+        "is_verified": False,
+    }
+
+    print(f"User registered: {username} ({email})")
+    return {
+        "id": user_id,
+        "username": username,
+        "email": email,
+        "first_name": user_data.first_name,
+        "last_name": user_data.last_name,
+        "phone": user_data.phone,
+        "location": user_data.location,
+        "role": "public",
+        "is_active": True,
+        "is_verified": False,
+    }
+
+# Simple logout endpoint
+@app.post("/api/auth/logout")
+async def logout():
+    """Logout endpoint — client should discard token"""
+    return {"message": "Successfully logged out"}
 
 # Simple incidents endpoint
 @app.get("/api/incidents/")
