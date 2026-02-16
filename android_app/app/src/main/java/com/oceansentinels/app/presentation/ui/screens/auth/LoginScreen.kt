@@ -82,21 +82,22 @@ fun LoginScreen(
                     .fillMaxWidth()
                     .background(OceanColors.Primary)
                     .statusBarsPadding()
-                    .padding(horizontal = 24.dp, vertical = 16.dp)
-                    .height(120.dp),
-                contentAlignment = Alignment.BottomStart
+                    .padding(horizontal = 24.dp, vertical = 20.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Column {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(
                         text = "Ocean Sentinels Portal",
                         style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Secure access to India's coastal safety network",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        textAlign = TextAlign.Center
                     )
                 }
             }

@@ -94,11 +94,11 @@ fun RegisterScreen(
             .navigationBarsPadding()
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
-            // Yellow header - centered
+            // Yellow header - centered (matches login page)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(OceanColors.PrimaryDark)
+                    .background(OceanColors.Primary)
                     .statusBarsPadding()
                     .padding(horizontal = 24.dp, vertical = 20.dp),
                 contentAlignment = Alignment.Center
@@ -107,14 +107,14 @@ fun RegisterScreen(
                     Text(
                         text = "Ocean Sentinels Portal",
                         style = MaterialTheme.typography.headlineSmall,
-                        color = OceanColors.TextPrimary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         textAlign = TextAlign.Center
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = "Secure access to India's coastal safety network",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = OceanColors.TextPrimary,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         textAlign = TextAlign.Center
                     )
                 }

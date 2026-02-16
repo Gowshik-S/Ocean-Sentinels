@@ -57,11 +57,15 @@ object NetworkModule {
         return Interceptor { chain ->
             val token = runBlocking { preferencesManager.authToken.first() }
             
-            val request = chain.request().newBuilder().apply {
+            val originalRequest = chain.request()
+            val request = originalRequest.newBuilder().apply {
                 if (!token.isNullOrEmpty()) {
                     addHeader("Authorization", "Bearer $token")
                 }
-                addHeader("Content-Type", "application/json")
+                // Only set Content-Type if not already set (e.g. by @FormUrlEncoded)
+                if (originalRequest.header("Content-Type") == null) {
+                    addHeader("Content-Type", "application/json")
+                }
                 addHeader("Accept", "application/json")
             }.build()
             
