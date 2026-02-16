@@ -830,11 +830,15 @@ private fun MeshMessageCard(message: MeshMessage) {
                     Spacer(modifier = Modifier.width(12.dp))
                 }
 
-                // TTL
+                // Time remaining
+                val ageMs = System.currentTimeMillis() - message.createdAtMillis
+                val remainingMs = MeshMessage.MESSAGE_LIFETIME_MS - ageMs
+                val remainingHours = (remainingMs / (1000 * 60 * 60)).coerceAtLeast(0)
                 Text(
-                    text = "TTL: ${message.ttl}",
+                    text = if (remainingHours > 0) "${remainingHours}h left" else "Expiring",
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (remainingHours <= 6) MaterialTheme.colorScheme.error
+                            else MaterialTheme.colorScheme.onSurfaceVariant
                 )
 
                 Spacer(modifier = Modifier.weight(1f))

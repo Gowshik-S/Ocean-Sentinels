@@ -49,11 +49,15 @@ class BleMeshManager(private val context: Context) {
         /** Fragment size for BLE transmission */
         const val FRAGMENT_SIZE = 469
         /** Scan interval between restarts */
-        const val SCAN_RESTART_INTERVAL_MS = 30_000L
+        const val SCAN_RESTART_INTERVAL_MS = 20_000L
         /** Stale peer timeout */
         const val PEER_STALE_TIMEOUT_MS = 180_000L
         /** Maximum simultaneous connections */
         const val MAX_CONNECTIONS = 7
+        /** Delay between write confirmation checks (ms) */
+        const val WRITE_CONFIRM_TIMEOUT_MS = 5_000L
+        /** Reconnection attempt interval for lost peers (ms) */
+        const val RECONNECT_INTERVAL_MS = 10_000L
     }
 
     // ==================== State ====================
@@ -110,9 +114,51 @@ class BleMeshManager(private val context: Context) {
     var onPeerDiscovered: ((MeshPeer) -> Unit)? = null
     var onPeerConnected: ((MeshPeer) -> Unit)? = null
     var onPeerDisconnected: ((String) -> Unit)? = null
-    var onMessageReceived: ((MeshMessage) -> Unit)? = null
+    /**
+     * Called when a valid mesh message is received from a peer.
+     *
+     * Parameters: (message: MeshMessage, senderBleAddress: String)
+     *
+     * The senderBleAddress is the BLE MAC of the peer that sent/relayed this
+     * message to us. This is critical for relay exclusion:
+     *
+     * Comparison with bitchat-android:
+     * ─────────────────────────────────
+     * bitchat's RoutedPacket carries both `peerID` (logical sender) and
+     * `relayAddress` (BLE address of the immediate hop). When broadcasting,
+     * BluetoothPacketBroadcaster.broadcastSinglePacketInternal() skips both:
+     *   1. device.address == routed.relayAddress  (don't echo back to relay hop)
+     *   2. addressPeerMap[device.address] == senderID  (don't echo to author)
+     *
+     * Our equivalent: MeshForegroundService.handleReceivedMessage() receives
+     * senderBleAddress here and passes it as excludeAddress to broadcastMessage().
+     * broadcastMessage() also checks message.originDeviceMac against the
+     * addressToDeviceId map to skip the original author.
+     */
+    var onMessageReceived: ((MeshMessage, String) -> Unit)? = null
     var onMessageSent: ((String, Boolean) -> Unit)? = null
     var onError: ((String) -> Unit)? = null
+
+    /**
+     * Maps BLE device address → mesh device ID (from DeviceIdentifier).
+     * Populated when we receive a message from a peer — we extract their
+     * originDeviceMac from the message JSON and associate it with their
+     * BLE address.
+     *
+     * This is the Ocean Sentinels equivalent of bitchat's
+     * BluetoothConnectionTracker.addressPeerMap, which maps BLE MAC → peerID.
+     * Used in broadcastMessage() to skip the original message author.
+     */
+    private val addressToDeviceId = ConcurrentHashMap<String, String>()
+
+    /**
+     * Tracks in-flight writes: messageId -> set of peer addresses with confirmed delivery.
+     * A write is only considered "delivered to peer" after onCharacteristicWrite SUCCESS.
+     */
+    private val pendingWrites = ConcurrentHashMap<String, MutableSet<String>>()
+    private val confirmedWrites = ConcurrentHashMap<String, MutableSet<String>>()
+    /** Maps GATT device address to the messageId currently being written */
+    private val activeWriteMessageId = ConcurrentHashMap<String, String>()
 
     // ==================== Reactive State for UI ====================
 
@@ -200,6 +246,7 @@ class BleMeshManager(private val context: Context) {
         startAdvertising()
         startScanning()
         startPeerCleanup()
+        startReconnectionLoop()
     }
 
     /** Stop the mesh network */
@@ -394,7 +441,8 @@ class BleMeshManager(private val context: Context) {
             builder.setPrimaryPhy(BluetoothDevice.PHY_LE_CODED)
             builder.setSecondaryPhy(BluetoothDevice.PHY_LE_CODED)
             builder.setTxPowerLevel(AdvertisingSetParameters.TX_POWER_HIGH)
-            builder.setInterval(AdvertisingSetParameters.INTERVAL_MEDIUM)
+            // Use LOW interval (100ms) for best discovery range with Coded PHY
+            builder.setInterval(AdvertisingSetParameters.INTERVAL_LOW)
             val parameters = builder.build()
 
             val data = AdvertiseData.Builder()
@@ -541,9 +589,27 @@ class BleMeshManager(private val context: Context) {
                 stopScanning()
                 handler.postDelayed({
                     if (isRunning) startScanning()
-                }, 2000)
+                }, 1000)
             }
         }, SCAN_RESTART_INTERVAL_MS)
+    }
+
+    /**
+     * Attempt to reconnect to known peers that were previously seen but are now disconnected.
+     * Called periodically to maintain mesh connectivity through obstacles.
+     */
+    private fun attemptReconnections() {
+        if (!isRunning) return
+        val now = System.currentTimeMillis()
+        discoveredPeers.values
+            .filter { !it.isConnected && !connectedGatts.containsKey(it.address) }
+            .filter { now - it.lastSeenMillis < PEER_STALE_TIMEOUT_MS }
+            .filter { connectedGatts.size < MAX_CONNECTIONS }
+            .forEach { peer ->
+                Timber.d("$TAG: Attempting reconnection to ${peer.address}")
+                val device = adapter?.getRemoteDevice(peer.address)
+                device?.let { connectToPeer(it) }
+            }
     }
 
     private fun stopScanning() {
@@ -736,10 +802,20 @@ class BleMeshManager(private val context: Context) {
             characteristic: BluetoothGattCharacteristic,
             status: Int
         ) {
+            val peerAddress = gatt.device.address
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                Timber.d("$TAG: Data written to ${gatt.device.address}")
+                Timber.d("$TAG: Data written to $peerAddress")
+                // Track confirmed write for this peer
+                val messageId = activeWriteMessageId.remove(peerAddress)
+                if (messageId != null) {
+                    confirmedWrites.getOrPut(messageId) {
+                        java.util.Collections.synchronizedSet(mutableSetOf())
+                    }.add(peerAddress)
+                    Timber.i("$TAG: Write confirmed for message $messageId to $peerAddress")
+                }
             } else {
-                Timber.w("$TAG: Write failed for ${gatt.device.address}: $status")
+                Timber.w("$TAG: Write failed for $peerAddress: $status")
+                activeWriteMessageId.remove(peerAddress)
             }
         }
 
@@ -819,14 +895,76 @@ class BleMeshManager(private val context: Context) {
      * Send a mesh message to all connected peers (flooding broadcast).
      * Handles MTU-aware chunking for large messages.
      * Returns the number of peers it was sent to.
+     *
+     * Note: sentCount reflects peers where the write was *queued* successfully.
+     * Use getConfirmedDeliveryCount(messageId) to check actual confirmed deliveries.
      */
-    fun broadcastMessage(message: MeshMessage): Int {
+    /**
+     * Send a mesh message to all connected peers (flooding broadcast).
+     * Handles MTU-aware chunking for large messages.
+     * Returns the number of peers it was sent to.
+     *
+     * @param message The mesh message to broadcast
+     * @param excludeAddresses BLE MAC addresses to skip (the peer(s) that sent
+     *   this message to us). This prevents echo-back to the sender.
+     *
+     * Peer exclusion logic (3-layer filter, inspired by bitchat-android):
+     * ──────────────────────────────────────────────────────────────────
+     * bitchat's BluetoothPacketBroadcaster.broadcastSinglePacketInternal()
+     * applies two skip checks per device:
+     *   1. device.address == routed.relayAddress  → skip relay hop
+     *   2. addressPeerMap[device.address] == senderID  → skip author
+     *
+     * Our equivalent (3 layers):
+     *   1. excludeAddresses.contains(gatt.device.address)
+     *      → Skip the BLE peer that forwarded the message to us
+     *      → Matches bitchat's relayAddress check
+     *   2. addressToDeviceId[gatt.device.address] == originDeviceMac
+     *      → Skip the original message author if connected to us
+     *      → Matches bitchat's senderID check
+     *   3. relayPath.contains(deviceIdForPeer)
+     *      → Skip any peer that has previously relayed this message
+     *      → More thorough than bitchat (which only checks 1 & 2)
+     *
+     * Note: sentCount reflects peers where the write was *queued* successfully.
+     * Use getConfirmedDeliveryCount(messageId) to check actual confirmed deliveries.
+     */
+    fun broadcastMessage(message: MeshMessage, excludeAddresses: Set<String> = emptySet()): Int {
         val data = message.toBytes()
         var sentCount = 0
 
+        // Track pending writes for this message
+        pendingWrites[message.messageId] = java.util.Collections.synchronizedSet(mutableSetOf())
+        confirmedWrites[message.messageId] = java.util.Collections.synchronizedSet(mutableSetOf())
+
         connectedGatts.values.forEach { gatt ->
-            // Skip if the peer is in the relay path (already received)
-            if (message.relayPath.contains(gatt.device.address)) return@forEach
+            val peerBleAddress = gatt.device.address
+
+            // ── Filter 1: Skip the immediate relay sender ──
+            // This is the BLE address of the peer that forwarded this message to us.
+            // Matches bitchat's: if (device.address == routed.relayAddress) return@forEach
+            if (excludeAddresses.contains(peerBleAddress)) {
+                Timber.d("$TAG: Skipping relay back to sender: $peerBleAddress")
+                return@forEach
+            }
+
+            // ── Filter 2: Skip the original message author ──
+            // Resolve BLE address → mesh device ID via our learned mapping.
+            // Matches bitchat's: if (addressPeerMap[device.address] == senderID) return@forEach
+            val peerDeviceId = addressToDeviceId[peerBleAddress]
+            if (peerDeviceId != null && peerDeviceId == message.originDeviceMac) {
+                Timber.d("$TAG: Skipping broadcast to original author: $peerBleAddress (deviceId=$peerDeviceId)")
+                return@forEach
+            }
+
+            // ── Filter 3: Skip peers already in the relay path ──
+            // relayPath contains mesh device IDs (not BLE MACs), so we
+            // compare against the resolved device ID for this peer.
+            // This catches peers that relayed earlier in the chain.
+            if (peerDeviceId != null && message.relayPath.contains(peerDeviceId)) {
+                Timber.d("$TAG: Skipping peer already in relay path: $peerBleAddress (deviceId=$peerDeviceId)")
+                return@forEach
+            }
 
             try {
                 val service = gatt.getService(MESH_SERVICE_UUID)
@@ -840,28 +978,34 @@ class BleMeshManager(private val context: Context) {
                     return@forEach
                 }
 
+                // Track which message we're writing to this peer
+                activeWriteMessageId[gatt.device.address] = message.messageId
+                pendingWrites[message.messageId]?.add(gatt.device.address)
+
                 // Get effective MTU payload size (MTU - 3 bytes GATT overhead)
                 val mtu = peerMtu.getOrDefault(gatt.device.address, 23)
                 val maxPayload = (mtu - 3).coerceAtLeast(20)
 
                 if (data.size <= maxPayload) {
-                    // Single write — fits in one packet
+                    // Single write -- fits in one packet
                     characteristic.value = data
                     characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
                     if (gatt.writeCharacteristic(characteristic)) {
                         sentCount++
                         Timber.d("$TAG: Sent ${data.size}B to ${gatt.device.address}")
+                    } else {
+                        activeWriteMessageId.remove(gatt.device.address)
                     }
                 } else {
-                    // Chunked write — split into MTU-sized fragments
-                    // Uses handler.postDelayed instead of Thread.sleep to avoid ANR
+                    // Chunked write -- split into MTU-sized fragments
                     val chunks = data.toList().chunked(maxPayload).map { it.toByteArray() }
                     val peerAddress = gatt.device.address
                     writeChunksSequentially(gatt, characteristic, chunks, 0, peerAddress, message.messageId)
-                    sentCount++ // optimistic — individual chunk failures are logged
+                    sentCount++
                 }
             } catch (e: Exception) {
                 Timber.e(e, "$TAG: Error sending to ${gatt.device.address}")
+                activeWriteMessageId.remove(gatt.device.address)
             }
         }
 
@@ -871,6 +1015,28 @@ class BleMeshManager(private val context: Context) {
 
         Timber.i("$TAG: Broadcast message ${message.messageId} to $sentCount peers")
         return sentCount
+    }
+
+    /**
+     * Check how many peers have confirmed receiving a given message.
+     */
+    fun getConfirmedDeliveryCount(messageId: String): Int {
+        return confirmedWrites[messageId]?.size ?: 0
+    }
+
+    /**
+     * Check if at least one peer confirmed receiving the message.
+     */
+    fun isMessageConfirmedByAnyPeer(messageId: String): Boolean {
+        return (confirmedWrites[messageId]?.size ?: 0) > 0
+    }
+
+    /**
+     * Clean up tracking data for a message (after it's been processed).
+     */
+    fun clearMessageTracking(messageId: String) {
+        pendingWrites.remove(messageId)
+        confirmedWrites.remove(messageId)
     }
 
     /**
@@ -948,8 +1114,19 @@ class BleMeshManager(private val context: Context) {
         }
 
         markProcessed(message.messageId)
+
+        // Learn this peer's mesh device ID from their message.
+        // This builds our addressToDeviceId map (like bitchat's
+        // BluetoothConnectionTracker.addressPeerMap) so broadcastMessage()
+        // can skip the original author when relaying.
+        if (message.originDeviceMac.isNotBlank()) {
+            addressToDeviceId[senderAddress] = message.originDeviceMac
+            Timber.d("$TAG: Learned peer identity: $senderAddress → ${message.originDeviceMac}")
+        }
+
         Timber.i("$TAG: Received message ${message.messageId} from $senderAddress (hop: ${message.hopCount})")
-        onMessageReceived?.invoke(message)
+        // Pass sender BLE address so the service can exclude it during relay
+        onMessageReceived?.invoke(message, senderAddress)
     }
 
     /** Handle raw incoming bytes from a peer (non-fragmented path) */
@@ -1020,6 +1197,17 @@ class BleMeshManager(private val context: Context) {
         }, 60_000)
     }
 
+    /** Periodically attempt to reconnect to known disconnected peers */
+    private fun startReconnectionLoop() {
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                if (!isRunning) return
+                attemptReconnections()
+                handler.postDelayed(this, RECONNECT_INTERVAL_MS)
+            }
+        }, RECONNECT_INTERVAL_MS)
+    }
+
     // ==================== Status ====================
 
     fun isRunning(): Boolean = isRunning
@@ -1047,7 +1235,6 @@ class BleMeshManager(private val context: Context) {
             val desc = obj.get("desc")?.asString ?: ""
             val urg = obj.get("urg")?.asString ?: "medium"
             val ts = obj.get("ts")?.asLong ?: System.currentTimeMillis()
-            val ttl = obj.get("ttl")?.asInt ?: MeshMessage.DEFAULT_TTL
             val hops = obj.get("hops")?.asInt ?: 0
             val photo = obj.get("photo")?.asString
             val contact = obj.get("contact")?.asString
@@ -1070,7 +1257,6 @@ class BleMeshManager(private val context: Context) {
                 description = desc,
                 urgency = urg,
                 createdAtMillis = ts,
-                ttl = ttl,
                 hopCount = hops,
                 relayPath = path,
                 photoUrl = photo,

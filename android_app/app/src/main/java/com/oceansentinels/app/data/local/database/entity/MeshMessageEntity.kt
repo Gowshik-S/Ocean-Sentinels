@@ -61,7 +61,7 @@ data class MeshMessageEntity(
     val createdAtMillis: Long,
 
     @ColumnInfo(name = "ttl")
-    val ttl: Int,
+    val ttl: Int = 0, // Legacy column, kept for Room schema compat. No longer used for relay decisions.
 
     @ColumnInfo(name = "hop_count")
     val hopCount: Int,
@@ -125,7 +125,6 @@ data class MeshMessageEntity(
             description = description,
             urgency = urgency,
             createdAtMillis = createdAtMillis,
-            ttl = ttl,
             hopCount = hopCount,
             status = MeshMessageStatus.fromValue(status),
             relayPath = if (relayPath.isBlank()) emptyList() else relayPath.split(","),
@@ -154,7 +153,6 @@ data class MeshMessageEntity(
                 description = message.description,
                 urgency = message.urgency,
                 createdAtMillis = message.createdAtMillis,
-                ttl = message.ttl,
                 hopCount = message.hopCount,
                 status = (overrideStatus ?: message.status).value,
                 transport = transport.value,

@@ -113,10 +113,30 @@ interface MeshMessageDao {
         SELECT * FROM mesh_messages 
         WHERE has_been_relayed = 0 
         AND status IN ('pending', 'sending')
-        AND ttl > 0
         ORDER BY created_at_millis ASC
     """)
     suspend fun getUnrelayedMessages(): List<MeshMessageEntity>
+
+    /**
+     * Get messages that were already relayed to some peers but haven't been
+     * delivered to server. These can be re-broadcast to newly connected peers
+     * (broadcastMessage skips peers already in relay_path).
+     * No TTL filter — messages relay until time-based expiry (72h) or server delivery.
+     */
+    @Query("""
+        SELECT * FROM mesh_messages 
+        WHERE has_been_relayed = 1 
+        AND status IN ('relayed', 'pending', 'sending')
+        ORDER BY 
+            CASE urgency 
+                WHEN 'critical' THEN 0 
+                WHEN 'high' THEN 1 
+                WHEN 'medium' THEN 2 
+                WHEN 'low' THEN 3 
+            END,
+            created_at_millis ASC
+    """)
+    suspend fun getRelayableMessages(): List<MeshMessageEntity>
 
     /** Count messages by status */
     @Query("SELECT COUNT(*) FROM mesh_messages WHERE status = :status")

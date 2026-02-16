@@ -17,10 +17,13 @@ class IncidentStatus(str, enum.Enum):
 
 class HazardType(str, enum.Enum):
     HIGH_WAVES = "HIGH_WAVES"
+    STRONG_CURRENTS = "STRONG_CURRENTS"
     FLOODING = "FLOODING"
     TSUNAMI = "TSUNAMI"
     LOST_VESSEL = "LOST_VESSEL"
     DEBRIS = "DEBRIS"
+    EROSION = "EROSION"
+    STORM = "STORM"
     OIL_SPILL = "OIL_SPILL"
     OTHER = "OTHER"
 

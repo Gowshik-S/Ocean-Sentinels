@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.oceansentinels.app.domain.model.*
 import com.oceansentinels.app.domain.repository.IncidentRepository
+import com.oceansentinels.app.mesh.network.NetworkConnectivityManager
 import com.oceansentinels.app.mesh.repository.MeshMessageRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -12,12 +13,43 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * ViewModel for incident-related operations
+ * ViewModel for incident-related operations.
+ *
+ * Hazard report delivery strategy (Internet-first with auto mesh fallback):
+ * ─────────────────────────────────────────────────────────────────────────
+ * 1. CHECK internet via NetworkConnectivityManager.isInternetAvailable()
+ *    (instant cached check — no system call, no timeout)
+ *
+ * 2a. Internet AVAILABLE:
+ *     → Try API via incidentRepository.createIncident()
+ *     → On success: done (CreateIncidentState.Success)
+ *     → On failure (server error, etc.): fall back to mesh
+ *
+ * 2b. Internet UNAVAILABLE:
+ *     → Skip API entirely (avoids ~10s HTTP timeout)
+ *     → Route directly to meshMessageRepository.forwardToMesh()
+ *     → Message broadcast to BLE peers or queued in local DB
+ *     → Auto-uploaded when internet returns (MeshForegroundService)
+ *
+ * Comparison with other mesh implementations:
+ * ─────────────────────────────────────────────
+ * • bitchat-android: ALWAYS uses mesh. No internet check, no API call.
+ *   sendMessage() → signPacket() → broadcastPacket() → all peers.
+ *   No fallback needed because mesh IS the primary (and only) transport.
+ *
+ * • bridgefy-alerts: ALWAYS uses mesh via SDK. No internet check.
+ *   bridgefy.send(data, TransmissionMode.Broadcast) handles everything.
+ *
+ * • Ocean Sentinels (us): HYBRID. Internet when possible, mesh when not.
+ *   This ViewModel is the decision point that routes between the two paths.
+ *   The pre-check via NetworkConnectivityManager is what makes this instant
+ *   instead of waiting for an HTTP timeout to detect offline state.
  */
 @HiltViewModel
 class IncidentViewModel @Inject constructor(
     private val incidentRepository: IncidentRepository,
-    private val meshMessageRepository: MeshMessageRepository
+    private val meshMessageRepository: MeshMessageRepository,
+    private val networkConnectivityManager: NetworkConnectivityManager
 ) : ViewModel() {
 
     // Incidents list
@@ -158,58 +190,146 @@ class IncidentViewModel @Inject constructor(
 
     /**
      * Create a new incident report.
-     * Tries internet first; on failure, auto-forwards to BLE mesh service.
+     *
+     * PRE-CHECKS internet availability BEFORE attempting the API call.
+     * If offline, routes DIRECTLY to BLE mesh — no HTTP timeout wait.
+     *
+     * Previous behavior (before this fix):
+     * ────────────────────────────────────
+     *   createIncident(request)
+     *     → incidentRepository.createIncident(request)  // HTTP API call
+     *     → TIMEOUT (~10 seconds on dead connection)
+     *     → catch error
+     *     → meshMessageRepository.createAndSend()  // mesh fallback
+     *   Total time when offline: ~10+ seconds of waiting
+     *
+     * New behavior (this fix):
+     * ────────────────────────────────────
+     *   createIncident(request)
+     *     → networkConnectivityManager.isInternetAvailable()  // instant cached check
+     *     → if TRUE:
+     *         → incidentRepository.createIncident(request)  // HTTP API call
+     *         → on failure: meshMessageRepository.forwardToMesh()  // fallback
+     *     → if FALSE:
+     *         → meshMessageRepository.forwardToMesh()  // direct, no timeout
+     *   Total time when offline: <100ms (instant mesh routing)
+     *
+     * Comparison with bitchat-android:
+     * ────────────────────────────────
+     * bitchat doesn't need this decision at all because it's 100% mesh.
+     * Every message goes through BluetoothMeshService.sendMessage() →
+     * signPacketBeforeBroadcast() → connectionManager.broadcastPacket()
+     * with no internet check, no API call, no timeout concern.
+     *
+     * Our hybrid model is more complex but provides server-side
+     * aggregation, map visualization, and cross-region visibility
+     * that pure mesh cannot offer.
      */
     fun createIncident(request: CreateIncidentRequest) {
         viewModelScope.launch {
             _createIncidentState.value = CreateIncidentState.Loading
 
-            val result = incidentRepository.createIncident(request)
+            // ── Step 1: Pre-check internet (instant, cached) ──
+            // Uses NetworkConnectivityManager's AtomicBoolean — no system call,
+            // no suspend, O(1) read. Updated in real-time by NetworkCallback.
+            val hasInternet = networkConnectivityManager.isInternetAvailable()
+            Timber.d("Internet pre-check: available=$hasInternet")
 
-            result.fold(
-                onSuccess = { incident ->
-                    _createIncidentState.value = CreateIncidentState.Success(incident)
-                    Timber.d("Incident created via internet: ${incident.referenceId}")
-                },
-                onFailure = { error ->
-                    Timber.w(error, "Internet delivery failed, attempting mesh fallback")
-                    
-                    // Fallback: send via BLE mesh
-                    try {
-                        val meshResult = meshMessageRepository.createAndSend(
-                            hazardType = request.hazardType,
-                            location = request.location,
-                            latitude = request.latitude,
-                            longitude = request.longitude,
-                            description = request.description,
-                            urgency = request.urgency,
-                            contactInfo = request.contactInfo,
-                            photoUrl = request.photoUrl,
-                            reporterUserId = null
-                        )
-                        meshResult.fold(
-                            onSuccess = { meshMessage ->
-                                _createIncidentState.value = CreateIncidentState.MeshFallbackSuccess(
-                                    "Report sent via mesh network (${meshMessage.status.value}). " +
-                                    "It will be delivered to the server when internet is available."
-                                )
-                                Timber.i("Incident sent via mesh fallback: ${meshMessage.messageId}")
-                            },
-                            onFailure = { meshError ->
-                                _createIncidentState.value = CreateIncidentState.Error(
-                                    error.message ?: "Failed to create incident"
-                                )
-                                Timber.e(meshError, "Mesh fallback also failed")
-                            }
-                        )
-                    } catch (e: Exception) {
-                        _createIncidentState.value = CreateIncidentState.Error(
-                            error.message ?: "Failed to create incident"
-                        )
-                        Timber.e(e, "Mesh fallback exception")
+            if (hasInternet) {
+                // ── Step 2a: Internet available → try API first ──
+                val result = incidentRepository.createIncident(request)
+
+                result.fold(
+                    onSuccess = { incident ->
+                        _createIncidentState.value = CreateIncidentState.Success(incident)
+                        Timber.d("Incident created via internet: ${incident.referenceId}")
+                    },
+                    onFailure = { error ->
+                        // API call failed despite having internet (server error,
+                        // captive portal, etc.) — fall back to mesh
+                        Timber.w(error, "Internet available but API failed, auto-forwarding to mesh")
+                        autoForwardToMesh(request, error)
                     }
+                )
+            } else {
+                // ── Step 2b: No internet → skip API, go straight to mesh ──
+                // This is the KEY improvement: instead of waiting ~10s for
+                // an HTTP timeout, we route immediately to the mesh network.
+                //
+                // Similar to how bitchat-android ALWAYS goes to mesh:
+                //   BluetoothMeshService.sendMessage() → broadcastPacket()
+                // But we only take this path when internet is confirmed down.
+                Timber.i("No internet detected — auto-forwarding hazard report to mesh network")
+                autoForwardToMesh(request, null)
+            }
+        }
+    }
+
+    /**
+     * Auto-forward a hazard report to the BLE mesh network.
+     *
+     * Called in two scenarios:
+     * 1. Internet is unavailable (pre-check failed) → originalError = null
+     * 2. Internet available but API call failed → originalError = the exception
+     *
+     * Uses meshMessageRepository.forwardToMesh() which:
+     * - Persists to Room DB (crash-safe, unlike bitchat's in-memory StoreForwardManager)
+     * - Broadcasts to all connected BLE peers via BleMeshManager
+     * - Queues PENDING if no peers are connected
+     * - MeshForegroundService auto-retries every 15s and auto-uploads when internet returns
+     *
+     * The message follows the same relay chain as bitchat's PacketRelayManager:
+     * each receiving peer adds itself to relayPath and re-broadcasts to its own
+     * peers (flood routing). Unlike bitchat's hop-based TTL=7, Ocean Sentinels
+     * uses time-based expiry (72 hours) so hazard reports survive across any
+     * number of hops until reaching a server. Bitchat adds adaptive relay
+     * probability (40-100% based on network size); we always flood because
+     * hazard reports are high-priority safety data where delivery matters more
+     * than bandwidth.
+     */
+    private suspend fun autoForwardToMesh(
+        request: CreateIncidentRequest,
+        originalError: Throwable?
+    ) {
+        try {
+            val meshResult = meshMessageRepository.forwardToMesh(
+                hazardType = request.hazardType,
+                location = request.location,
+                latitude = request.latitude,
+                longitude = request.longitude,
+                description = request.description,
+                urgency = request.urgency,
+                contactInfo = request.contactInfo,
+                photoUrl = request.photoUrl,
+                reporterUserId = null
+            )
+            meshResult.fold(
+                onSuccess = { meshMessage ->
+                    val statusDesc = when (meshMessage.status) {
+                        com.oceansentinels.app.mesh.model.MeshMessageStatus.RELAYED ->
+                            "relayed to ${meshMessage.hopCount} peer(s)"
+                        com.oceansentinels.app.mesh.model.MeshMessageStatus.PENDING ->
+                            "queued locally, waiting for mesh peers"
+                        else -> meshMessage.status.value
+                    }
+                    _createIncidentState.value = CreateIncidentState.MeshFallbackSuccess(
+                        "Report auto-forwarded via mesh network ($statusDesc). " +
+                        "It will be delivered to the server when internet is available."
+                    )
+                    Timber.i("Hazard report auto-forwarded to mesh: ${meshMessage.messageId} [$statusDesc]")
+                },
+                onFailure = { meshError ->
+                    _createIncidentState.value = CreateIncidentState.Error(
+                        originalError?.message ?: meshError.message ?: "Failed to create incident"
+                    )
+                    Timber.e(meshError, "Mesh auto-forward also failed")
                 }
             )
+        } catch (e: Exception) {
+            _createIncidentState.value = CreateIncidentState.Error(
+                originalError?.message ?: e.message ?: "Failed to create incident"
+            )
+            Timber.e(e, "Mesh auto-forward exception")
         }
     }
 

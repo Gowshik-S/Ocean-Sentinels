@@ -47,6 +47,10 @@ async def lifespan(app: FastAPI):
                     "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ",
                     "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ",
                     "CREATE INDEX IF NOT EXISTS ix_incidents_mesh_message_id ON incidents (mesh_message_id)",
+                    # Add new hazard type enum values to PostgreSQL enum
+                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'STRONG_CURRENTS' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'STRONG_CURRENTS'; END IF; END $$;",
+                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'EROSION' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'EROSION'; END IF; END $$;",
+                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'STORM' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'STORM'; END IF; END $$;",
                 ]
                 for migration in migrations:
                     await conn.execute(text(migration))

@@ -1,8 +1,6 @@
 package com.oceansentinels.app.mesh.repository
 
 import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
 import com.oceansentinels.app.data.local.database.dao.MeshMessageDao
 import com.oceansentinels.app.data.local.database.entity.MeshMessageEntity
 import com.oceansentinels.app.data.remote.api.OceanSentinelsApi
@@ -13,6 +11,7 @@ import com.oceansentinels.app.mesh.ble.DeviceIdentifier
 import com.oceansentinels.app.mesh.model.MeshMessage
 import com.oceansentinels.app.mesh.model.MeshMessageStatus
 import com.oceansentinels.app.mesh.model.MeshTransport
+import com.oceansentinels.app.mesh.network.NetworkConnectivityManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -20,20 +19,39 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
 import java.time.LocalDateTime
-import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
  * Repository managing the mesh message lifecycle.
  *
- * Delivery strategy:
- * 1. Internet available → Upload directly to server
- * 2. Internet unavailable → Store in local DB + broadcast via BLE mesh
- * 3. Received from mesh + internet available → Upload to server on their behalf
- * 4. Received from mesh + no internet → Store and relay to more peers
+ * Delivery strategy (priority order):
+ * ────────────────────────────────────
+ * 1. Internet available → Upload directly to server via Retrofit API
+ * 2. Internet unavailable + BLE peers connected → Broadcast via BLE mesh
+ * 3. Internet unavailable + no peers → Store in local Room DB queue
+ * 4. Received from mesh + internet available → Upload to server on their behalf
+ * 5. Received from mesh + no internet → Store and relay to more peers
  *
- * Auto-flush: When internet becomes available, all pending messages are sent.
+ * Auto-flush: When internet becomes available (via NetworkConnectivityManager
+ * callback), all pending + relayed messages are uploaded to the server.
+ *
+ * Architecture comparison with bitchat-android:
+ * ─────────────────────────────────────────────
+ * • bitchat has NO internet fallback — pure mesh. Messages are sent via
+ *   BluetoothPacketBroadcaster (actor pattern) and cached in-memory by
+ *   StoreForwardManager (12h timeout, separate favorites queue).
+ * • Ocean Sentinels is HYBRID: internet-priority with mesh fallback.
+ *   Messages persist in Room DB (500 max, 24h expiry) and auto-flush
+ *   to the server when connectivity returns.
+ * • bitchat's StoreForwardManager caches per-recipient; our queue is
+ *   global (all messages go to server, regardless of recipient).
+ * • bitchat uses binary wire format; we use compact JSON for BLE payloads.
+ *
+ * Key improvement (this update):
+ * forwardToMesh() provides a direct mesh-only path that skips the internet
+ * check entirely. This is called by IncidentViewModel when it detects
+ * no internet BEFORE attempting the API — avoiding a ~10s HTTP timeout.
  */
 @Singleton
 class MeshMessageRepository @Inject constructor(
@@ -41,6 +59,7 @@ class MeshMessageRepository @Inject constructor(
     private val api: OceanSentinelsApi,
     private val bleMeshManager: BleMeshManager,
     private val deviceIdentifier: DeviceIdentifier,
+    private val networkConnectivityManager: NetworkConnectivityManager,
     @ApplicationContext private val context: Context
 ) {
     companion object {
@@ -54,16 +73,40 @@ class MeshMessageRepository @Inject constructor(
     /** Mutex to prevent concurrent queue processing from periodic + network callback */
     private val queueMutex = Mutex()
 
-    /** Thread-safe internet availability flag (Issue #11) */
-    private val _hasInternet = AtomicBoolean(false)
-    fun hasInternetCached(): Boolean = _hasInternet.get()
-    fun setInternetAvailable(available: Boolean) { _hasInternet.set(available) }
+    /**
+     * Thread-safe internet availability check.
+     * Now delegates to the centralized NetworkConnectivityManager rather than
+     * maintaining a separate AtomicBoolean (eliminates Issue #11 race condition).
+     *
+     * Compare with bitchat-android: bitchat never checks internet — all messages
+     * go through mesh unconditionally. Our hybrid approach needs this fast-path
+     * check to decide: API upload vs. BLE mesh broadcast.
+     */
+    fun hasInternetCached(): Boolean = networkConnectivityManager.isInternetAvailable()
+    fun setInternetAvailable(available: Boolean) {
+        // No-op: state is now managed by NetworkConnectivityManager's callback.
+        // Kept for backward compatibility with MeshForegroundService calls.
+    }
 
     // ==================== Create & Queue ====================
 
     /**
      * Create a new hazard report message.
      * If internet is available, send directly. Otherwise queue for mesh relay.
+     *
+     * Decision flow (mirrors bitchat-android's broadcastPacket pattern but
+     * with an internet-priority layer):
+     *
+     * ┌─ isInternetAvailable() ──→ tryDeliverToServer()
+     * │     ↓ (failed)
+     * │  bleMeshManager.isRunning() && peers > 0
+     * │     ↓ yes → broadcastMessage() → RELAYED
+     * │     ↓ no  → PENDING (queue for later)
+     * └─────────────────────────────────────────────────
+     *
+     * bitchat-android equivalent: BluetoothMeshService.sendMessage() →
+     *   signPacketBeforeBroadcast() → connectionManager.broadcastPacket()
+     *   (no internet check, always mesh)
      */
     suspend fun createAndSend(
         hazardType: HazardType,
@@ -108,21 +151,33 @@ class MeshMessageRepository @Inject constructor(
             reporterUserId = reporterUserId
         )
 
-        // Store in local DB
+        // Store in local DB first (like bitchat's StoreForwardManager caching
+        // before send — ensures no data loss even if BLE write fails)
         val entity = MeshMessageEntity.fromDomain(message, isOwnMessage = true)
         meshMessageDao.insert(entity)
         meshMessageDao.trimToLimit(MAX_LOCAL_MESSAGES)
 
         // Try direct internet delivery first
+        // Uses NetworkConnectivityManager's cached flag for instant check
+        // (no system call overhead — similar to bitchat's
+        // BluetoothConnectionTracker.getConnectedDevices() pattern)
         if (isInternetAvailable()) {
             val delivered = tryDeliverToServer(message)
             if (delivered) {
                 return Result.success(message.copy(status = MeshMessageStatus.DELIVERED))
             }
+            // Internet check passed but server delivery failed (e.g., captive portal,
+            // server down) — fall through to mesh, don't return error yet
+            Timber.w("$TAG: Internet available but server delivery failed, trying mesh")
         }
 
-        // Internet failed or unavailable → broadcast via BLE mesh
-        if (bleMeshManager.isRunning()) {
+        // Internet failed or unavailable -> broadcast via BLE mesh
+        // This mirrors bitchat's broadcastPacket() which sends to ALL
+        // connected devices (both server and client GATT connections).
+        // The key difference: bitchat uses binary protocol + fragmentation
+        // (512B threshold, 469B max, 20ms inter-fragment delay), while we
+        // use JSON + MTU-aware chunking (50ms inter-chunk delay).
+        if (bleMeshManager.isRunning() && bleMeshManager.getConnectedPeerCount() > 0) {
             val sentCount = bleMeshManager.broadcastMessage(message)
             if (sentCount > 0) {
                 meshMessageDao.markRelayed(messageId)
@@ -131,7 +186,118 @@ class MeshMessageRepository @Inject constructor(
             }
         }
 
-        Timber.i("$TAG: Message queued for mesh delivery: $messageId")
+        // No peers available -- message stays PENDING in local queue.
+        // The MeshForegroundService relay processor will automatically
+        // retry when peers become available or internet returns.
+        //
+        // Compare: bitchat's StoreForwardManager does a similar queue-and-retry
+        // but only for directed messages to specific peers, not broadcasts.
+        // Our approach queues ALL types since they need to reach the server.
+        Timber.i("$TAG: Message queued (no peers/internet): $messageId")
+        return Result.success(message.copy(status = MeshMessageStatus.PENDING))
+    }
+
+    /**
+     * Forward a hazard report DIRECTLY to the mesh network, bypassing internet check.
+     *
+     * Called by IncidentViewModel when it has ALREADY determined that internet
+     * is unavailable (via NetworkConnectivityManager.isInternetAvailable()).
+     * This avoids the ~10s HTTP timeout that would occur if we tried the API
+     * first on a dead connection.
+     *
+     * Flow: Create message → Store in DB → Broadcast to BLE peers → Queue if no peers
+     *
+     * This is the Ocean Sentinels equivalent of bitchat-android's direct
+     * BluetoothMeshService.sendMessage() path — both skip any server/internet
+     * logic and go straight to BLE broadcast:
+     *
+     * bitchat:  sendMessage() → signPacket() → broadcastPacket() → all peers
+     * Ocean:    forwardToMesh() → store DB → broadcastMessage() → all peers
+     *
+     * The only difference: bitchat uses Ed25519 signatures (SecurityManager)
+     * and Noise encryption for private messages. We transmit plaintext JSON
+     * and rely on server-side validation after eventual upload.
+     */
+    suspend fun forwardToMesh(
+        hazardType: HazardType,
+        location: String,
+        latitude: Double?,
+        longitude: Double?,
+        description: String,
+        urgency: UrgencyLevel,
+        contactInfo: String?,
+        photoUrl: String?,
+        reporterUserId: Int?
+    ): Result<MeshMessage> {
+        val deviceId = deviceIdentifier.getDeviceId()
+        val fingerprint = deviceIdentifier.getDeviceFingerprint()
+        val timestamp = System.currentTimeMillis()
+
+        val messageId = MeshMessage.generateMessageId(
+            deviceId, timestamp, hazardType.value, latitude, longitude, description
+        )
+
+        // Dedup check (same as bitchat's SecurityManager.isDuplicate() which
+        // uses a hash-based message ID set with MAX_PROCESSED_MESSAGES limit)
+        if (meshMessageDao.exists(messageId)) {
+            Timber.w("$TAG: Duplicate message detected: $messageId")
+            val existing = meshMessageDao.getByMessageId(messageId)
+            return if (existing != null) Result.success(existing.toDomain())
+            else Result.failure(Exception("Duplicate message"))
+        }
+
+        val message = MeshMessage(
+            messageId = messageId,
+            originDeviceMac = deviceId,
+            originDeviceFingerprint = fingerprint,
+            hazardType = hazardType.value,
+            location = location,
+            latitude = latitude,
+            longitude = longitude,
+            description = description,
+            urgency = urgency.value,
+            createdAtMillis = timestamp,
+            photoUrl = photoUrl,
+            contactInfo = contactInfo,
+            reporterUserId = reporterUserId
+        )
+
+        // Step 1: Persist to Room DB (crash-safe, unlike bitchat's in-memory cache)
+        val entity = MeshMessageEntity.fromDomain(message, isOwnMessage = true)
+        meshMessageDao.insert(entity)
+        meshMessageDao.trimToLimit(MAX_LOCAL_MESSAGES)
+        Timber.i("$TAG: [MESH-DIRECT] Message stored in local DB: $messageId")
+
+        // Step 2: Broadcast to all connected BLE peers
+        // Uses the same broadcastMessage() path as createAndSend() but without
+        // attempting internet first. broadcastMessage() internally handles:
+        //   - MTU-aware chunking (data > MTU-3 → split into chunks)
+        //   - 50ms inter-chunk delay (bitchat uses 20ms for its fragments)
+        //   - relay path filtering (skips peers already in relayPath)
+        //   - dedup via LRU LinkedHashSet of 10,000 message IDs
+        if (bleMeshManager.isRunning() && bleMeshManager.getConnectedPeerCount() > 0) {
+            val sentCount = bleMeshManager.broadcastMessage(message)
+            if (sentCount > 0) {
+                meshMessageDao.markRelayed(messageId)
+                Timber.i("$TAG: [MESH-DIRECT] Broadcast to $sentCount peers: $messageId")
+                return Result.success(message.copy(
+                    status = MeshMessageStatus.RELAYED,
+                    // Note: bitchat would also set transport here. We track transport
+                    // separately in MeshMessageEntity for server upload metadata.
+                ))
+            }
+            Timber.w("$TAG: [MESH-DIRECT] broadcastMessage returned 0 despite peers connected")
+        }
+
+        // Step 3: No peers available — stays PENDING
+        // MeshForegroundService.relayPendingMessages() runs every 15s and will
+        // broadcast to any newly connected peer (similar to bitchat's
+        // StoreForwardManager.sendCachedMessages(peerID) on peer connect,
+        // but we send to ALL new peers, not targeted by recipient).
+        //
+        // When internet returns, MeshForegroundService.processQueue() uploads
+        // to server (no equivalent in bitchat — it's mesh-only forever).
+        Timber.i("$TAG: [MESH-DIRECT] Queued locally (no BLE peers): $messageId")
         return Result.success(message.copy(status = MeshMessageStatus.PENDING))
     }
 
@@ -223,9 +389,12 @@ class MeshMessageRepository @Inject constructor(
     // ==================== Queue Processing ====================
 
     /**
-     * Process the message queue — attempt to deliver all pending/failed messages to server.
+     * Process the message queue -- attempt to deliver all pending/failed messages to server.
      * Called when internet becomes available or periodically.
      * Protected by Mutex to prevent concurrent processing from periodic + network callback.
+     *
+     * Also verifies relayed messages: if a message was relayed via mesh and later
+     * internet becomes available, this uploads it and clears the queue entry.
      */
     suspend fun processQueue() {
         if (!isInternetAvailable()) return
@@ -233,7 +402,7 @@ class MeshMessageRepository @Inject constructor(
         queueMutex.withLock {
             val now = LocalDateTime.now().toString()
 
-            // Issue #10: Clean up expired undelivered messages first
+            // Clean up expired undelivered messages first
             val expired = meshMessageDao.getExpiredMessages(now)
             if (expired.isNotEmpty()) {
                 expired.forEach { meshMessageDao.deleteByMessageId(it.messageId) }
@@ -245,11 +414,23 @@ class MeshMessageRepository @Inject constructor(
 
             val allToDeliver = (pending + relayedForOthers).distinctBy { it.messageId }
 
-            Timber.i("$TAG: Processing queue: ${allToDeliver.size} messages")
+            if (allToDeliver.isNotEmpty()) {
+                Timber.i("$TAG: Processing queue: ${allToDeliver.size} messages to deliver")
+            }
 
+            var deliveredCount = 0
             allToDeliver.forEach { entity ->
                 val message = entity.toDomain()
-                tryDeliverToServer(message)
+                val delivered = tryDeliverToServer(message)
+                if (delivered) {
+                    deliveredCount++
+                    // Clear write tracking in BleMeshManager
+                    bleMeshManager.clearMessageTracking(message.messageId)
+                }
+            }
+
+            if (deliveredCount > 0) {
+                Timber.i("$TAG: Queue sync complete: $deliveredCount/${allToDeliver.size} delivered to server")
             }
 
             // Clean up expired delivered messages
@@ -285,6 +466,14 @@ class MeshMessageRepository @Inject constructor(
      */
     suspend fun getUnrelayedMessages(): List<MeshMessageEntity> {
         return meshMessageDao.getUnrelayedMessages()
+    }
+
+    /**
+     * Get messages already relayed to some peers but eligible for re-broadcast
+     * to newly connected peers. broadcastMessage handles dedup via relay path.
+     */
+    suspend fun getRelayableMessages(): List<MeshMessageEntity> {
+        return meshMessageDao.getRelayableMessages()
     }
 
     /**
@@ -342,13 +531,20 @@ class MeshMessageRepository @Inject constructor(
 
     // ==================== Utilities ====================
 
+    /**
+     * Check internet availability via the centralized NetworkConnectivityManager.
+     *
+     * Previously this method created its own ConnectivityManager query each time,
+     * which was redundant with MeshForegroundService's NetworkCallback.
+     * Now uses the singleton's cached AtomicBoolean for O(1) thread-safe reads.
+     *
+     * Comparison:
+     * • bitchat-android: Never checks internet (pure mesh, no server)
+     * • bridgefy-alerts: Never checks internet (SDK handles everything)
+     * • Ocean Sentinels: Checks via NetworkConnectivityManager.isInternetAvailable()
+     *   to decide between API upload and BLE mesh broadcast
+     */
     private fun isInternetAvailable(): Boolean {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = cm.activeNetwork ?: return false
-        val capabilities = cm.getNetworkCapabilities(network) ?: return false
-        val available = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-        _hasInternet.set(available)
-        return available
+        return networkConnectivityManager.isInternetAvailable()
     }
 }
