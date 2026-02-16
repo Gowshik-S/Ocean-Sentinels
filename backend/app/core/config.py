@@ -14,7 +14,12 @@ class Settings:
         self.DATABASE_URL_LOCAL: str = os.getenv("DATABASE_URL_LOCAL", "sqlite+aiosqlite:///./database/ocean_hazard.db")
 
         # JWT
-        self.SECRET_KEY: str = os.getenv("SECRET_KEY", "your-super-secret-jwt-key-here-change-in-production")
+        self.SECRET_KEY: str = os.getenv("SECRET_KEY", "")
+        if not self.SECRET_KEY:
+            import secrets
+            self.SECRET_KEY = secrets.token_hex(32)
+            import warnings
+            warnings.warn("SECRET_KEY not set! Using random key — sessions won't persist across restarts. Set SECRET_KEY env var in production.")
         self.ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
         self.ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 

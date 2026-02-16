@@ -39,6 +39,10 @@ android {
         
         // Mapbox Access Token - reads from local.properties
         buildConfigField("String", "MAPBOX_ACCESS_TOKEN", "\"${localProperties.getProperty("MAPBOX_ACCESS_TOKEN") ?: ""}\"")
+
+        // Weather API keys - reads from local.properties
+        buildConfigField("String", "WEATHERAPI_KEY", "\"${localProperties.getProperty("WEATHERAPI_KEY") ?: ""}\"")
+        buildConfigField("String", "INDIAN_API_KEY", "\"${localProperties.getProperty("INDIAN_API_KEY") ?: ""}\"")
     }
 
     buildTypes {

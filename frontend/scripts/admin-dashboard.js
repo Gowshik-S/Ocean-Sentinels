@@ -561,7 +561,7 @@ class AdminDashboard {
             const teamData = {
                 username: document.getElementById('team-email').value.trim(), // Use email as username and trim
                 email: document.getElementById('team-email').value.trim(),
-                password: 'Ocean@123', // Default password - team can change it later
+                password: this.generateTempPassword(), // Auto-generated temporary password
                 first_name: document.getElementById('team-name').value.trim().split(' ')[0] || document.getElementById('team-name').value.trim(),
                 last_name: document.getElementById('team-name').value.trim().split(' ').slice(1).join(' ') || '',
                 phone: document.getElementById('team-phone').value.trim(),
@@ -582,7 +582,7 @@ class AdminDashboard {
             await this.loadTeams();
             await this.loadStatistics();
 
-            this.showSuccessNotification('Rescue team added successfully! Default password: Ocean@123');
+            this.showSuccessNotification(`Rescue team added successfully! Temporary password: ${teamData.password}`);
         } catch (error) {
             console.error('❌ Failed to add rescue team:', error);
             this.showErrorNotification(`Failed to add rescue team: ${error.message}`);
@@ -597,7 +597,7 @@ class AdminDashboard {
             const authorityData = {
                 username: document.getElementById('authority-email').value.trim(), // Use email as username and trim
                 email: document.getElementById('authority-email').value.trim(),
-                password: 'Ocean@123', // Default password - authority can change it later
+                password: this.generateTempPassword(), // Auto-generated temporary password
                 first_name: document.getElementById('authority-name').value.trim().split(' ')[0] || document.getElementById('authority-name').value.trim(),
                 last_name: document.getElementById('authority-name').value.trim().split(' ').slice(1).join(' ') || '',
                 phone: document.getElementById('authority-phone').value.trim(),
@@ -618,7 +618,7 @@ class AdminDashboard {
             await this.loadAuthorities();
             await this.loadStatistics();
 
-            this.showSuccessNotification('Authority added successfully! Default password: Ocean@123');
+            this.showSuccessNotification(`Authority added successfully! Temporary password: ${authorityData.password}`);
         } catch (error) {
             console.error('❌ Failed to add authority:', error);
             this.showErrorNotification(`Failed to add authority: ${error.message}`);
@@ -816,6 +816,21 @@ class AdminDashboard {
     logout() {
         localStorage.removeItem('oceanGuardToken');
         window.location.href = 'index.html';
+    }
+
+    /**
+     * Generate a temporary password for new users
+     * @returns {string} A random temporary password
+     */
+    generateTempPassword() {
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+        const special = '!@#$%';
+        let password = '';
+        for (let i = 0; i < 10; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        password += special.charAt(Math.floor(Math.random() * special.length));
+        return password;
     }
 }
 

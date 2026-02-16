@@ -7,6 +7,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import uvicorn
+import os
+import hashlib
+import secrets as _secrets
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -62,29 +65,40 @@ async def health_check():
         "timestamp": "2025-01-27T10:30:00Z"
     }
 
+# Demo credentials from environment variables
+DEMO_ADMIN_USER = os.environ.get("DEMO_ADMIN_USER", "admin")
+DEMO_ADMIN_PASS = os.environ.get("DEMO_ADMIN_PASS", "")
+DEMO_USER_USER = os.environ.get("DEMO_USER_USER", "user")
+DEMO_USER_PASS = os.environ.get("DEMO_USER_PASS", "")
+
+def _generate_token(role: str) -> str:
+    return hashlib.sha256(f"{_secrets.token_hex(16)}-{role}".encode()).hexdigest()
+
 # Simple authentication endpoint
 @app.post("/api/auth/login")
 async def login(username: str, password: str):
-    """Simple login endpoint for testing"""
-    if username == "admin" and password == "admin":
+    """Simple login endpoint — set DEMO_ADMIN_PASS and DEMO_USER_PASS env vars"""
+    if not DEMO_ADMIN_PASS and not DEMO_USER_PASS:
+        raise HTTPException(status_code=503, detail="Demo credentials not configured. Set DEMO_ADMIN_PASS / DEMO_USER_PASS env vars.")
+    if username == DEMO_ADMIN_USER and password == DEMO_ADMIN_PASS:
         return {
-            "access_token": "fake-jwt-token",
+            "access_token": _generate_token("admin"),
             "token_type": "bearer",
             "user": {
                 "id": 1,
-                "username": "admin",
+                "username": DEMO_ADMIN_USER,
                 "role": "admin",
                 "first_name": "Admin",
                 "last_name": "User"
             }
         }
-    elif username == "user" and password == "user":
+    elif username == DEMO_USER_USER and password == DEMO_USER_PASS:
         return {
-            "access_token": "fake-jwt-token-user",
+            "access_token": _generate_token("user"),
             "token_type": "bearer",
             "user": {
                 "id": 2,
-                "username": "user",
+                "username": DEMO_USER_USER,
                 "role": "public",
                 "first_name": "Test",
                 "last_name": "User"

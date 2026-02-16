@@ -1,5 +1,6 @@
 package com.oceansentinels.app.data.repository
 
+import com.oceansentinels.app.BuildConfig
 import com.oceansentinels.app.data.remote.api.IndianWeatherApi
 import com.oceansentinels.app.data.remote.api.WeatherApi
 import com.oceansentinels.app.data.remote.dto.*
@@ -18,8 +19,8 @@ class WeatherRepository @Inject constructor(
     private val indianWeatherApi: IndianWeatherApi
 ) {
     companion object {
-        const val WEATHERAPI_KEY = "f65978b7b4d24271a6364713261402"
-        const val INDIAN_API_KEY = "sk-live-mLpjO5IlL34DIXcaD0RGKm3Gm49GMaVAs0b9w3Vi"
+        val WEATHERAPI_KEY: String = BuildConfig.WEATHERAPI_KEY
+        val INDIAN_API_KEY: String = BuildConfig.INDIAN_API_KEY
     }
 
     // ============= IndianAPI.in Methods =============
