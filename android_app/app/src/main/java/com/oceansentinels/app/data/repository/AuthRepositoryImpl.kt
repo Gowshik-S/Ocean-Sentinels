@@ -93,9 +93,19 @@ class AuthRepositoryImpl @Inject constructor(
             val response = api.register(request)
             
             if (response.isSuccessful && response.body() != null) {
-                val user = response.body()!!.toDomain()
-                Timber.d("Registration successful for user: ${user.username}")
-                Result.success(user)
+                val authResponse = response.body()!!
+                val authToken = authResponse.toDomain()
+                
+                // Save auth token and user data so user is logged in after registration
+                preferencesManager.saveAuthToken(authToken.accessToken)
+                preferencesManager.saveUserData(authToken.user)
+                preferencesManager.setLoggedIn(true)
+                
+                // Cache user in database
+                userDao.insert(UserEntity.fromDomain(authToken.user))
+                
+                Timber.d("Registration successful for user: ${authToken.user.username}")
+                Result.success(authToken.user)
             } else {
                 val errorBody = response.errorBody()?.string() ?: "Unknown error"
                 Timber.e("Registration failed: $errorBody")

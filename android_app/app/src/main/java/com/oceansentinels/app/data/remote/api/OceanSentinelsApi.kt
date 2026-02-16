@@ -22,7 +22,7 @@ interface OceanSentinelsApi {
     @POST("auth/register")
     suspend fun register(
         @Body request: RegisterRequestDto
-    ): Response<UserDto>
+    ): Response<AuthResponseDto>
     
     // ============= Users =============
     

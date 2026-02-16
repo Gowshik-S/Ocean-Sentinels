@@ -106,20 +106,31 @@ async def register(
         
         print(f"User registered successfully: {user_data.email}")
 
-        # Return user data as dict to avoid serialization issues
+        # Create access token so the user is automatically logged in after registration
+        access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": db_user.username, "role": db_user.role.value if hasattr(db_user.role, 'value') else str(db_user.role)},
+            expires_delta=access_token_expires
+        )
+
+        # Return token + user data (same format as login) so the client can auto-login
         return {
-            "id": db_user.id,
-            "username": db_user.username,
-            "email": db_user.email,
-            "first_name": db_user.first_name,
-            "last_name": db_user.last_name,
-            "phone": db_user.phone,
-            "location": db_user.location,
-            "role": db_user.role.value if hasattr(db_user.role, 'value') else str(db_user.role),
-            "is_active": db_user.is_active,
-            "is_verified": db_user.is_verified,
-            "created_at": db_user.created_at,
-            "last_login": db_user.last_login
+            "access_token": access_token,
+            "token_type": "bearer",
+            "user": {
+                "id": db_user.id,
+                "username": db_user.username,
+                "email": db_user.email,
+                "first_name": db_user.first_name,
+                "last_name": db_user.last_name,
+                "phone": db_user.phone,
+                "location": db_user.location,
+                "role": db_user.role.value if hasattr(db_user.role, 'value') else str(db_user.role),
+                "is_active": db_user.is_active,
+                "is_verified": db_user.is_verified,
+                "created_at": db_user.created_at,
+                "last_login": db_user.last_login
+            }
         }
         
     except HTTPException as he:
