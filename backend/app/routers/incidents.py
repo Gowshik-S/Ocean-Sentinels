@@ -140,7 +140,10 @@ async def create_incident(
         return incident_dict
         
     except Exception as e:
-        await db.rollback()
+        try:
+            await db.rollback()
+        except Exception:
+            pass  # Connection may already be closed
         print(f"Incident creation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to create incident: {str(e)}")
 

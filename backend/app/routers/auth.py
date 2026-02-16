@@ -124,11 +124,17 @@ async def register(
         
     except HTTPException as he:
         # Re-raise HTTP exceptions (like duplicate username/email)
-        await db.rollback()
+        try:
+            await db.rollback()
+        except Exception:
+            pass  # Connection may already be closed
         raise he
     except Exception as e:
         print(f"Registration error: {str(e)}")
-        await db.rollback()
+        try:
+            await db.rollback()
+        except Exception:
+            pass  # Connection may already be closed
         raise HTTPException(
             status_code=500,
             detail=f"Registration failed: {str(e)}"
@@ -164,7 +170,11 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: AsyncSessi
     
     # Update last login
     user.last_login = datetime.utcnow()
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception:
+        await db.rollback()
+        # Non-fatal: login still succeeds even if last_login update fails
     
     return {
         "access_token": access_token,

@@ -67,6 +67,8 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     print("Shutting down Ocean Hazard Backend...")
+    await engine.dispose()
+    print("Database engine disposed.")
 
 # Create FastAPI application
 app = FastAPI(

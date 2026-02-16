@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const hasSeenDemoPopup = localStorage.getItem('hasSeenDemoPopup');
         
         // Only show popup if user is NOT logged in and hasn't seen it before
-        if (!authToken && !hasSeenDemoPopup) {
+        if (!authToken && !hasSeenDemoPopup && demoPopup) {
             // Show demo popup only if not authenticated and first visit
             demoPopup.classList.remove('hidden');
             
@@ -40,7 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     closeDemoPopup();
                 }
             });
-        } else {
+        } else if (demoPopup) {
             // Hide popup if user is logged in or has already seen it
             demoPopup.classList.add('hidden');
         }

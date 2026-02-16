@@ -6,7 +6,7 @@
 class UserAnalyticsTracker {
     constructor() {
         this.sessionId = this.generateSessionId();
-        this.apiEndpoint = 'https://ocean-hazard-1-6j5g.onrender.com/api/analytics/track-visit';
+        this.apiEndpoint = 'https://ocean-sentinels.onrender.com/api/analytics/track-visit';
         this.initialized = false;
     }
 

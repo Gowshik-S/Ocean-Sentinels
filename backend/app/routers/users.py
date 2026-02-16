@@ -78,10 +78,16 @@ async def admin_create_user(
             "last_login": db_user.last_login
         }
     except HTTPException:
-        await db.rollback()
+        try:
+            await db.rollback()
+        except Exception:
+            pass
         raise
     except Exception as e:
-        await db.rollback()
+        try:
+            await db.rollback()
+        except Exception:
+            pass
         raise HTTPException(status_code=500, detail=f"Failed to create user: {str(e)}")
 
 
@@ -115,8 +121,12 @@ async def update_current_user(
     for field, value in update_data.items():
         setattr(current_user, field, value)
     
-    await db.commit()
-    await db.refresh(current_user)
+    try:
+        await db.commit()
+        await db.refresh(current_user)
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update user: {str(e)}")
     
     return {
         "id": current_user.id,
@@ -211,7 +221,11 @@ async def activate_user(
         raise HTTPException(status_code=404, detail="User not found")
     
     user.is_active = not user.is_active
-    await db.commit()
+    try:
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to update user status: {str(e)}")
     
     return {"message": f"User {'activated' if user.is_active else 'deactivated'} successfully"}
 
@@ -266,8 +280,12 @@ async def delete_user(
     }
     
     # Delete the user
-    await db.delete(user)
-    await db.commit()
+    try:
+        await db.delete(user)
+        await db.commit()
+    except Exception as e:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to delete user: {str(e)}")
     
     return {
         "message": "User deleted successfully",

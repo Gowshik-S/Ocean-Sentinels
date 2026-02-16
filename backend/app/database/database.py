@@ -39,12 +39,23 @@ if database_url.startswith("postgresql://"):
         parsed.fragment
     ))
 
-engine = create_async_engine(
-    database_url,
+# Build engine kwargs – add pool health-check & recycling for PostgreSQL
+engine_kwargs = dict(
     echo=settings.DEBUG,
     future=True,
-    connect_args=connect_args
+    connect_args=connect_args,
 )
+
+if "postgresql" in database_url:
+    engine_kwargs.update(
+        pool_pre_ping=True,      # Test connection before handing it out (fixes "connection is closed")
+        pool_size=5,             # Baseline connections kept open
+        max_overflow=10,         # Extra connections allowed under load
+        pool_recycle=300,        # Recycle connections every 5 min to avoid server-side timeouts
+        pool_timeout=30,         # Wait up to 30s for a connection from the pool
+    )
+
+engine = create_async_engine(database_url, **engine_kwargs)
 
 # Create async session factory
 AsyncSessionLocal = async_sessionmaker(
@@ -61,6 +72,10 @@ async def get_db():
     async with AsyncSessionLocal() as session:
         try:
             yield session
+            await session.commit()          # Auto-commit if no exception
+        except Exception:
+            await session.rollback()        # Rollback on any unhandled error
+            raise
         finally:
             await session.close()
 
