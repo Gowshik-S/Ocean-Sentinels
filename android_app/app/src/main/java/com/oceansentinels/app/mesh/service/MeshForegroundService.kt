@@ -286,33 +286,44 @@ class MeshForegroundService : Service() {
      *      (c) relayPath check (extra safety, no bitchat equivalent)
      */
     private suspend fun handleReceivedMessage(message: MeshMessage, senderBleAddress: String) {
-        // Check deduplication in DB
+        // ── Deduplication: 3-layer check ──
+        //
+        // Layer 1: BleMeshManager.processedMessageIds (LRU in-memory set)
+        //   → Already handled before this callback fires (handleIncomingData)
+        //
+        // Layer 2: DB existence check
+        //   → If we already have this message, check its status:
+        //      - DELIVERED: Another device (or we) already uploaded it to the server.
+        //        Drop silently — do NOT relay again. This is the key fix for the
+        //        scenario where A,B,C,D all get internet: the first delivery marks
+        //        it DELIVERED, and subsequent receives are ignored.
+        //      - Any other status: We already have it but it hasn't reached the
+        //        server yet. Still drop (don't re-process), but the periodic
+        //        relay processor will continue trying to push it.
         if (meshRepository.isMessageKnown(message.messageId)) {
-            Timber.d("$TAG: Message already known: ${message.messageId}")
+            Timber.d("$TAG: Message already known: ${message.messageId}, dropping")
             return
         }
 
-        // Store original in local DB
+        // Layer 3: New message — save to DB
         meshRepository.saveReceivedMessage(message)
 
-        // If internet available, deliver to server directly -- no mesh relay needed
+        // If internet available, deliver to server directly — no mesh relay needed.
+        // The server deduplicates by mesh_message_id (UNIQUE constraint + app-level check).
+        // Even if multiple devices upload the same message, only the first creates a
+        // new incident — the rest get the existing incident back (200 OK, duplicate=true).
+        // Either way, we mark the local copy as DELIVERED so it stops being relayed.
         if (hasInternet) {
             val delivered = meshRepository.tryDeliverToServer(message)
             if (delivered) {
                 Timber.i("$TAG: Received message delivered to server: ${message.messageId}")
                 return
             }
-            // Server delivery failed despite having internet -- fall through to mesh relay
+            // Server delivery failed despite having internet — fall through to mesh relay
         }
 
-        // No internet (or server delivery failed) -> relay to all connected peers
+        // No internet (or server delivery failed) → relay to all connected peers
         // EXCLUDING the sender so we don't echo back to them.
-        //
-        // This is the critical fix: previously broadcastMessage() tried to
-        // check relayPath.contains(gatt.device.address) but relayPath uses
-        // device IDs (e.g., "a3f7c1b9e2d4") while gatt.device.address is a
-        // BLE MAC (e.g., "AA:BB:CC:DD:EE:FF"), so the filter NEVER matched.
-        // Now we explicitly pass the sender's BLE address to exclude.
         val deviceId = deviceIdentifier.getDeviceId()
         val relayed = message.relay(deviceId)
         if (relayed != null) {
@@ -394,17 +405,39 @@ class MeshForegroundService : Service() {
 
         allMessages.forEach { entity ->
             val message = entity.toDomain()
-            val relayed = message.relay(deviceId)
-            if (relayed != null) {
-                // No specific sender to exclude for periodic relay.
-                // broadcastMessage() still applies addressToDeviceId and
-                // relayPath filters to prevent sending back to the
-                // original author or to peers already in the relay chain.
-                val sentCount = bleMeshManager.broadcastMessage(relayed)
+
+            // For messages WE already relayed (has_been_relayed=true),
+            // our deviceId is already in the relayPath. Calling
+            // message.relay(deviceId) returns null (loop detected),
+            // which silently killed all re-broadcasts to new peers.
+            //
+            // Fix: If we already relayed, broadcast the stored version
+            // as-is (relayPath already contains our ID). For new messages,
+            // call relay() to add our ID and increment hops.
+            val messageToSend = if (entity.hasBeenRelayed) {
+                // Already relayed by us — re-broadcast to new peers without
+                // modifying relay path. broadcastMessage() skips peers
+                // already in the relay chain via its 3-layer filter.
+                message
+            } else {
+                // Not yet relayed by us — add our device ID to relay path
+                message.relay(deviceId)
+            }
+
+            if (messageToSend != null) {
+                val sentCount = bleMeshManager.broadcastMessage(messageToSend)
                 if (sentCount > 0) {
-                    meshRepository.markRelayedByThisDevice(
-                        message.messageId, deviceId, relayed.relayPath
-                    )
+                    if (!entity.hasBeenRelayed) {
+                        // First successful relay — mark in DB
+                        val updatedPath = if (message.relayPath.contains(deviceId)) {
+                            message.relayPath
+                        } else {
+                            message.relayPath + deviceId
+                        }
+                        meshRepository.markRelayedByThisDevice(
+                            message.messageId, deviceId, updatedPath
+                        )
+                    }
                     relayedCount++
                 }
             }

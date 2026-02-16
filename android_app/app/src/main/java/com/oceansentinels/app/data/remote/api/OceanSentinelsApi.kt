@@ -73,6 +73,16 @@ interface OceanSentinelsApi {
     suspend fun createIncident(
         @Body request: CreateIncidentRequestDto
     ): Response<IncidentDto>
+
+    /**
+     * Bulk check which mesh message IDs have already been delivered to the server.
+     * Called when a device comes online to discover messages already uploaded by
+     * other mesh peers. Those can be marked DELIVERED locally and stop relaying.
+     */
+    @POST("incidents/mesh/check")
+    suspend fun checkMeshMessages(
+        @Body request: MeshCheckRequestDto
+    ): Response<MeshCheckResponseDto>
     
     @PUT("incidents/{id}/verify")
     suspend fun verifyIncident(

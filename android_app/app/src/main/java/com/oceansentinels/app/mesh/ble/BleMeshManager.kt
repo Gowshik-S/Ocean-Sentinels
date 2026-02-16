@@ -68,6 +68,8 @@ class BleMeshManager(private val context: Context) {
 
     private val discoveredPeers = ConcurrentHashMap<String, MeshPeer>()
     private val connectedGatts = ConcurrentHashMap<String, BluetoothGatt>()
+    /** Tracks addresses with a pending connectGatt() call that hasn't resolved yet */
+    private val pendingConnections = java.util.Collections.synchronizedSet(mutableSetOf<String>())
 
     /** LRU-based deduplication cache — auto-evicts oldest entries */
     private val processedMessageIds: MutableSet<String> = java.util.Collections.synchronizedSet(
@@ -261,9 +263,27 @@ class BleMeshManager(private val context: Context) {
         stopAdvertising()
         stopGattServer()
         disconnectAll()
+
+        // ── Clear ALL in-memory state ──
+        // Without this, stale peers/dedup entries survive a stop()+start()
+        // cycle and cause connection failures on the next session.
+        // Clearing app data/cache fixes this because it restarts the process
+        // and recreates the Hilt singleton, but we must not require that.
         incomingBuffers.clear()
         bufferTimestamps.clear()
+        discoveredPeers.clear()
+        pendingConnections.clear()
+        peerMtu.clear()
+        addressToDeviceId.clear()
+        processedMessageIds.clear()
+        pendingWrites.clear()
+        confirmedWrites.clear()
+        activeWriteMessageId.clear()
+
         handler.removeCallbacksAndMessages(null)
+
+        // Reset UI state
+        updatePeerCounts()
     }
 
     // ==================== GATT Server ====================
@@ -308,25 +328,42 @@ class BleMeshManager(private val context: Context) {
                 when (newState) {
                     BluetoothProfile.STATE_CONNECTED -> {
                         Timber.i("$TAG: Device connected to server: ${device.address}")
-                        val peer = MeshPeer(
-                            address = device.address,
-                            name = device.name,
-                            rssi = 0,
-                            isCodedPhy = false,
-                            primaryPhy = BluetoothDevice.PHY_LE_1M,
-                            secondaryPhy = 0,
-                            lastSeenMillis = System.currentTimeMillis(),
-                            isConnected = true,
-                            hasOceanService = true
-                        )
-                        discoveredPeers[device.address] = peer
-                        updatePeerCounts()
-                        onPeerConnected?.invoke(peer)
+                        // Only register as a new peer if we don't already know them
+                        // from the client side (scan → connectToPeer). If the client
+                        // callback already added a richer MeshPeer with RSSI/PHY info,
+                        // don't overwrite it with a bare peer (rssi=0, isCodedPhy=false).
+                        val existingPeer = discoveredPeers[device.address]
+                        if (existingPeer == null) {
+                            // Unknown device connected to our GATT server.
+                            // Mark hasOceanService=false until they actually write to
+                            // our mesh characteristic (proving they're an Ocean Sentinels peer).
+                            val peer = MeshPeer(
+                                address = device.address,
+                                name = device.name,
+                                rssi = 0,
+                                isCodedPhy = false,
+                                primaryPhy = BluetoothDevice.PHY_LE_1M,
+                                secondaryPhy = 0,
+                                lastSeenMillis = System.currentTimeMillis(),
+                                isConnected = true,
+                                hasOceanService = false // proven when they write to our characteristic
+                            )
+                            discoveredPeers[device.address] = peer
+                            updatePeerCounts()
+                            onPeerConnected?.invoke(peer)
+                        } else if (!existingPeer.isConnected) {
+                            // Known peer reconnecting via server side — update status
+                            val updated = existingPeer.copy(
+                                isConnected = true,
+                                lastSeenMillis = System.currentTimeMillis()
+                            )
+                            discoveredPeers[device.address] = updated
+                            updatePeerCounts()
+                            onPeerConnected?.invoke(updated)
+                        }
                     }
                     BluetoothProfile.STATE_DISCONNECTED -> {
                         Timber.i("$TAG: Device disconnected from server: ${device.address}")
-                        // Keep peer in discovered list (mark disconnected) so both
-                        // devices maintain symmetric visibility of each other.
                         discoveredPeers[device.address]?.let { peer ->
                             discoveredPeers[device.address] = peer.copy(isConnected = false)
                         }
@@ -397,6 +434,15 @@ class BleMeshManager(private val context: Context) {
                     gattServer?.sendResponse(
                         device, requestId, BluetoothGatt.GATT_SUCCESS, offset, null
                     )
+                }
+
+                // Mark hasOceanService=true: this device wrote to our mesh
+                // characteristic, proving it's a real Ocean Sentinels peer
+                // (not just a random BLE device that connected to our GATT server).
+                discoveredPeers[device.address]?.let { peer ->
+                    if (!peer.hasOceanService) {
+                        discoveredPeers[device.address] = peer.copy(hasOceanService = true)
+                    }
                 }
             }
         }
@@ -536,6 +582,17 @@ class BleMeshManager(private val context: Context) {
 
     // ==================== Scanning ====================
 
+    /** Reusable scan-restart runnable — prevents stacking duplicate restarts */
+    private val scanRestartRunnable = object : Runnable {
+        override fun run() {
+            if (!isRunning) return
+            stopScanning()
+            handler.postDelayed({
+                if (isRunning) startScanning()
+            }, 1000)
+        }
+    }
+
     private fun startScanning() {
         val scanner = adapter?.bluetoothLeScanner ?: run {
             Timber.e("$TAG: BluetoothLeScanner not available")
@@ -567,7 +624,8 @@ class BleMeshManager(private val context: Context) {
 
             override fun onScanFailed(errorCode: Int) {
                 Timber.e("$TAG: Scan failed: $errorCode")
-                // Schedule retry
+                // Schedule retry — remove old restart first to prevent stacking
+                handler.removeCallbacks(scanRestartRunnable)
                 handler.postDelayed({
                     if (isRunning) startScanning()
                 }, SCAN_RESTART_INTERVAL_MS)
@@ -584,14 +642,9 @@ class BleMeshManager(private val context: Context) {
         }
 
         // Schedule periodic scan restart (Android limits continuous scanning)
-        handler.postDelayed({
-            if (isRunning) {
-                stopScanning()
-                handler.postDelayed({
-                    if (isRunning) startScanning()
-                }, 1000)
-            }
-        }, SCAN_RESTART_INTERVAL_MS)
+        // Remove any previous scanRestartRunnable to prevent stacking
+        handler.removeCallbacks(scanRestartRunnable)
+        handler.postDelayed(scanRestartRunnable, SCAN_RESTART_INTERVAL_MS)
     }
 
     /**
@@ -603,8 +656,9 @@ class BleMeshManager(private val context: Context) {
         val now = System.currentTimeMillis()
         discoveredPeers.values
             .filter { !it.isConnected && !connectedGatts.containsKey(it.address) }
+            .filter { !pendingConnections.contains(it.address) } // skip already-pending
             .filter { now - it.lastSeenMillis < PEER_STALE_TIMEOUT_MS }
-            .filter { connectedGatts.size < MAX_CONNECTIONS }
+            .filter { connectedGatts.size + pendingConnections.size < MAX_CONNECTIONS }
             .forEach { peer ->
                 Timber.d("$TAG: Attempting reconnection to ${peer.address}")
                 val device = adapter?.getRemoteDevice(peer.address)
@@ -663,7 +717,8 @@ class BleMeshManager(private val context: Context) {
 
             // Re-connect if previously disconnected and we have capacity
             if (!existingPeer.isConnected && !connectedGatts.containsKey(address)
-                && connectedGatts.size < MAX_CONNECTIONS) {
+                && !pendingConnections.contains(address)
+                && connectedGatts.size + pendingConnections.size < MAX_CONNECTIONS) {
                 Timber.i("$TAG: Re-connecting to previously seen peer: $address")
                 connectToPeer(device)
             }
@@ -675,7 +730,7 @@ class BleMeshManager(private val context: Context) {
             Timber.i("$TAG: New peer discovered: $address (Coded: $isCodedPhy, RSSI: ${result.rssi})")
 
             // Auto-connect if we have capacity
-            if (connectedGatts.size < MAX_CONNECTIONS) {
+            if (connectedGatts.size + pendingConnections.size < MAX_CONNECTIONS) {
                 connectToPeer(device)
             }
         }
@@ -686,6 +741,16 @@ class BleMeshManager(private val context: Context) {
     private fun connectToPeer(device: BluetoothDevice) {
         if (connectedGatts.containsKey(device.address)) return
         if (connectedGatts.size >= MAX_CONNECTIONS) return
+        // Prevent duplicate connectGatt() calls while a connection attempt
+        // is still pending. Without this guard, rapid scan results trigger
+        // multiple connectGatt() calls for the same address, each creating
+        // a separate BluetoothGatt object. Android's BLE stack has a hard
+        // limit (~7 GATT clients), and these phantom GATT handles exhaust it,
+        // blocking connections to the 3rd, 4th, ... device.
+        if (!pendingConnections.add(device.address)) {
+            Timber.d("$TAG: Connection already pending for ${device.address}, skipping")
+            return
+        }
 
         val phyMask = if (isCodedPhySupported()) {
             BluetoothDevice.PHY_LE_CODED_MASK or BluetoothDevice.PHY_LE_1M_MASK
@@ -703,26 +768,51 @@ class BleMeshManager(private val context: Context) {
                 handler
             )
         } catch (e: Exception) {
+            pendingConnections.remove(device.address)
             Timber.e(e, "$TAG: Error connecting to ${device.address}")
         }
     }
 
     private val gattClientCallback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
+            val address = gatt.device.address
+            // Always clear pending state — the connection attempt has resolved
+            pendingConnections.remove(address)
+
             try {
+                // Handle GATT errors (status != 0) — the connection failed or was lost.
+                // Common codes: 133 (GATT_ERROR), 8 (CONN_TIMEOUT), 19 (TERMINATED_BY_PEER)
+                // Some OEMs fire non-zero status with STATE_DISCONNECTED, others with
+                // intermediate states. Treat ANY non-zero status as disconnection.
+                if (status != BluetoothGatt.GATT_SUCCESS && newState != BluetoothProfile.STATE_CONNECTED) {
+                    Timber.w("$TAG: GATT error for $address: status=$status, newState=$newState")
+                    connectedGatts.remove(address)
+                    gatt.close() // MUST close to free the GATT client slot
+                    peerMtu.remove(address)
+                    synchronized(bufferLock) {
+                        incomingBuffers.remove(address)
+                        bufferTimestamps.remove(address)
+                    }
+                    discoveredPeers[address]?.let { peer ->
+                        discoveredPeers[address] = peer.copy(isConnected = false)
+                    }
+                    updatePeerCounts()
+                    onPeerDisconnected?.invoke(address)
+                    return
+                }
+
                 when (newState) {
                     BluetoothProfile.STATE_CONNECTED -> {
-                        Timber.i("$TAG: Connected to ${gatt.device.address}")
-                        connectedGatts[gatt.device.address] = gatt
+                        Timber.i("$TAG: Connected to $address")
+                        connectedGatts[address] = gatt
                         updatePeerCounts()
                         gatt.discoverServices()
 
                         // Request Coded PHY upgrade if supported
                         if (isCodedPhySupported()) {
-                            val peerAddress = gatt.device.address
                             handler.postDelayed({
                                 // Guard: only upgrade if still connected
-                                if (connectedGatts.containsKey(peerAddress)) {
+                                if (connectedGatts.containsKey(address)) {
                                     try {
                                         gatt.setPreferredPhy(
                                             BluetoothDevice.PHY_LE_CODED,
@@ -739,25 +829,26 @@ class BleMeshManager(private val context: Context) {
                         // Request larger MTU for better throughput
                         gatt.requestMtu(517)
 
-                        discoveredPeers[gatt.device.address]?.let { peer ->
-                            discoveredPeers[gatt.device.address] = peer.copy(isConnected = true)
+                        discoveredPeers[address]?.let { peer ->
+                            discoveredPeers[address] = peer.copy(isConnected = true)
                             onPeerConnected?.invoke(peer.copy(isConnected = true))
                         }
                     }
                     BluetoothProfile.STATE_DISCONNECTED -> {
-                        Timber.i("$TAG: Disconnected from ${gatt.device.address}")
-                        connectedGatts.remove(gatt.device.address)
+                        Timber.i("$TAG: Disconnected from $address")
+                        connectedGatts.remove(address)
                         gatt.close()
+                        peerMtu.remove(address)
                         synchronized(bufferLock) {
-                            incomingBuffers.remove(gatt.device.address)
-                            bufferTimestamps.remove(gatt.device.address)
+                            incomingBuffers.remove(address)
+                            bufferTimestamps.remove(address)
                         }
                         updatePeerCounts()
 
-                        discoveredPeers[gatt.device.address]?.let { peer ->
-                            discoveredPeers[gatt.device.address] = peer.copy(isConnected = false)
+                        discoveredPeers[address]?.let { peer ->
+                            discoveredPeers[address] = peer.copy(isConnected = false)
                         }
-                        onPeerDisconnected?.invoke(gatt.device.address)
+                        onPeerDisconnected?.invoke(address)
                     }
                 }
             } catch (e: Exception) {
@@ -883,6 +974,8 @@ class BleMeshManager(private val context: Context) {
             }
         }
         connectedGatts.clear()
+        pendingConnections.clear()
+        peerMtu.clear()
         updatePeerCounts()
     }
 
@@ -1115,13 +1208,19 @@ class BleMeshManager(private val context: Context) {
 
         markProcessed(message.messageId)
 
-        // Learn this peer's mesh device ID from their message.
-        // This builds our addressToDeviceId map (like bitchat's
-        // BluetoothConnectionTracker.addressPeerMap) so broadcastMessage()
-        // can skip the original author when relaying.
-        if (message.originDeviceMac.isNotBlank()) {
-            addressToDeviceId[senderAddress] = message.originDeviceMac
-            Timber.d("$TAG: Learned peer identity: $senderAddress → ${message.originDeviceMac}")
+        // Learn this peer's actual mesh device ID from the message.
+        // If the message was relayed, relayPath.last() is the device ID
+        // of the peer that just sent it to us. If relayPath is empty,
+        // the sender IS the original author (originDeviceMac).
+        //
+        // Previous bug: we always used originDeviceMac, which maps the
+        // relay peer's BLE address to the original author's device ID.
+        // Example: A creates message, B relays to C → C mapped
+        // B's BLE address → A's device ID, corrupting Filter 2.
+        val senderDeviceId = message.relayPath.lastOrNull() ?: message.originDeviceMac
+        if (senderDeviceId.isNotBlank()) {
+            addressToDeviceId[senderAddress] = senderDeviceId
+            Timber.d("$TAG: Learned peer identity: $senderAddress → $senderDeviceId")
         }
 
         Timber.i("$TAG: Received message ${message.messageId} from $senderAddress (hop: ${message.hopCount})")

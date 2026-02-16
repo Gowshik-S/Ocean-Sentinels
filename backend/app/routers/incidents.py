@@ -61,7 +61,10 @@ async def create_incident(
             )
             existing_incident = existing_result.scalar_one_or_none()
             if existing_incident:
-                # Return the existing incident instead of creating a duplicate
+                # Return the existing incident with duplicate flag.
+                # The Android client uses 'duplicate: true' to know it was
+                # already delivered by another device in the mesh, so it
+                # can mark the local copy as DELIVERED and stop relaying.
                 incident_dict = {
                     "id": int(existing_incident.id),
                     "reference_id": str(existing_incident.reference_id),
@@ -81,7 +84,9 @@ async def create_incident(
                     "updated_at": existing_incident.updated_at.isoformat() if existing_incident.updated_at else None,
                     "verified_at": existing_incident.verified_at.isoformat() if existing_incident.verified_at else None,
                     "resolved_at": existing_incident.resolved_at.isoformat() if existing_incident.resolved_at else None,
-                    "assigned_at": existing_incident.assigned_at.isoformat() if existing_incident.assigned_at else None
+                    "assigned_at": existing_incident.assigned_at.isoformat() if existing_incident.assigned_at else None,
+                    "duplicate": True,
+                    "mesh_message_id": mesh_message_id
                 }
                 return incident_dict
         
@@ -127,7 +132,9 @@ async def create_incident(
             "updated_at": db_incident.updated_at.isoformat() if db_incident.updated_at else None,
             "verified_at": db_incident.verified_at.isoformat() if db_incident.verified_at else None,
             "resolved_at": db_incident.resolved_at.isoformat() if db_incident.resolved_at else None,
-            "assigned_at": db_incident.assigned_at.isoformat() if db_incident.assigned_at else None
+            "assigned_at": db_incident.assigned_at.isoformat() if db_incident.assigned_at else None,
+            "duplicate": False,
+            "mesh_message_id": mesh_message_id
         }
         
         return incident_dict
@@ -136,6 +143,47 @@ async def create_incident(
         await db.rollback()
         print(f"Incident creation error: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to create incident: {str(e)}")
+
+
+@router.post("/mesh/check", response_model=None)
+async def check_mesh_messages(
+    request_data: dict,
+    current_user: User = Depends(get_current_active_user),
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Bulk check which mesh_message_ids have already been delivered to the server.
+    
+    Android devices call this when they come online to find out which queued
+    messages have already been delivered by another device in the mesh.
+    Those can then be marked as DELIVERED locally and stop being relayed.
+    
+    Request:  { "message_ids": ["abc123", "def456", ...] }
+    Response: { "delivered": ["abc123"], "unknown": ["def456"] }
+    """
+    message_ids = request_data.get("message_ids", [])
+    if not message_ids or not isinstance(message_ids, list):
+        return {"delivered": [], "unknown": []}
+    
+    # Cap at 100 to prevent abuse
+    message_ids = message_ids[:100]
+    
+    try:
+        result = await db.execute(
+            select(Incident.mesh_message_id).where(
+                Incident.mesh_message_id.in_(message_ids)
+            )
+        )
+        delivered_ids = set(row[0] for row in result.all() if row[0])
+        
+        return {
+            "delivered": [mid for mid in message_ids if mid in delivered_ids],
+            "unknown": [mid for mid in message_ids if mid not in delivered_ids]
+        }
+    except Exception as e:
+        print(f"Mesh check error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to check mesh messages: {str(e)}")
+
 
 @router.get("/", response_model=None)
 async def get_incidents(

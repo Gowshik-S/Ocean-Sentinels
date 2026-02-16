@@ -5,6 +5,7 @@ import com.oceansentinels.app.data.local.database.dao.MeshMessageDao
 import com.oceansentinels.app.data.local.database.entity.MeshMessageEntity
 import com.oceansentinels.app.data.remote.api.OceanSentinelsApi
 import com.oceansentinels.app.data.remote.dto.CreateIncidentRequestDto
+import com.oceansentinels.app.data.remote.dto.MeshCheckRequestDto
 import com.oceansentinels.app.domain.model.*
 import com.oceansentinels.app.mesh.ble.BleMeshManager
 import com.oceansentinels.app.mesh.ble.DeviceIdentifier
@@ -310,11 +311,17 @@ class MeshMessageRepository @Inject constructor(
             return
         }
 
+        // Save as PENDING — NOT RELAYED.
+        // The message was received from the mesh but has not been relayed
+        // by THIS device yet. Saving as RELAYED made it invisible to
+        // getUnrelayedMessages() (which filters status IN 'pending','sending'),
+        // so if the immediate relay attempt failed (no connected peers),
+        // the message was stuck and never retried by the periodic relay processor.
         val entity = MeshMessageEntity.fromDomain(
             message,
             isOwnMessage = false,
             transport = MeshTransport.BLE_CODED,
-            overrideStatus = MeshMessageStatus.RELAYED
+            overrideStatus = MeshMessageStatus.PENDING
         )
 
         meshMessageDao.insert(entity)
@@ -348,6 +355,13 @@ class MeshMessageRepository @Inject constructor(
                 val serverRefId = response.body()!!.referenceId
                 val transport = if (message.hopCount > 0) MeshTransport.BLE_CODED else MeshTransport.INTERNET
 
+                // Server returns the same incident for duplicate mesh_message_id.
+                // Whether it's a new creation or a duplicate, we mark it DELIVERED
+                // so it stops being relayed. This handles the scenario where
+                // devices A, B, C, D all get internet and try to upload the
+                // same mesh message — the first one creates it, the rest get
+                // the existing incident back (with 'duplicate: true') and all
+                // correctly mark their local copy as DELIVERED.
                 meshMessageDao.markDelivered(
                     messageId = message.messageId,
                     deliveredAt = LocalDateTime.now().toString(),
@@ -414,27 +428,77 @@ class MeshMessageRepository @Inject constructor(
 
             val allToDeliver = (pending + relayedForOthers).distinctBy { it.messageId }
 
-            if (allToDeliver.isNotEmpty()) {
-                Timber.i("$TAG: Processing queue: ${allToDeliver.size} messages to deliver")
+            if (allToDeliver.isEmpty()) {
+                meshMessageDao.deleteExpiredDelivered(now)
+                return@withLock
             }
 
+            Timber.i("$TAG: Processing queue: ${allToDeliver.size} messages to deliver")
+
+            // ── Step 1: Bulk check which messages are already on the server ──
+            // Another device in the mesh may have already uploaded them.
+            // This avoids N individual HTTP calls that would all return duplicates.
+            val alreadyDeliveredIds = bulkCheckDeliveredOnServer(
+                allToDeliver.map { it.messageId }
+            )
+
+            // Mark server-confirmed messages as DELIVERED without re-uploading
+            var skipCount = 0
+            alreadyDeliveredIds.forEach { messageId ->
+                meshMessageDao.markDelivered(
+                    messageId = messageId,
+                    deliveredAt = now,
+                    transport = MeshTransport.BLE_CODED.value,
+                    serverRefId = "mesh-dedup"
+                )
+                bleMeshManager.clearMessageTracking(messageId)
+                skipCount++
+            }
+            if (skipCount > 0) {
+                Timber.i("$TAG: $skipCount messages already delivered by other mesh devices")
+            }
+
+            // ── Step 2: Upload remaining undelivered messages ──
+            val remainingToDeliver = allToDeliver.filter { it.messageId !in alreadyDeliveredIds }
             var deliveredCount = 0
-            allToDeliver.forEach { entity ->
+            remainingToDeliver.forEach { entity ->
                 val message = entity.toDomain()
                 val delivered = tryDeliverToServer(message)
                 if (delivered) {
                     deliveredCount++
-                    // Clear write tracking in BleMeshManager
                     bleMeshManager.clearMessageTracking(message.messageId)
                 }
             }
 
-            if (deliveredCount > 0) {
-                Timber.i("$TAG: Queue sync complete: $deliveredCount/${allToDeliver.size} delivered to server")
+            if (deliveredCount > 0 || skipCount > 0) {
+                Timber.i("$TAG: Queue sync: $deliveredCount new + $skipCount already-delivered = ${deliveredCount + skipCount} total")
             }
 
             // Clean up expired delivered messages
             meshMessageDao.deleteExpiredDelivered(now)
+        }
+    }
+
+    /**
+     * Bulk check which mesh message IDs are already on the server.
+     * Returns the set of IDs that are already delivered.
+     * Falls back to empty set on network error (will try individual uploads instead).
+     */
+    private suspend fun bulkCheckDeliveredOnServer(messageIds: List<String>): Set<String> {
+        if (messageIds.isEmpty()) return emptySet()
+        return try {
+            val response = api.checkMeshMessages(
+                MeshCheckRequestDto(messageIds = messageIds)
+            )
+            if (response.isSuccessful && response.body() != null) {
+                response.body()!!.delivered.toSet()
+            } else {
+                Timber.w("$TAG: Bulk check failed: ${response.code()}")
+                emptySet()
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "$TAG: Bulk check network error, will try individual uploads")
+            emptySet()
         }
     }
 

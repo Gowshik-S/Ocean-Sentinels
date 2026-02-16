@@ -245,6 +245,7 @@ sealed class MeshSendState {
  * Tabs for the mesh screen
  */
 enum class MeshTab(val title: String) {
+    ALL("All"),
     QUEUE("Queue"),
     DELIVERED("Delivered"),
     RELAYED("Relayed"),

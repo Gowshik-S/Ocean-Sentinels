@@ -112,3 +112,22 @@ private fun String.parseDateTime(): LocalDateTime? {
         }
     }
 }
+
+/**
+ * Request DTO for bulk mesh message status check.
+ * Sent when a device comes online to discover which queued messages
+ * have already been uploaded to the server by other mesh devices.
+ */
+data class MeshCheckRequestDto(
+    @SerializedName("message_ids") val messageIds: List<String>
+)
+
+/**
+ * Response DTO for bulk mesh message status check.
+ * 'delivered' = already in the server DB (can stop relaying)
+ * 'unknown' = not yet on server (keep relaying or deliver ourselves)
+ */
+data class MeshCheckResponseDto(
+    @SerializedName("delivered") val delivered: List<String>,
+    @SerializedName("unknown") val unknown: List<String>
+)

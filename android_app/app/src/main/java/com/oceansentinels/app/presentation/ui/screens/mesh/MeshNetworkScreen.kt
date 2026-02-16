@@ -251,6 +251,7 @@ fun MeshNetworkScreen(
             item {
                 MeshTabRow(
                     selectedTab = selectedTab,
+                    allCount = allMessages.size,
                     pendingCount = pendingMessages.size,
                     deliveredCount = deliveredMessages.size,
                     relayedCount = relayedMessages.size,
@@ -260,6 +261,7 @@ fun MeshNetworkScreen(
 
             // ==================== Message List ====================
             val currentMessages = when (selectedTab) {
+                MeshTab.ALL -> allMessages
                 MeshTab.QUEUE -> pendingMessages
                 MeshTab.DELIVERED -> deliveredMessages
                 MeshTab.RELAYED -> relayedMessages
@@ -655,19 +657,22 @@ private fun QuickReportForm(
 @Composable
 private fun MeshTabRow(
     selectedTab: MeshTab,
+    allCount: Int,
     pendingCount: Int,
     deliveredCount: Int,
     relayedCount: Int,
     onTabSelected: (MeshTab) -> Unit
 ) {
-    TabRow(
+    ScrollableTabRow(
         selectedTabIndex = selectedTab.ordinal,
         containerColor = Color.Transparent,
         contentColor = OceanColors.Primary,
+        edgePadding = 0.dp,
         modifier = Modifier.clip(RoundedCornerShape(12.dp))
     ) {
         MeshTab.entries.forEach { tab ->
             val count = when (tab) {
+                MeshTab.ALL -> allCount
                 MeshTab.QUEUE -> pendingCount
                 MeshTab.DELIVERED -> deliveredCount
                 MeshTab.RELAYED -> relayedCount
@@ -781,6 +786,24 @@ private fun MeshMessageCard(message: MeshMessage) {
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            // Sender info — show origin device for group-chat context
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(12.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text(
+                    text = "From: ${message.originDeviceFingerprint.take(8)}",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
             // Description
             Text(
                 text = message.description,
@@ -790,9 +813,47 @@ private fun MeshMessageCard(message: MeshMessage) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
+            // Relay path chain — shows the journey of the message through the mesh
+            if (message.relayPath.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(6.dp))
+                Surface(
+                    shape = RoundedCornerShape(6.dp),
+                    color = OceanColors.Primary.copy(alpha = 0.08f),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Timeline,
+                            contentDescription = "Relay path",
+                            modifier = Modifier.size(14.dp),
+                            tint = OceanColors.Primary
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        // Build relay chain: Origin → Hop1 → Hop2 → ...
+                        val chain = buildString {
+                            append(message.originDeviceMac.take(6))
+                            message.relayPath.forEachIndexed { index, deviceId ->
+                                append(" → ")
+                                append(deviceId.take(6))
+                            }
+                        }
+                        Text(
+                            text = chain,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = OceanColors.Primary,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Bottom row: time, hops, message ID
+            // Bottom row: time, hops, status
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -813,22 +874,27 @@ private fun MeshMessageCard(message: MeshMessage) {
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Hops
-                if (message.hopCount > 0) {
-                    Icon(
-                        Icons.Default.Route,
-                        contentDescription = null,
-                        modifier = Modifier.size(14.dp),
-                        tint = OceanColors.Primary
-                    )
-                    Spacer(modifier = Modifier.width(2.dp))
-                    Text(
-                        text = "${message.hopCount} hops",
-                        style = MaterialTheme.typography.labelSmall,
-                        color = OceanColors.Primary
-                    )
-                    Spacer(modifier = Modifier.width(12.dp))
-                }
+                // Hops — always show so users can track relay distance
+                Icon(
+                    Icons.Default.Route,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp),
+                    tint = if (message.hopCount > 0) OceanColors.Primary
+                           else MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(2.dp))
+                Text(
+                    text = when {
+                        message.hopCount == 0 -> "Origin"
+                        message.hopCount == 1 -> "1 hop"
+                        else -> "${message.hopCount} hops"
+                    },
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (message.hopCount > 0) OceanColors.Primary
+                            else MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontWeight = if (message.hopCount > 0) FontWeight.Bold else FontWeight.Normal
+                )
+                Spacer(modifier = Modifier.width(12.dp))
 
                 // Time remaining
                 val ageMs = System.currentTimeMillis() - message.createdAtMillis
@@ -922,6 +988,11 @@ private fun PeersSection(
 @Composable
 private fun EmptyStateCard(tab: MeshTab) {
     val (icon, title, subtitle) = when (tab) {
+        MeshTab.ALL -> Triple(
+            Icons.Default.Forum,
+            "No messages yet",
+            "All sent and received hazard reports will appear here like a group chat"
+        )
         MeshTab.QUEUE -> Triple(
             Icons.Default.Inbox,
             "No pending messages",
