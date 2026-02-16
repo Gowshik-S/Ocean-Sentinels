@@ -39,13 +39,18 @@ async def lifespan(app: FastAPI):
         # Auto-migrate: add missing columns to existing tables
         async with engine.begin() as conn:
             try:
-                await conn.execute(text(
-                    "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS mesh_message_id VARCHAR(128) UNIQUE"
-                ))
-                await conn.execute(text(
-                    "CREATE INDEX IF NOT EXISTS ix_incidents_mesh_message_id ON incidents (mesh_message_id)"
-                ))
-                print("Migration check complete: mesh_message_id column ensured")
+                migrations = [
+                    "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS mesh_message_id VARCHAR(128) UNIQUE",
+                    "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS verified_by_id INTEGER REFERENCES users(id)",
+                    "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS assigned_to_id INTEGER REFERENCES users(id)",
+                    "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS verified_at TIMESTAMPTZ",
+                    "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ",
+                    "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ",
+                    "CREATE INDEX IF NOT EXISTS ix_incidents_mesh_message_id ON incidents (mesh_message_id)",
+                ]
+                for migration in migrations:
+                    await conn.execute(text(migration))
+                print("Migration check complete: all columns ensured")
             except Exception as migrate_err:
                 print(f"Migration note (non-fatal): {migrate_err}")
         
