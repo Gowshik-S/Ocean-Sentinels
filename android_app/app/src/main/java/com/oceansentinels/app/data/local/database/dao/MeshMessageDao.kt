@@ -93,10 +93,15 @@ interface MeshMessageDao {
     """)
     fun getRelayedMessages(): Flow<List<MeshMessageEntity>>
 
-    /** Get messages that have been relayed but not yet delivered to server */
+    /**
+     * Get messages that have been relayed but not yet delivered to server.
+     * Includes BOTH received-from-others AND own messages that were relayed
+     * via mesh. Previously excluded own relayed messages (is_own_message = 0),
+     * which meant own messages never got uploaded when internet returned.
+     */
     @Query("""
         SELECT * FROM mesh_messages 
-        WHERE status = 'relayed' AND is_own_message = 0
+        WHERE status = 'relayed'
         AND retry_count < max_retries
         ORDER BY 
             CASE urgency 
@@ -233,12 +238,33 @@ interface MeshMessageDao {
     @Query("DELETE FROM mesh_messages")
     suspend fun deleteAll()
 
-    /** Keep only the latest N messages (FIFO), delete oldest beyond limit */
+    /**
+     * Keep the most important N messages, delete the rest.
+     * Priority: urgency weight (critical=0, high=1, medium=2, low=3),
+     * then delivery status (undelivered before delivered), then newest first.
+     * This ensures critical hazard reports survive eviction over old low-urgency ones.
+     */
     @Query("""
         DELETE FROM mesh_messages 
         WHERE local_id NOT IN (
             SELECT local_id FROM mesh_messages 
-            ORDER BY created_at_millis DESC 
+            ORDER BY 
+                CASE urgency 
+                    WHEN 'critical' THEN 0 
+                    WHEN 'high' THEN 1 
+                    WHEN 'medium' THEN 2 
+                    WHEN 'low' THEN 3 
+                    ELSE 4 
+                END ASC,
+                CASE status 
+                    WHEN 'pending' THEN 0 
+                    WHEN 'sending' THEN 1 
+                    WHEN 'relayed' THEN 2 
+                    WHEN 'failed' THEN 3 
+                    WHEN 'delivered' THEN 4 
+                    ELSE 5 
+                END ASC,
+                created_at_millis DESC 
             LIMIT :limit
         )
     """)

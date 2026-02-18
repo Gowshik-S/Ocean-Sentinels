@@ -79,8 +79,51 @@ class NetworkConnectivityManager @Inject constructor(
     private val _isOnline = MutableStateFlow(false)
     val isOnline: StateFlow<Boolean> = _isOnline.asStateFlow()
 
-    /** Callback for components that need to react to connectivity changes */
-    var onConnectivityChanged: ((Boolean) -> Unit)? = null
+    /**
+     * Thread-safe list of connectivity listeners.
+     * Replaces the old single-callback pattern (var onConnectivityChanged)
+     * which was last-write-wins — if two components registered, only the
+     * second one received callbacks. Now all registered listeners are notified.
+     */
+    private val connectivityListeners = mutableListOf<(Boolean) -> Unit>()
+
+    /**
+     * @deprecated Use addConnectivityListener/removeConnectivityListener instead.
+     * Kept for backward compatibility — setting this adds a legacy listener.
+     */
+    @Deprecated("Use addConnectivityListener() instead")
+    var onConnectivityChanged: ((Boolean) -> Unit)?
+        get() = null
+        set(value) {
+            // Remove any previously set legacy listener tag
+            synchronized(connectivityListeners) {
+                connectivityListeners.removeAll { it is LegacyListenerWrapper }
+                if (value != null) {
+                    connectivityListeners.add(LegacyListenerWrapper(value))
+                }
+            }
+        }
+
+    /** Wrapper to identify legacy listeners for removal */
+    private class LegacyListenerWrapper(
+        private val delegate: (Boolean) -> Unit
+    ) : (Boolean) -> Unit {
+        override fun invoke(online: Boolean) = delegate(online)
+    }
+
+    /** Add a connectivity change listener. Thread-safe. */
+    fun addConnectivityListener(listener: (Boolean) -> Unit) {
+        synchronized(connectivityListeners) {
+            connectivityListeners.add(listener)
+        }
+    }
+
+    /** Remove a previously added connectivity listener. Thread-safe. */
+    fun removeConnectivityListener(listener: (Boolean) -> Unit) {
+        synchronized(connectivityListeners) {
+            connectivityListeners.remove(listener)
+        }
+    }
 
     private var networkCallback: ConnectivityManager.NetworkCallback? = null
     private var isRegistered = false
@@ -159,15 +202,19 @@ class NetworkConnectivityManager @Inject constructor(
 
     /**
      * Stop monitoring. Call from Service.onDestroy() or when mesh is stopped.
+     * Uses finally block to ensure isRegistered is always reset, even if
+     * unregisterNetworkCallback throws — preventing permanent re-registration block.
      */
     fun stopMonitoring() {
         networkCallback?.let {
             try {
                 connectivityManager.unregisterNetworkCallback(it)
-                isRegistered = false
                 Timber.i("$TAG: Network monitoring stopped")
             } catch (e: Exception) {
                 Timber.e(e, "$TAG: Error unregistering network callback")
+            } finally {
+                isRegistered = false
+                networkCallback = null
             }
         }
     }
@@ -201,6 +248,8 @@ class NetworkConnectivityManager @Inject constructor(
     private fun updateState(online: Boolean) {
         _isOnlineAtomic.set(online)
         _isOnline.value = online
-        onConnectivityChanged?.invoke(online)
+        // Notify all registered listeners (snapshot to avoid ConcurrentModificationException)
+        val listeners = synchronized(connectivityListeners) { connectivityListeners.toList() }
+        listeners.forEach { it.invoke(online) }
     }
 }

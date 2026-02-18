@@ -47,27 +47,67 @@ fun ReportIncidentScreen(
     var locationDescription by remember { mutableStateOf("") }
     var imageUri by remember { mutableStateOf<Uri?>(null) }
     var isGettingLocation by remember { mutableStateOf(false) }
+    var locationError by remember { mutableStateOf<String?>(null) }
     var hazardTypeExpanded by remember { mutableStateOf(false) }
     var urgencyExpanded by remember { mutableStateOf(false) }
+
+    val fusedLocationClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
+
+    // Function to fetch GPS location with high accuracy
+    fun fetchGpsLocation() {
+        isGettingLocation = true
+        locationError = null
+        try {
+            val cancellationToken = com.google.android.gms.tasks.CancellationTokenSource()
+            fusedLocationClient.getCurrentLocation(
+                com.google.android.gms.location.Priority.PRIORITY_HIGH_ACCURACY,
+                cancellationToken.token
+            ).addOnSuccessListener { location ->
+                if (location != null) {
+                    latitude = "%.6f".format(location.latitude)
+                    longitude = "%.6f".format(location.longitude)
+                    locationError = null
+                } else {
+                    // Fallback to lastLocation
+                    fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
+                        if (lastLoc != null) {
+                            latitude = "%.6f".format(lastLoc.latitude)
+                            longitude = "%.6f".format(lastLoc.longitude)
+                            locationError = null
+                        } else {
+                            locationError = "Could not get location. Ensure GPS is enabled."
+                        }
+                        isGettingLocation = false
+                    }
+                    return@addOnSuccessListener
+                }
+                isGettingLocation = false
+            }.addOnFailureListener { e ->
+                locationError = "Location error: ${e.localizedMessage}"
+                isGettingLocation = false
+            }
+        } catch (e: SecurityException) {
+            locationError = "Location permission denied"
+            isGettingLocation = false
+        }
+    }
     
     // Location permission
     val locationPermissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            isGettingLocation = true
-            val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
-            try {
-                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                    location?.let {
-                        latitude = it.latitude.toString()
-                        longitude = it.longitude.toString()
-                    }
-                    isGettingLocation = false
-                }
-            } catch (e: SecurityException) {
-                isGettingLocation = false
-            }
+            fetchGpsLocation()
+        }
+    }
+
+    // Auto-detect GPS on screen load
+    LaunchedEffect(Unit) {
+        if (latitude.isBlank() && longitude.isBlank()) {
+            // Request permission which auto-fetches on grant
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
     
@@ -278,48 +318,89 @@ fun ReportIncidentScreen(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Get Current Location Button
-            OutlinedButton(
-                onClick = {
-                    locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-                },
+            // Auto-detected GPS Location Card
+            val hasLocation = latitude.isNotBlank() && longitude.isNotBlank()
+            Card(
                 modifier = Modifier.fillMaxWidth(),
-                enabled = !isGettingLocation
+                colors = CardDefaults.cardColors(
+                    containerColor = when {
+                        isGettingLocation -> MaterialTheme.colorScheme.surfaceVariant
+                        hasLocation -> OceanColors.Success.copy(alpha = 0.08f)
+                        else -> OceanColors.Warning.copy(alpha = 0.08f)
+                    }
+                ),
+                border = BorderStroke(
+                    1.dp,
+                    when {
+                        isGettingLocation -> MaterialTheme.colorScheme.outline
+                        hasLocation -> OceanColors.Success
+                        else -> OceanColors.Warning
+                    }
+                )
             ) {
-                if (isGettingLocation) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = when {
+                            isGettingLocation -> Icons.Default.GpsNotFixed
+                            hasLocation -> Icons.Default.GpsFixed
+                            else -> Icons.Default.GpsOff
+                        },
+                        contentDescription = null,
+                        tint = when {
+                            hasLocation -> OceanColors.Success
+                            isGettingLocation -> MaterialTheme.colorScheme.primary
+                            else -> OceanColors.Warning
+                        },
+                        modifier = Modifier.size(28.dp)
                     )
-                } else {
-                    Icon(Icons.Default.MyLocation, contentDescription = null)
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = when {
+                                isGettingLocation -> "Detecting GPS location..."
+                                hasLocation -> "Location detected"
+                                else -> "Location unavailable"
+                            },
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        if (hasLocation) {
+                            Text(
+                                text = "$latitude, $longitude",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        if (locationError != null) {
+                            Text(
+                                text = locationError!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = OceanColors.Danger
+                            )
+                        }
+                    }
+                    if (isGettingLocation) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            strokeWidth = 2.dp
+                        )
+                    } else {
+                        IconButton(onClick = {
+                            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                        }) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = "Refresh location",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(if (isGettingLocation) "Getting location..." else "Use Current Location")
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            // Lat/Long fields
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                OutlinedTextField(
-                    value = latitude,
-                    onValueChange = { latitude = it },
-                    label = { Text("Latitude *") },
-                    modifier = Modifier.weight(1f),
-                    shape = MaterialTheme.shapes.medium
-                )
-                
-                OutlinedTextField(
-                    value = longitude,
-                    onValueChange = { longitude = it },
-                    label = { Text("Longitude *") },
-                    modifier = Modifier.weight(1f),
-                    shape = MaterialTheme.shapes.medium
-                )
             }
             
             Spacer(modifier = Modifier.height(12.dp))

@@ -77,6 +77,14 @@ class MeshForegroundService : Service() {
         /** Interval to relay unrelayed messages */
         const val RELAY_INTERVAL_MS = 15_000L
 
+        /**
+         * Maximum messages to relay per cycle.
+         * Caps the relay loop to prevent unbounded blocking:
+         * Without this, 500 queued msgs × 200ms inter-write delay = 100s per cycle.
+         * With cap: 25 msgs × 200ms = 5s max, allowing the service to remain responsive.
+         */
+        const val RELAY_BATCH_SIZE = 25
+
         private val _isServiceRunning = MutableStateFlow(false)
         val isServiceRunning = _isServiceRunning.asStateFlow()
 
@@ -114,17 +122,13 @@ class MeshForegroundService : Service() {
     private val serviceScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     /**
-     * Local hasInternet cache, synced from NetworkConnectivityManager.
-     *
-     * Why not just read networkConnectivityManager.isInternetAvailable() directly?
-     * For consistency and to avoid late-init access before injection completes.
-     * The onConnectivityChanged callback keeps this in sync.
-     *
-     * Compare: bitchat-android doesn't track internet at all. Its
-     * BluetoothMeshService only tracks BLE peer connection state via
-     * BluetoothConnectionTracker for relay decisions.
+     * Connectivity listener reference — stored so we can remove it in onDestroy.
+     * Replaces the old local `hasInternet` cache which could become stale
+     * between callback fire and coroutine execution.
      */
-    private var hasInternet = false
+    private val connectivityListener: (Boolean) -> Unit = { online ->
+        onConnectivityChanged(online)
+    }
 
     override fun onCreate() {
         super.onCreate()
@@ -133,14 +137,11 @@ class MeshForegroundService : Service() {
         // Use centralized NetworkConnectivityManager instead of local callback.
         // This eliminates the duplicate NetworkCallback registration that was
         // previously split between this service and MeshMessageRepository.
-        hasInternet = networkConnectivityManager.isInternetAvailable()
 
         // Register for connectivity change events
         // When internet becomes available → flush queue to server
         // When internet is lost → switch to mesh relay mode
-        networkConnectivityManager.onConnectivityChanged = { online ->
-            onConnectivityChanged(online)
-        }
+        networkConnectivityManager.addConnectivityListener(connectivityListener)
         networkConnectivityManager.startMonitoring()
 
         createNotificationChannel()
@@ -161,7 +162,7 @@ class MeshForegroundService : Service() {
     override fun onDestroy() {
         stopMesh()
         serviceScope.cancel()
-        networkConnectivityManager.onConnectivityChanged = null
+        networkConnectivityManager.removeConnectivityListener(connectivityListener)
         networkConnectivityManager.stopMonitoring()
         super.onDestroy()
         Timber.i("$TAG: Service destroyed")
@@ -173,7 +174,14 @@ class MeshForegroundService : Service() {
         if (_isServiceRunning.value) return
 
         val notification = createNotification("Mesh network starting...")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            // API 34+: Declare both connectedDevice (BLE mesh) and dataSync (HTTP uploads)
+            startForeground(
+                NOTIFICATION_ID, notification,
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE or
+                        ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(
                 NOTIFICATION_ID, notification,
                 ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE
@@ -225,13 +233,21 @@ class MeshForegroundService : Service() {
                 "Mesh active • ${bleMeshManager.getConnectedPeerCount()} peers connected"
             )
 
-            // When a new peer connects and we have no internet,
-            // relay all pending/unrelayed messages to this new peer
+            // When a new peer connects, burst all pending messages to them.
+            // Delay allows GATT service discovery + MTU negotiation to complete
+            // before we attempt writes. The reverse client connection (added in
+            // gattServerCallback fix) fires its own onPeerConnected which also
+            // triggers this, ensuring burst works for both directions.
+            //
+            // ── FIX: Always relay on peer connect, regardless of internet ──
+            // Previous bug: `if (!hasInternet)` guard suppressed relay when this
+            // device had internet. Result: Device D (connected to C which has
+            // internet) never received relayed messages because C "swallowed"
+            // them by uploading to server instead of forwarding to D.
+            // Mesh relay must ALWAYS happen — server delivery is a parallel path.
             serviceScope.launch {
-                delay(500) // Brief delay for GATT service discovery to complete
-                if (!hasInternet) {
-                    relayPendingMessages()
-                }
+                delay(2000) // Wait for service discovery + MTU negotiation
+                relayPendingMessages()
             }
         }
 
@@ -292,14 +308,8 @@ class MeshForegroundService : Service() {
         //   → Already handled before this callback fires (handleIncomingData)
         //
         // Layer 2: DB existence check
-        //   → If we already have this message, check its status:
-        //      - DELIVERED: Another device (or we) already uploaded it to the server.
-        //        Drop silently — do NOT relay again. This is the key fix for the
-        //        scenario where A,B,C,D all get internet: the first delivery marks
-        //        it DELIVERED, and subsequent receives are ignored.
-        //      - Any other status: We already have it but it hasn't reached the
-        //        server yet. Still drop (don't re-process), but the periodic
-        //        relay processor will continue trying to push it.
+        //   → If we already have this message in ANY status (PENDING/RELAYED/DELIVERED),
+        //     drop silently. This prevents re-processing and infinite relay loops.
         if (meshRepository.isMessageKnown(message.messageId)) {
             Timber.d("$TAG: Message already known: ${message.messageId}, dropping")
             return
@@ -308,22 +318,13 @@ class MeshForegroundService : Service() {
         // Layer 3: New message — save to DB
         meshRepository.saveReceivedMessage(message)
 
-        // If internet available, deliver to server directly — no mesh relay needed.
-        // The server deduplicates by mesh_message_id (UNIQUE constraint + app-level check).
-        // Even if multiple devices upload the same message, only the first creates a
-        // new incident — the rest get the existing incident back (200 OK, duplicate=true).
-        // Either way, we mark the local copy as DELIVERED so it stops being relayed.
-        if (hasInternet) {
-            val delivered = meshRepository.tryDeliverToServer(message)
-            if (delivered) {
-                Timber.i("$TAG: Received message delivered to server: ${message.messageId}")
-                return
-            }
-            // Server delivery failed despite having internet — fall through to mesh relay
-        }
-
-        // No internet (or server delivery failed) → relay to all connected peers
-        // EXCLUDING the sender so we don't echo back to them.
+        // ── Step 1: ALWAYS relay to mesh peers FIRST (burst behavior) ──
+        // This is the critical fix: relay BEFORE server delivery so the message
+        // keeps propagating through the mesh immediately. Without this, a device
+        // with internet would "swallow" the message (upload to server, return,
+        // never forward) — killing the chain for any downstream peers without internet.
+        //
+        // The message must BURST to all connected peers the moment it arrives.
         val deviceId = deviceIdentifier.getDeviceId()
         val relayed = message.relay(deviceId)
         if (relayed != null) {
@@ -335,10 +336,23 @@ class MeshForegroundService : Service() {
                 meshRepository.markRelayedByThisDevice(
                     message.messageId, deviceId, relayed.relayPath
                 )
-                Timber.i("$TAG: Relayed message ${message.messageId} to $sentCount peers (excluded sender: $senderBleAddress)")
+                Timber.i("$TAG: Burst-relayed message ${message.messageId} to $sentCount peers (excluded sender: $senderBleAddress)")
             } else {
                 Timber.d("$TAG: No connected peers to relay ${message.messageId}, queued for later")
             }
+        }
+
+        // ── Step 2: If internet available, ALSO deliver to server ──
+        // The server deduplicates by mesh_message_id (UNIQUE constraint).
+        // This runs AFTER relay so the message isn't held on this device.
+        // Always read fresh from NetworkConnectivityManager to avoid stale cache.
+        if (networkConnectivityManager.isInternetAvailable()) {
+            val delivered = meshRepository.tryDeliverToServer(message)
+            if (delivered) {
+                Timber.i("$TAG: Received message also delivered to server: ${message.messageId}")
+            }
+            // If server delivery fails, message stays PENDING/RELAYED in DB
+            // and processQueue() will retry when internet is stable.
         }
     }
 
@@ -349,7 +363,7 @@ class MeshForegroundService : Service() {
     private fun startQueueProcessor() {
         serviceScope.launch {
             while (isActive && _isServiceRunning.value) {
-                if (hasInternet) {
+                if (networkConnectivityManager.isInternetAvailable()) {
                     meshRepository.processQueue()
                 }
                 delay(QUEUE_CHECK_INTERVAL_MS)
@@ -359,15 +373,15 @@ class MeshForegroundService : Service() {
 
     /**
      * Periodically relay unrelayed messages to connected peers.
-     * Only runs when internet is NOT available -- if internet is up,
-     * the queue processor uploads to server instead.
+     * Runs regardless of internet status — even when internet is available,
+     * we still relay to mesh peers so all devices in the network receive
+     * messages (group-chat behavior). Server upload is handled separately
+     * by processQueue().
      */
     private fun startRelayProcessor() {
         serviceScope.launch {
             while (isActive && _isServiceRunning.value) {
-                if (!hasInternet) {
-                    relayPendingMessages()
-                }
+                relayPendingMessages()
                 delay(RELAY_INTERVAL_MS)
             }
         }
@@ -398,12 +412,19 @@ class MeshForegroundService : Service() {
         // so we can reach new peers that connected after the first relay
         val unrelayed = meshRepository.getUnrelayedMessages()
         val alreadyRelayed = meshRepository.getRelayableMessages()
-        val allMessages = (unrelayed + alreadyRelayed).distinctBy { it.messageId }
+        val allMessages = (unrelayed + alreadyRelayed)
+            .distinctBy { it.messageId }
+            .take(RELAY_BATCH_SIZE) // Cap to prevent unbounded relay cycles
 
         val deviceId = deviceIdentifier.getDeviceId()
         var relayedCount = 0
 
-        allMessages.forEach { entity ->
+        allMessages.forEachIndexed { index, entity ->
+            // Space out BLE writes between messages to prevent write conflicts.
+            // Android BLE stack allows only one outstanding writeCharacteristic()
+            // per GATT client. Without this delay, rapid consecutive writes can
+            // silently fail on some OEMs, causing messages to appear "stuck".
+            if (index > 0) delay(200)
             val message = entity.toDomain()
 
             // For messages WE already relayed (has_been_relayed=true),
@@ -453,9 +474,9 @@ class MeshForegroundService : Service() {
 
     private fun flushQueue() {
         serviceScope.launch {
-            // Re-check internet state from centralized manager
-            hasInternet = networkConnectivityManager.checkInternetNow()
-            if (hasInternet) {
+            // Always read fresh state from centralized manager
+            val internetNow = networkConnectivityManager.checkInternetNow()
+            if (internetNow) {
                 // Internet available -- send to server
                 meshRepository.processQueue()
             } else {
@@ -495,8 +516,6 @@ class MeshForegroundService : Service() {
      * because hazard reports are high-priority safety data.
      */
     private fun onConnectivityChanged(online: Boolean) {
-        hasInternet = online
-
         if (online) {
             Timber.i("$TAG: Internet available — flushing queue to server")
             updateNotification("Mesh active • Internet available, syncing queue...")

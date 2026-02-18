@@ -1,8 +1,15 @@
 package com.oceansentinels.app.presentation.ui.screens.mesh
 
 import android.Manifest
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.content.Context
+import android.content.Intent
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -33,6 +40,9 @@ import com.oceansentinels.app.presentation.ui.theme.OceanColors
 import com.oceansentinels.app.presentation.viewmodel.MeshSendState
 import com.oceansentinels.app.presentation.viewmodel.MeshTab
 import com.oceansentinels.app.presentation.viewmodel.MeshViewModel
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -87,6 +97,122 @@ fun MeshNetworkScreen(
     var selectedUrgency by remember { mutableStateOf(UrgencyLevel.MEDIUM) }
     var latitude by remember { mutableStateOf("") }
     var longitude by remember { mutableStateOf("") }
+    var isGettingLocation by remember { mutableStateOf(false) }
+    var locationError by remember { mutableStateOf<String?>(null) }
+
+    val context = LocalContext.current
+
+    // ==================== Bluetooth Auto-Enable ====================
+    val bluetoothManager = remember {
+        context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
+    }
+    val bluetoothAdapter: BluetoothAdapter? = remember { bluetoothManager?.adapter }
+    var pendingMeshStartAfterBt by remember { mutableStateOf(false) }
+
+    // Launcher for system Bluetooth enable dialog
+    val bluetoothEnableLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK || bluetoothAdapter?.isEnabled == true) {
+            // Bluetooth was enabled — now start mesh
+            if (pendingMeshStartAfterBt) {
+                pendingMeshStartAfterBt = false
+                viewModel.toggleMeshService()
+            }
+        } else {
+            pendingMeshStartAfterBt = false
+        }
+    }
+
+    /**
+     * Checks Bluetooth state and either starts mesh directly or prompts user to enable BT.
+     */
+    fun startMeshWithBluetoothCheck() {
+        if (bluetoothAdapter == null) {
+            // No Bluetooth adapter on device — start anyway (mesh will report BLE unavailable)
+            viewModel.toggleMeshService()
+            return
+        }
+        if (bluetoothAdapter.isEnabled) {
+            // Bluetooth already on — start mesh
+            viewModel.toggleMeshService()
+        } else {
+            // Prompt user to enable Bluetooth
+            pendingMeshStartAfterBt = true
+            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+            bluetoothEnableLauncher.launch(enableBtIntent)
+        }
+    }
+
+    val fusedLocationClient = remember {
+        LocationServices.getFusedLocationProviderClient(context)
+    }
+
+    // Function to fetch GPS location
+    fun fetchGpsLocation() {
+        isGettingLocation = true
+        locationError = null
+        try {
+            // Try getCurrentLocation first (more accurate, forces fresh fix)
+            val cancellationToken = CancellationTokenSource()
+            fusedLocationClient.getCurrentLocation(
+                Priority.PRIORITY_HIGH_ACCURACY,
+                cancellationToken.token
+            ).addOnSuccessListener { location ->
+                if (location != null) {
+                    latitude = "%.6f".format(location.latitude)
+                    longitude = "%.6f".format(location.longitude)
+                    locationError = null
+                } else {
+                    // Fallback to lastLocation
+                    fusedLocationClient.lastLocation.addOnSuccessListener { lastLoc ->
+                        if (lastLoc != null) {
+                            latitude = "%.6f".format(lastLoc.latitude)
+                            longitude = "%.6f".format(lastLoc.longitude)
+                            locationError = null
+                        } else {
+                            locationError = "Could not get location. Make sure GPS is enabled."
+                        }
+                        isGettingLocation = false
+                    }.addOnFailureListener {
+                        locationError = "Location unavailable"
+                        isGettingLocation = false
+                    }
+                    return@addOnSuccessListener
+                }
+                isGettingLocation = false
+            }.addOnFailureListener { e ->
+                locationError = "Location error: ${e.localizedMessage}"
+                isGettingLocation = false
+            }
+        } catch (e: SecurityException) {
+            locationError = "Location permission denied"
+            isGettingLocation = false
+        }
+    }
+
+    // Location permission launcher — auto-fetches GPS after grant
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            fetchGpsLocation()
+        } else {
+            locationError = "Location permission denied"
+        }
+    }
+
+    // Auto-detect location when report form opens
+    LaunchedEffect(showReportForm) {
+        if (showReportForm && latitude.isBlank() && longitude.isBlank()) {
+            // Check if we already have location permission
+            if (permissionsState.allPermissionsGranted) {
+                fetchGpsLocation()
+            } else {
+                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
 
     // Handle send success
     LaunchedEffect(sendState) {
@@ -96,6 +222,7 @@ fun MeshNetworkScreen(
             selectedHazardType = null
             latitude = ""
             longitude = ""
+            locationError = null
         }
     }
 
@@ -119,13 +246,17 @@ fun MeshNetworkScreen(
                     }
                 },
                 actions = {
-                    // Mesh toggle
+                    // Mesh toggle — checks Bluetooth before starting
                     Switch(
                         checked = isServiceRunning,
-                        onCheckedChange = {
+                        onCheckedChange = { turnOn ->
                             if (!permissionsState.allPermissionsGranted) {
                                 permissionsState.launchMultiplePermissionRequest()
+                            } else if (turnOn) {
+                                // Turning ON → check Bluetooth first
+                                startMeshWithBluetoothCheck()
                             } else {
+                                // Turning OFF → just stop
                                 viewModel.toggleMeshService()
                             }
                         },
@@ -228,9 +359,16 @@ fun MeshNetworkScreen(
                         selectedUrgency = selectedUrgency,
                         onUrgencyChange = { selectedUrgency = it },
                         latitude = latitude,
-                        onLatitudeChange = { latitude = it },
                         longitude = longitude,
-                        onLongitudeChange = { longitude = it },
+                        isGettingLocation = isGettingLocation,
+                        locationError = locationError,
+                        onRefreshLocation = {
+                            if (permissionsState.allPermissionsGranted) {
+                                fetchGpsLocation()
+                            } else {
+                                locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+                            }
+                        },
                         isSending = sendState is MeshSendState.Sending,
                         onSubmit = {
                             val hazard = selectedHazardType ?: return@QuickReportForm
@@ -502,16 +640,18 @@ private fun QuickReportForm(
     selectedUrgency: UrgencyLevel,
     onUrgencyChange: (UrgencyLevel) -> Unit,
     latitude: String,
-    onLatitudeChange: (String) -> Unit,
     longitude: String,
-    onLongitudeChange: (String) -> Unit,
+    isGettingLocation: Boolean,
+    locationError: String?,
+    onRefreshLocation: () -> Unit,
     isSending: Boolean,
     onSubmit: () -> Unit
 ) {
     var hazardExpanded by remember { mutableStateOf(false) }
     var urgencyExpanded by remember { mutableStateOf(false) }
 
-    val isValid = description.isNotBlank() && selectedHazardType != null
+    val hasLocation = latitude.isNotBlank() && longitude.isNotBlank()
+    val isValid = description.isNotBlank() && selectedHazardType != null && hasLocation
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -610,22 +750,86 @@ private fun QuickReportForm(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Lat/Lng
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = latitude,
-                    onValueChange = onLatitudeChange,
-                    label = { Text("Latitude") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
+            // ── Auto-Detected GPS Location ──
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = if (hasLocation)
+                        OceanColors.Success.copy(alpha = 0.08f)
+                    else
+                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                ),
+                border = BorderStroke(
+                    1.dp,
+                    if (hasLocation) OceanColors.Success.copy(alpha = 0.3f)
+                    else MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
                 )
-                OutlinedTextField(
-                    value = longitude,
-                    onValueChange = onLongitudeChange,
-                    label = { Text("Longitude") },
-                    modifier = Modifier.weight(1f),
-                    shape = RoundedCornerShape(12.dp)
-                )
+            ) {
+                Column(modifier = Modifier.padding(12.dp)) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        if (isGettingLocation) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(18.dp),
+                                strokeWidth = 2.dp,
+                                color = OceanColors.Primary
+                            )
+                        } else {
+                            Icon(
+                                if (hasLocation) Icons.Default.MyLocation else Icons.Default.LocationOff,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp),
+                                tint = if (hasLocation) OceanColors.Success else OceanColors.Warning
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = if (isGettingLocation) "Detecting GPS location..."
+                                       else if (hasLocation) "Location detected"
+                                       else "Location not available",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (hasLocation) OceanColors.Success
+                                        else if (isGettingLocation) OceanColors.Primary
+                                        else OceanColors.Warning
+                            )
+                            if (hasLocation) {
+                                Text(
+                                    text = "$latitude, $longitude",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                        // Refresh button
+                        IconButton(
+                            onClick = onRefreshLocation,
+                            enabled = !isGettingLocation,
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            Icon(
+                                Icons.Default.Refresh,
+                                contentDescription = "Refresh location",
+                                modifier = Modifier.size(20.dp),
+                                tint = OceanColors.Primary
+                            )
+                        }
+                    }
+
+                    // Error message
+                    if (locationError != null) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = locationError,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = OceanColors.Danger
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(12.dp))

@@ -35,7 +35,7 @@ data class UserEntity(
     val location: String?,
     
     @ColumnInfo(name = "role")
-    val role: String,
+    val role: String?,
     
     @ColumnInfo(name = "is_active")
     val isActive: Boolean,
@@ -61,7 +61,7 @@ data class UserEntity(
             lastName = lastName,
             phone = phone,
             location = location,
-            role = UserRole.fromValue(role),
+            role = role?.let { UserRole.fromValue(it) } ?: UserRole.PUBLIC,
             isActive = isActive,
             isVerified = isVerified,
             createdAt = createdAt,

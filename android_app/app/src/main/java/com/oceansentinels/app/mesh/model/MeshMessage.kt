@@ -180,10 +180,32 @@ data class MeshMessage(
         )
     }
 
-    /** Serialize to a compact byte array for BLE transmission */
+    /**
+     * Serialize to a compact byte array for BLE transmission.
+     *
+     * Wire format: [4-byte big-endian length prefix] + [UTF-8 JSON payload]
+     *
+     * The length prefix tells the receiver exactly how many payload bytes
+     * to accumulate before attempting JSON parse. This replaces the old
+     * brace-counting heuristic ({/} balance check) which failed when
+     * the description field contained literal braces — e.g. "GPS {lost}"
+     * would make the receiver think the JSON was complete too early.
+     *
+     * Backward compatibility: Old peers that don't use length-prefix
+     * will see the first 4 bytes as non-'{' and fall back to brace-counting.
+     * The receiver checks: if first byte == '{' (0x7B), use legacy mode.
+     */
     fun toBytes(): ByteArray {
         val json = toJson()
-        return json.toByteArray(Charsets.UTF_8)
+        val payload = json.toByteArray(Charsets.UTF_8)
+        val result = ByteArray(4 + payload.size)
+        // Big-endian length prefix
+        result[0] = ((payload.size shr 24) and 0xFF).toByte()
+        result[1] = ((payload.size shr 16) and 0xFF).toByte()
+        result[2] = ((payload.size shr 8) and 0xFF).toByte()
+        result[3] = (payload.size and 0xFF).toByte()
+        System.arraycopy(payload, 0, result, 4, payload.size)
+        return result
     }
 
     /** Serialize to JSON string */
@@ -193,20 +215,42 @@ data class MeshMessage(
             append("\"id\":\"$messageId\",")
             append("\"mac\":\"$originDeviceMac\",")
             append("\"fp\":\"$originDeviceFingerprint\",")
-            append("\"ht\":\"$hazardType\",")
-            append("\"loc\":\"$location\",")
+            append("\"ht\":\"${jsonEscape(hazardType)}\",")
+            append("\"loc\":\"${jsonEscape(location)}\",")
             latitude?.let { append("\"lat\":$it,") }
             longitude?.let { append("\"lng\":$it,") }
-            append("\"desc\":\"${description.replace("\"", "\\\"")}\",")
+            append("\"desc\":\"${jsonEscape(description)}\",")
             append("\"urg\":\"$urgency\",")
             append("\"ts\":$createdAtMillis,")
             append("\"hops\":$hopCount,")
             append("\"path\":[${relayPath.joinToString(",") { "\"$it\"" }}]")
-            photoUrl?.let { append(",\"photo\":\"$it\"") }
-            contactInfo?.let { append(",\"contact\":\"${it.replace("\"", "\\\"")}\"") }
+            photoUrl?.let { append(",\"photo\":\"${jsonEscape(it)}\"") }
+            contactInfo?.let { append(",\"contact\":\"${jsonEscape(it)}\"") }
             reporterUserId?.let { append(",\"uid\":$it") }
             append("}")
         }
+    }
+
+    /**
+     * Escape a string for safe JSON embedding.
+     * Handles all JSON-special characters that could corrupt the wire format:
+     * - Backslash must be escaped first (before other escapes add more backslashes)
+     * - Double-quote breaks JSON string boundaries
+     * - Newlines/tabs/carriage returns break single-line JSON
+     * - Form feed and backspace are control characters
+     *
+     * Without this, a description containing a newline would split the JSON
+     * across lines, breaking fragment reassembly on the receiving device
+     * and killing message delivery across all hops.
+     */
+    private fun jsonEscape(s: String): String {
+        return s.replace("\\", "\\\\")
+            .replace("\"", "\\\"")
+            .replace("\n", "\\n")
+            .replace("\r", "\\r")
+            .replace("\t", "\\t")
+            .replace("\b", "\\b")
+            .replace("\u000C", "\\f")
     }
 }
 

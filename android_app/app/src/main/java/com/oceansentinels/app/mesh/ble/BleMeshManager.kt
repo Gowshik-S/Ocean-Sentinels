@@ -43,13 +43,21 @@ class BleMeshManager(private val context: Context) {
         val MESH_SERVICE_UUID: UUID = UUID.fromString("A1C3E5F7-2B4D-6E8F-9A0B-1C2D3E4F5A6B")
         /** Ocean Sentinels Mesh Characteristic UUID (for data transfer) */
         val MESH_CHARACTERISTIC_UUID: UUID = UUID.fromString("B2D4F608-3C5E-7F90-AB1C-2D3E4F5061C7")
+        /** Client Characteristic Configuration Descriptor UUID (standard BLE CCCD) */
+        val CCCD_UUID: UUID = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb")
 
         /** Maximum BLE packet size before fragmentation */
         const val MAX_PACKET_SIZE = 512
         /** Fragment size for BLE transmission */
         const val FRAGMENT_SIZE = 469
-        /** Scan interval between restarts */
-        const val SCAN_RESTART_INTERVAL_MS = 20_000L
+        /** Scan interval between restarts (aligned with relay interval) */
+        const val SCAN_RESTART_INTERVAL_MS = 15_000L
+        /** Duty-cycle scan ON duration — 8s to catch Coded PHY long preamble */
+        const val SCAN_DUTY_ON_MS = 8_000L
+        /** Duty-cycle scan OFF duration — 2s pause to prevent Android throttling */
+        const val SCAN_DUTY_OFF_MS = 2_000L
+        /** Minimum interval between scan starts to prevent Android error 6 */
+        const val SCAN_RATE_LIMIT_MS = 5_000L
         /** Stale peer timeout */
         const val PEER_STALE_TIMEOUT_MS = 180_000L
         /** Maximum simultaneous connections */
@@ -70,6 +78,18 @@ class BleMeshManager(private val context: Context) {
     private val connectedGatts = ConcurrentHashMap<String, BluetoothGatt>()
     /** Tracks addresses with a pending connectGatt() call that hasn't resolved yet */
     private val pendingConnections = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+    /** Timestamps for pending connections — used to cleanup stuck entries */
+    private val pendingConnectionTimestamps = ConcurrentHashMap<String, Long>()
+
+    /**
+     * Devices that have subscribed to GATT server notifications (via CCCD write).
+     * These are peers connected to OUR server that we can push data to via
+     * notifyCharacteristicChanged() — the second write path alongside connectedGatts.
+     *
+     * This matches bitchat's subscribedDevices in BluetoothGattServerManager which
+     * broadcasts to both server-subscribed and client-connected devices.
+     */
+    private val notificationSubscribers = ConcurrentHashMap<String, BluetoothDevice>()
 
     /** LRU-based deduplication cache — auto-evicts oldest entries */
     private val processedMessageIds: MutableSet<String> = java.util.Collections.synchronizedSet(
@@ -110,6 +130,81 @@ class BleMeshManager(private val context: Context) {
     private val BUFFER_STALE_TIMEOUT_MS = 10_000L
     /** Lock for synchronized fragment reassembly across GATT server/client callbacks */
     private val bufferLock = Any()
+
+    /**
+     * Try to reassemble a complete message from accumulated buffer data.
+     * MUST be called inside synchronized(bufferLock).
+     *
+     * Supports two wire formats with automatic detection:
+     * 1. Length-prefix (new): [4-byte BE length][UTF-8 JSON payload]
+     *    - Reliable: receiver knows exactly how many bytes to expect
+     *    - First byte will NOT be '{' (0x7B) for any realistic payload size
+     * 2. Legacy brace-counting (old): raw UTF-8 JSON starting with '{'
+     *    - Backward compatible with peers running older app versions
+     *    - Fragile: fails if description contains literal braces
+     *
+     * Detection: if first accumulated byte == '{', use legacy. Otherwise, length-prefix.
+     * This is safe because a length prefix starting with 0x7B would mean a payload
+     * of >= 2 billion bytes — impossible over BLE.
+     *
+     * @param address BLE address of the sending device (buffer key)
+     * @return Parsed MeshMessage if reassembly is complete, null if more data needed
+     */
+    private fun tryReassembleMessage(address: String): MeshMessage? {
+        val buffer = incomingBuffers[address] ?: return null
+        val accumulated = buffer.toByteArray()
+        if (accumulated.isEmpty()) return null
+
+        val isLegacyFormat = accumulated[0] == '{'.code.toByte()
+
+        if (isLegacyFormat) {
+            // Legacy brace-counting fallback for old peers
+            val json = String(accumulated, Charsets.UTF_8).trim()
+            if (json.startsWith("{") && json.endsWith("}")) {
+                val message = parseMeshMessage(json)
+                if (message != null) {
+                    incomingBuffers.remove(address)
+                    bufferTimestamps.remove(address)
+                    return message
+                } else if (json.count { it == '{' } == json.count { it == '}' }) {
+                    Timber.w("$TAG: Malformed legacy JSON from $address, clearing buffer")
+                    incomingBuffers.remove(address)
+                    bufferTimestamps.remove(address)
+                }
+            }
+        } else {
+            // Length-prefix protocol: [4-byte BE length][payload]
+            if (accumulated.size < 4) return null // Need more data for header
+
+            val expectedLen = ((accumulated[0].toInt() and 0xFF) shl 24) or
+                    ((accumulated[1].toInt() and 0xFF) shl 16) or
+                    ((accumulated[2].toInt() and 0xFF) shl 8) or
+                    (accumulated[3].toInt() and 0xFF)
+
+            // Sanity: reject implausible lengths (>1MB — no BLE message is that large)
+            if (expectedLen <= 0 || expectedLen > 1_048_576) {
+                Timber.w("$TAG: Invalid length prefix ($expectedLen) from $address, clearing buffer")
+                incomingBuffers.remove(address)
+                bufferTimestamps.remove(address)
+                return null
+            }
+
+            if (accumulated.size >= 4 + expectedLen) {
+                val payload = accumulated.copyOfRange(4, 4 + expectedLen)
+                val json = String(payload, Charsets.UTF_8)
+                incomingBuffers.remove(address)
+                bufferTimestamps.remove(address)
+                val message = parseMeshMessage(json)
+                if (message != null) {
+                    return message
+                } else {
+                    Timber.w("$TAG: Length-prefix payload invalid JSON from $address (len=$expectedLen)")
+                }
+            }
+            // else: still accumulating chunks, need more data
+        }
+        return null
+    }
 
     // ==================== Callbacks ====================
 
@@ -273,12 +368,15 @@ class BleMeshManager(private val context: Context) {
         bufferTimestamps.clear()
         discoveredPeers.clear()
         pendingConnections.clear()
+        pendingConnectionTimestamps.clear()
+        notificationSubscribers.clear()
         peerMtu.clear()
         addressToDeviceId.clear()
         processedMessageIds.clear()
         pendingWrites.clear()
         confirmedWrites.clear()
         activeWriteMessageId.clear()
+        peerWriteQueue.clear()
 
         handler.removeCallbacksAndMessages(null)
 
@@ -306,6 +404,17 @@ class BleMeshManager(private val context: Context) {
                 BluetoothGattCharacteristic.PERMISSION_READ or
                         BluetoothGattCharacteristic.PERMISSION_WRITE
             )
+
+            // ── CCCD Descriptor (required for GATT notifications) ──
+            // Without this descriptor, clients cannot subscribe to notifications
+            // and gattServer.notifyCharacteristicChanged() silently fails.
+            // The CCCD lets clients write ENABLE_NOTIFICATION_VALUE to opt-in.
+            val cccdDescriptor = BluetoothGattDescriptor(
+                CCCD_UUID,
+                BluetoothGattDescriptor.PERMISSION_READ or
+                        BluetoothGattDescriptor.PERMISSION_WRITE
+            )
+            characteristic.addDescriptor(cccdDescriptor)
 
             service.addCharacteristic(characteristic)
             gattServer?.addService(service)
@@ -361,9 +470,32 @@ class BleMeshManager(private val context: Context) {
                             updatePeerCounts()
                             onPeerConnected?.invoke(updated)
                         }
+
+                        // ── FIX: Initiate reverse client connection ──
+                        // When a peer connects to our GATT server, we can RECEIVE
+                        // their writes but we CANNOT write to them (no client GATT).
+                        // broadcastMessage() only uses connectedGatts (client handles).
+                        // Without a reverse client connection, messages received here
+                        // get stuck — we can't relay them forward.
+                        //
+                        // Solution: If we don't already have a client GATT handle,
+                        // connect back as a client so broadcastMessage() can reach them.
+                        if (!connectedGatts.containsKey(device.address)
+                            && !pendingConnections.contains(device.address)
+                            && connectedGatts.size + pendingConnections.size < MAX_CONNECTIONS) {
+                            handler.postDelayed({
+                                if (isRunning && !connectedGatts.containsKey(device.address)
+                                    && !pendingConnections.contains(device.address)
+                                    && connectedGatts.size + pendingConnections.size < MAX_CONNECTIONS) {
+                                    Timber.i("$TAG: Initiating reverse client connection to ${device.address}")
+                                    connectToPeer(device)
+                                }
+                            }, 1500) // Delay to let initial connection settle
+                        }
                     }
                     BluetoothProfile.STATE_DISCONNECTED -> {
                         Timber.i("$TAG: Device disconnected from server: ${device.address}")
+                        notificationSubscribers.remove(device.address)
                         discoveredPeers[device.address]?.let { peer ->
                             discoveredPeers[device.address] = peer.copy(isConnected = false)
                         }
@@ -405,24 +537,8 @@ class BleMeshManager(private val context: Context) {
                     buffer.write(value)
                     bufferTimestamps[address] = now
 
-                    // Try to parse the accumulated data as a complete JSON message
-                    val accumulated = buffer.toByteArray()
-                    val json = String(accumulated, Charsets.UTF_8).trim()
-
-                    // Quick check: valid JSON object starts with { and ends with }
-                    if (json.startsWith("{") && json.endsWith("}")) {
-                        val message = parseMeshMessage(json)
-                        if (message != null) {
-                            incomingBuffers.remove(address)
-                            bufferTimestamps.remove(address)
-                            message // return parsed message
-                        } else if (json.count { it == '{' } == json.count { it == '}' }) {
-                            Timber.w("$TAG: Malformed JSON from $address, clearing buffer")
-                            incomingBuffers.remove(address)
-                            bufferTimestamps.remove(address)
-                            null
-                        } else null
-                    } else null
+                    // Try to reassemble using length-prefix or legacy brace-counting
+                    tryReassembleMessage(address)
                 }
 
                 // Handle outside synchronized block to avoid holding lock during callback
@@ -458,6 +574,44 @@ class BleMeshManager(private val context: Context) {
                 gattServer?.sendResponse(
                     device, requestId, BluetoothGatt.GATT_SUCCESS, offset, localMeshId
                 )
+            }
+        }
+
+        /**
+         * Handle CCCD descriptor writes — clients subscribing/unsubscribing
+         * to GATT notifications.
+         *
+         * When a client writes ENABLE_NOTIFICATION_VALUE to the CCCD, we add
+         * them to notificationSubscribers so broadcastMessage() can push
+         * data to them via notifyCharacteristicChanged().
+         *
+         * This is the Ocean Sentinels equivalent of bitchat's
+         * BluetoothGattServerManager.onDescriptorWriteRequest() which tracks
+         * subscribedDevices for server-push broadcasting.
+         */
+        override fun onDescriptorWriteRequest(
+            device: BluetoothDevice,
+            requestId: Int,
+            descriptor: BluetoothGattDescriptor,
+            preparedWrite: Boolean,
+            responseNeeded: Boolean,
+            offset: Int,
+            value: ByteArray?
+        ) {
+            if (descriptor.uuid == CCCD_UUID) {
+                if (value != null && value.contentEquals(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE)) {
+                    notificationSubscribers[device.address] = device
+                    Timber.i("$TAG: Notification subscriber added: ${device.address} (total: ${notificationSubscribers.size})")
+                } else {
+                    notificationSubscribers.remove(device.address)
+                    Timber.i("$TAG: Notification subscriber removed: ${device.address} (total: ${notificationSubscribers.size})")
+                }
+
+                if (responseNeeded) {
+                    gattServer?.sendResponse(
+                        device, requestId, BluetoothGatt.GATT_SUCCESS, offset, null
+                    )
+                }
             }
         }
     }
@@ -582,6 +736,32 @@ class BleMeshManager(private val context: Context) {
 
     // ==================== Scanning ====================
 
+    /** Timestamp of the last scan start — used for rate-limiting */
+    private var lastScanStartTime = 0L
+
+    /**
+     * Duty-cycle scan runnable — prevents Android from throttling continuous
+     * LOW_LATENCY scanning after ~30 minutes.
+     *
+     * Cycle: 8s scan ON → 2s OFF → repeat.
+     * 80% duty cycle still catches Coded PHY's long preamble (~1ms) easily.
+     *
+     * Inspired by bitchat's PowerManager.kt which uses 8s/2s cycling for
+     * PERFORMANCE mode and 2s/28s for BATTERY_SAVER mode.
+     */
+    private val scanDutyCycleRunnable = object : Runnable {
+        override fun run() {
+            if (!isRunning) return
+            stopScanning()
+            // OFF period — then restart
+            handler.postDelayed({
+                if (isRunning) {
+                    startScanning()
+                }
+            }, SCAN_DUTY_OFF_MS)
+        }
+    }
+
     /** Reusable scan-restart runnable — prevents stacking duplicate restarts */
     private val scanRestartRunnable = object : Runnable {
         override fun run() {
@@ -594,6 +774,20 @@ class BleMeshManager(private val context: Context) {
     }
 
     private fun startScanning() {
+        // ── Rate-limit: prevent Android "scanning too frequently" error (code 6) ──
+        // Matches bitchat's 5s minimum between scan starts.
+        val now = System.currentTimeMillis()
+        val elapsed = now - lastScanStartTime
+        if (elapsed < SCAN_RATE_LIMIT_MS) {
+            val waitMs = SCAN_RATE_LIMIT_MS - elapsed
+            Timber.d("$TAG: Scan rate-limited, retrying in ${waitMs}ms")
+            handler.postDelayed({
+                if (isRunning) startScanning()
+            }, waitMs)
+            return
+        }
+        lastScanStartTime = now
+
         val scanner = adapter?.bluetoothLeScanner ?: run {
             Timber.e("$TAG: BluetoothLeScanner not available")
             return
@@ -603,7 +797,8 @@ class BleMeshManager(private val context: Context) {
             .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
 
         // Enable extended advertisement scanning for Coded PHY
-        if (isLongRangeSupported()) {
+        // Requires API 26+ (Oreo) for setLegacy() and setPhy() methods
+        if (isLongRangeSupported() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             settingsBuilder
                 .setLegacy(false)
                 .setPhy(ScanSettings.PHY_LE_ALL_SUPPORTED)
@@ -641,9 +836,13 @@ class BleMeshManager(private val context: Context) {
             Timber.e(e, "$TAG: Error starting scan")
         }
 
-        // Schedule periodic scan restart (Android limits continuous scanning)
-        // Remove any previous scanRestartRunnable to prevent stacking
+        // ── Duty-cycle scanning: 8s ON then 2s OFF ──
+        // Prevents Android from silently throttling continuous LOW_LATENCY scans
+        // after ~30 minutes. The 2s OFF resets the throttle counter.
+        // Also schedule the periodic full restart as a safety net.
+        handler.removeCallbacks(scanDutyCycleRunnable)
         handler.removeCallbacks(scanRestartRunnable)
+        handler.postDelayed(scanDutyCycleRunnable, SCAN_DUTY_ON_MS)
         handler.postDelayed(scanRestartRunnable, SCAN_RESTART_INTERVAL_MS)
     }
 
@@ -654,16 +853,67 @@ class BleMeshManager(private val context: Context) {
     private fun attemptReconnections() {
         if (!isRunning) return
         val now = System.currentTimeMillis()
+
+        // ── Cleanup stale pending connections (>15s timeout) ──
+        // If connectGatt() never fires onConnectionStateChange (e.g., device
+        // walked away before GATT response), the address stays in pendingConnections
+        // forever, permanently blocking reconnection attempts for that peer.
+        val staleThreshold = 15_000L
+        val stalePending = pendingConnectionTimestamps.entries
+            .filter { now - it.value > staleThreshold }
+            .map { it.key }
+        stalePending.forEach { address ->
+            pendingConnections.remove(address)
+            pendingConnectionTimestamps.remove(address)
+            Timber.d("$TAG: Cleared stale pending connection for $address (>15s)")
+        }
+
         discoveredPeers.values
-            .filter { !it.isConnected && !connectedGatts.containsKey(it.address) }
+            // ── FIX: Reconnect any peer missing a client GATT handle ──
+            // Previous: filtered `!it.isConnected` which missed server-only peers
+            // (marked isConnected=true from GATT server callback but no client GATT).
+            // Now: only check connectedGatts — if no client handle, reconnect.
+            .filter { !connectedGatts.containsKey(it.address) }
             .filter { !pendingConnections.contains(it.address) } // skip already-pending
             .filter { now - it.lastSeenMillis < PEER_STALE_TIMEOUT_MS }
             .filter { connectedGatts.size + pendingConnections.size < MAX_CONNECTIONS }
             .forEach { peer ->
                 Timber.d("$TAG: Attempting reconnection to ${peer.address}")
                 val device = adapter?.getRemoteDevice(peer.address)
-                device?.let { connectToPeer(it) }
+                device?.let { connectToPeerAutoConnect(it) }
             }
+    }
+
+    /**
+     * Connect to a peer with autoConnect=true.
+     * Used for reconnection of previously-known peers that went behind an obstacle.
+     * autoConnect=true uses Android's internal LOW_POWER scan to automatically
+     * reconnect when the peer returns to range — ideal for intermittent obstacles.
+     *
+     * Note: autoConnect=true does NOT support PHY selection (always uses 1M),
+     * but the PHY upgrade to Coded is requested after connection in the callback.
+     */
+    private fun connectToPeerAutoConnect(device: BluetoothDevice) {
+        if (connectedGatts.containsKey(device.address)) return
+        if (connectedGatts.size >= MAX_CONNECTIONS) return
+        if (!pendingConnections.add(device.address)) {
+            Timber.d("$TAG: Reconnection already pending for ${device.address}, skipping")
+            return
+        }
+        pendingConnectionTimestamps[device.address] = System.currentTimeMillis()
+
+        try {
+            device.connectGatt(
+                context,
+                true, // autoConnect for obstacle-lost peers
+                gattClientCallback,
+                BluetoothDevice.TRANSPORT_LE
+            )
+            Timber.d("$TAG: AutoConnect reconnection initiated for ${device.address}")
+        } catch (e: Exception) {
+            pendingConnections.remove(device.address)
+            Timber.e(e, "$TAG: Error auto-connecting to ${device.address}")
+        }
     }
 
     private fun stopScanning() {
@@ -715,11 +965,20 @@ class BleMeshManager(private val context: Context) {
             )
             updatePeerCounts()
 
-            // Re-connect if previously disconnected and we have capacity
-            if (!existingPeer.isConnected && !connectedGatts.containsKey(address)
+            // ── FIX: Connect as CLIENT even if peer is server-side connected ──
+            // Previous bug: when peer B connected to our GATT server, we marked
+            // B as isConnected=true. When we later scanned B, the check
+            // `!existingPeer.isConnected` was false → we skipped client connection.
+            // Result: broadcastMessage() iterates connectedGatts (client handles
+            // only) → couldn't write to B → messages got stuck on this device.
+            //
+            // Fix: Check connectedGatts (client GATT) instead of isConnected
+            // (which covers both server+client). We MUST have a client GATT
+            // to write/relay messages to a peer.
+            if (!connectedGatts.containsKey(address)
                 && !pendingConnections.contains(address)
                 && connectedGatts.size + pendingConnections.size < MAX_CONNECTIONS) {
-                Timber.i("$TAG: Re-connecting to previously seen peer: $address")
+                Timber.i("$TAG: Establishing client GATT to peer: $address (server-side connected: ${existingPeer.isConnected})")
                 connectToPeer(device)
             }
         } else {
@@ -751,6 +1010,7 @@ class BleMeshManager(private val context: Context) {
             Timber.d("$TAG: Connection already pending for ${device.address}, skipping")
             return
         }
+        pendingConnectionTimestamps[device.address] = System.currentTimeMillis()
 
         val phyMask = if (isCodedPhySupported()) {
             BluetoothDevice.PHY_LE_CODED_MASK or BluetoothDevice.PHY_LE_1M_MASK
@@ -778,6 +1038,7 @@ class BleMeshManager(private val context: Context) {
             val address = gatt.device.address
             // Always clear pending state — the connection attempt has resolved
             pendingConnections.remove(address)
+            pendingConnectionTimestamps.remove(address)
 
             try {
                 // Handle GATT errors (status != 0) — the connection failed or was lost.
@@ -789,6 +1050,7 @@ class BleMeshManager(private val context: Context) {
                     connectedGatts.remove(address)
                     gatt.close() // MUST close to free the GATT client slot
                     peerMtu.remove(address)
+                    peerWriteQueue.remove(address)
                     synchronized(bufferLock) {
                         incomingBuffers.remove(address)
                         bufferTimestamps.remove(address)
@@ -829,6 +1091,15 @@ class BleMeshManager(private val context: Context) {
                         // Request larger MTU for better throughput
                         gatt.requestMtu(517)
 
+                        // ── Request high connection priority for obstacle reliability ──
+                        // CONNECTION_PRIORITY_HIGH requests ~11.25ms connection interval
+                        // from the controller. More frequent link-layer transmissions
+                        // = more retry opportunities through walls and obstacles.
+                        // This is the single biggest improvement for through-wall
+                        // BLE reliability. Battery cost is acceptable for a mesh relay.
+                        gatt.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+                        Timber.d("$TAG: CONNECTION_PRIORITY_HIGH requested for $address")
+
                         discoveredPeers[address]?.let { peer ->
                             discoveredPeers[address] = peer.copy(isConnected = true)
                             onPeerConnected?.invoke(peer.copy(isConnected = true))
@@ -839,6 +1110,7 @@ class BleMeshManager(private val context: Context) {
                         connectedGatts.remove(address)
                         gatt.close()
                         peerMtu.remove(address)
+                        peerWriteQueue.remove(address)
                         synchronized(bufferLock) {
                             incomingBuffers.remove(address)
                             bufferTimestamps.remove(address)
@@ -882,6 +1154,26 @@ class BleMeshManager(private val context: Context) {
                     discoveredPeers[gatt.device.address]?.let { peer ->
                         discoveredPeers[gatt.device.address] = peer.copy(hasOceanService = true)
                     }
+
+                    // ── Subscribe to GATT notifications from this peer's server ──
+                    // This enables the peer to push data to us via
+                    // notifyCharacteristicChanged() — the second receive path
+                    // alongside our GATT client writes. The existing
+                    // onCharacteristicChanged handler already handles incoming
+                    // notification data with fragment reassembly.
+                    val characteristic = service.getCharacteristic(MESH_CHARACTERISTIC_UUID)
+                    if (characteristic != null) {
+                        gatt.setCharacteristicNotification(characteristic, true)
+
+                        val cccd = characteristic.getDescriptor(CCCD_UUID)
+                        if (cccd != null) {
+                            cccd.value = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
+                            gatt.writeDescriptor(cccd)
+                            Timber.i("$TAG: Subscribed to notifications on ${gatt.device.address}")
+                        } else {
+                            Timber.w("$TAG: No CCCD descriptor on ${gatt.device.address}, notifications may not work")
+                        }
+                    }
                 } else {
                     Timber.w("$TAG: No Ocean Sentinels service on ${gatt.device.address}")
                 }
@@ -904,9 +1196,14 @@ class BleMeshManager(private val context: Context) {
                     }.add(peerAddress)
                     Timber.i("$TAG: Write confirmed for message $messageId to $peerAddress")
                 }
+                // Drain queued writes for this peer now that the slot is free
+                drainPeerWriteQueue(peerAddress)
             } else {
                 Timber.w("$TAG: Write failed for $peerAddress: $status")
                 activeWriteMessageId.remove(peerAddress)
+                // Still try to drain queue — the failed message is lost but
+                // queued messages may succeed
+                drainPeerWriteQueue(peerAddress)
             }
         }
 
@@ -930,22 +1227,8 @@ class BleMeshManager(private val context: Context) {
                     buffer.write(value)
                     bufferTimestamps[address] = now
 
-                    val accumulated = buffer.toByteArray()
-                    val json = String(accumulated, Charsets.UTF_8).trim()
-
-                    if (json.startsWith("{") && json.endsWith("}")) {
-                        val message = parseMeshMessage(json)
-                        if (message != null) {
-                            incomingBuffers.remove(address)
-                            bufferTimestamps.remove(address)
-                            message
-                        } else if (json.count { it == '{' } == json.count { it == '}' }) {
-                            Timber.w("$TAG: Malformed JSON from $address, clearing buffer")
-                            incomingBuffers.remove(address)
-                            bufferTimestamps.remove(address)
-                            null
-                        } else null
-                    } else null
+                    // Try to reassemble using length-prefix or legacy brace-counting
+                    tryReassembleMessage(address)
                 }
 
                 if (parsedMessage != null) {
@@ -983,6 +1266,18 @@ class BleMeshManager(private val context: Context) {
 
     /** Track negotiated MTU per peer (default BLE MTU = 23, payload = 20) */
     private val peerMtu = ConcurrentHashMap<String, Int>()
+
+    /**
+     * Per-peer write queue for messages that couldn't be sent immediately
+     * because the peer had an active in-flight write.
+     *
+     * Previously, busy peers were skipped with `return@forEach` and had to
+     * wait for the next relay cycle (15s). Now they're enqueued and drained
+     * immediately when the current write completes (via onCharacteristicWrite).
+     *
+     * Maps peerAddress → queue of (data, messageId) pairs.
+     */
+    private val peerWriteQueue = ConcurrentHashMap<String, java.util.ArrayDeque<Pair<ByteArray, String>>>()
 
     /**
      * Send a mesh message to all connected peers (flooding broadcast).
@@ -1032,6 +1327,19 @@ class BleMeshManager(private val context: Context) {
 
         connectedGatts.values.forEach { gatt ->
             val peerBleAddress = gatt.device.address
+
+            // ── Filter 0: Queue for peers with an active in-flight write ──
+            // Android BLE stack allows only one outstanding writeCharacteristic()
+            // per GATT client. Instead of skipping busy peers entirely (losing
+            // the message until next relay cycle), enqueue for immediate delivery
+            // when the current write completes via onCharacteristicWrite callback.
+            if (activeWriteMessageId.containsKey(peerBleAddress)) {
+                val queue = peerWriteQueue.getOrPut(peerBleAddress) { java.util.ArrayDeque() }
+                queue.offer(Pair(data, message.messageId))
+                sentCount++ // Count as queued (will be sent shortly)
+                Timber.d("$TAG: Peer $peerBleAddress busy, enqueued message (queue: ${queue.size})")
+                return@forEach
+            }
 
             // ── Filter 1: Skip the immediate relay sender ──
             // This is the BLE address of the peer that forwarded this message to us.
@@ -1102,11 +1410,96 @@ class BleMeshManager(private val context: Context) {
             }
         }
 
+        // ── Second write path: GATT server notifications ──
+        // Push data to peers that connected to OUR server and subscribed
+        // to notifications (via CCCD write). This is the critical fix for
+        // multi-hop relay: when Device D connects to Device C's GATT server
+        // but C's reverse client connection to D fails (GATT error 133),
+        // C can still push data to D via server notifications.
+        //
+        // This matches bitchat's dual-path approach:
+        // BluetoothPacketBroadcaster iterates BOTH subscribedDevices
+        // (server-push) AND connectedDevices (client-write).
+        if (notificationSubscribers.isNotEmpty()) {
+            val server = gattServer
+            val gattService = server?.getService(MESH_SERVICE_UUID)
+            val gattCharacteristic = gattService?.getCharacteristic(MESH_CHARACTERISTIC_UUID)
+
+            if (server != null && gattCharacteristic != null) {
+                notificationSubscribers.forEach { (subscriberAddress, subscriberDevice) ->
+                    // Skip peers already handled via client GATT write above
+                    if (connectedGatts.containsKey(subscriberAddress)) {
+                        return@forEach
+                    }
+
+                    // Apply same 3-layer filter as client path
+                    if (excludeAddresses.contains(subscriberAddress)) {
+                        Timber.d("$TAG: Skipping server-notify back to sender: $subscriberAddress")
+                        return@forEach
+                    }
+                    val subDeviceId = addressToDeviceId[subscriberAddress]
+                    if (subDeviceId != null && subDeviceId == message.originDeviceMac) {
+                        Timber.d("$TAG: Skipping server-notify to original author: $subscriberAddress")
+                        return@forEach
+                    }
+                    if (subDeviceId != null && message.relayPath.contains(subDeviceId)) {
+                        Timber.d("$TAG: Skipping server-notify to peer in relay path: $subscriberAddress")
+                        return@forEach
+                    }
+
+                    try {
+                        // Use higher default MTU for server notifications.
+                        // Default BLE MTU=23 gives only 20B payload, causing
+                        // a 500B message to split into 25 chunks × 200ms = 5s.
+                        // Using 185 (common negotiated MTU) gives ~182B payload,
+                        // reducing to 3 chunks × 200ms = 0.6s.
+                        // peerMtu has the actual negotiated value if a client
+                        // GATT also exists; otherwise this reasonable default
+                        // works for most modern BLE devices.
+                        val mtu = peerMtu.getOrDefault(subscriberAddress, 185)
+                        val maxPayload = (mtu - 3).coerceAtLeast(20)
+
+                        if (data.size <= maxPayload) {
+                            gattCharacteristic.value = data
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                val result = server.notifyCharacteristicChanged(
+                                    subscriberDevice, gattCharacteristic, false, data
+                                )
+                                if (result == BluetoothGatt.GATT_SUCCESS) {
+                                    sentCount++
+                                    Timber.d("$TAG: Server-notified ${data.size}B to $subscriberAddress")
+                                }
+                            } else {
+                                @Suppress("DEPRECATION")
+                                val sent = server.notifyCharacteristicChanged(
+                                    subscriberDevice, gattCharacteristic, false
+                                )
+                                if (sent) {
+                                    sentCount++
+                                    Timber.d("$TAG: Server-notified ${data.size}B to $subscriberAddress")
+                                }
+                            }
+                        } else {
+                            // Chunked notification for large messages
+                            val chunks = data.toList().chunked(maxPayload).map { it.toByteArray() }
+                            notifyChunksSequentially(
+                                server, gattCharacteristic, subscriberDevice,
+                                chunks, 0, subscriberAddress
+                            )
+                            sentCount++
+                        }
+                    } catch (e: Exception) {
+                        Timber.e(e, "$TAG: Error server-notifying $subscriberAddress")
+                    }
+                }
+            }
+        }
+
         if (sentCount > 0) {
             onMessageSent?.invoke(message.messageId, true)
         }
 
-        Timber.i("$TAG: Broadcast message ${message.messageId} to $sentCount peers")
+        Timber.i("$TAG: Broadcast message ${message.messageId} to $sentCount peers (client+server)")
         return sentCount
     }
 
@@ -1130,6 +1523,53 @@ class BleMeshManager(private val context: Context) {
     fun clearMessageTracking(messageId: String) {
         pendingWrites.remove(messageId)
         confirmedWrites.remove(messageId)
+    }
+
+    /**
+     * Drain the per-peer write queue after a write completes.
+     * Takes the next queued (data, messageId) pair and initiates the write.
+     * Called from onCharacteristicWrite after the BLE slot is freed.
+     */
+    private fun drainPeerWriteQueue(peerAddress: String) {
+        val queue = peerWriteQueue[peerAddress] ?: return
+        val (data, messageId) = queue.poll() ?: run {
+            peerWriteQueue.remove(peerAddress) // cleanup empty queue
+            return
+        }
+
+        val gatt = connectedGatts[peerAddress] ?: run {
+            // Peer disconnected — drop the entire queue
+            peerWriteQueue.remove(peerAddress)
+            return
+        }
+
+        try {
+            val service = gatt.getService(MESH_SERVICE_UUID) ?: return
+            val characteristic = service.getCharacteristic(MESH_CHARACTERISTIC_UUID) ?: return
+
+            activeWriteMessageId[peerAddress] = messageId
+
+            val mtu = peerMtu.getOrDefault(peerAddress, 23)
+            val maxPayload = (mtu - 3).coerceAtLeast(20)
+
+            if (data.size <= maxPayload) {
+                characteristic.value = data
+                characteristic.writeType = BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+                if (!gatt.writeCharacteristic(characteristic)) {
+                    activeWriteMessageId.remove(peerAddress)
+                    Timber.w("$TAG: Failed to drain queued write to $peerAddress")
+                } else {
+                    Timber.d("$TAG: Drained queued write to $peerAddress (remaining: ${queue.size})")
+                }
+            } else {
+                val chunks = data.toList().chunked(maxPayload).map { it.toByteArray() }
+                writeChunksSequentially(gatt, characteristic, chunks, 0, peerAddress, messageId)
+                Timber.d("$TAG: Drained queued chunked write to $peerAddress (remaining: ${queue.size})")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "$TAG: Error draining write queue for $peerAddress")
+            activeWriteMessageId.remove(peerAddress)
+        }
     }
 
     /**
@@ -1159,14 +1599,84 @@ class BleMeshManager(private val context: Context) {
             if (gatt.writeCharacteristic(characteristic)) {
                 if (index < chunks.size - 1) {
                     handler.postDelayed({
-                        writeChunksSequentially(gatt, characteristic, chunks, index + 1, peerAddress, messageId)
-                    }, 50)
+                        // Guard: peer may have disconnected between scheduling and execution
+                        try {
+                            if (connectedGatts.containsKey(peerAddress)) {
+                                writeChunksSequentially(gatt, characteristic, chunks, index + 1, peerAddress, messageId)
+                            } else {
+                                Timber.w("$TAG: Peer $peerAddress disconnected before chunk ${index + 1}")
+                                activeWriteMessageId.remove(peerAddress)
+                            }
+                        } catch (e: Exception) {
+                            Timber.e(e, "$TAG: Error in delayed chunk write to $peerAddress")
+                            activeWriteMessageId.remove(peerAddress)
+                        }
+                    }, 150) // 150ms delay for through-wall reliability (link-layer retry time)
                 }
             } else {
                 Timber.w("$TAG: Chunk $index/${chunks.size} failed for $peerAddress")
+                activeWriteMessageId.remove(peerAddress)
             }
         } catch (e: Exception) {
             Timber.e(e, "$TAG: Error writing chunk $index to $peerAddress")
+            activeWriteMessageId.remove(peerAddress)
+        }
+    }
+
+    /**
+     * Send notification chunks sequentially via GATT server.
+     * Mirror of writeChunksSequentially() but uses server-push (notifyCharacteristicChanged)
+     * instead of client-write (writeCharacteristic).
+     *
+     * Uses a higher delay (200ms) than client writes because server notifications
+     * go through a different buffer path and don't have write confirmation callbacks.
+     */
+    private fun notifyChunksSequentially(
+        server: BluetoothGattServer,
+        characteristic: BluetoothGattCharacteristic,
+        device: BluetoothDevice,
+        chunks: List<ByteArray>,
+        index: Int,
+        peerAddress: String
+    ) {
+        if (index >= chunks.size) {
+            Timber.d("$TAG: All ${chunks.size} notification chunks sent to $peerAddress")
+            return
+        }
+        if (!notificationSubscribers.containsKey(peerAddress)) {
+            Timber.w("$TAG: Subscriber $peerAddress gone during chunked notification")
+            return
+        }
+
+        try {
+            characteristic.value = chunks[index]
+            val sent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                server.notifyCharacteristicChanged(
+                    device, characteristic, false, chunks[index]
+                ) == BluetoothGatt.GATT_SUCCESS
+            } else {
+                @Suppress("DEPRECATION")
+                server.notifyCharacteristicChanged(device, characteristic, false)
+            }
+
+            if (sent && index < chunks.size - 1) {
+                handler.postDelayed({
+                    // Guard: subscriber may have disconnected between scheduling and execution
+                    try {
+                        if (notificationSubscribers.containsKey(peerAddress)) {
+                            notifyChunksSequentially(server, characteristic, device, chunks, index + 1, peerAddress)
+                        } else {
+                            Timber.w("$TAG: Subscriber $peerAddress gone before notification chunk ${index + 1}")
+                        }
+                    } catch (e: Exception) {
+                        Timber.e(e, "$TAG: Error in delayed notification chunk to $peerAddress")
+                    }
+                }, 200) // 200ms spacing for server notification chunking
+            } else if (!sent) {
+                Timber.w("$TAG: Notification chunk $index/${chunks.size} failed for $peerAddress")
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "$TAG: Error notifying chunk $index to $peerAddress")
         }
     }
 

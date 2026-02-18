@@ -67,8 +67,8 @@ class MeshMessageRepository @Inject constructor(
         private const val TAG = "MeshMessageRepo"
         /** Maximum messages to keep in local DB (FIFO) */
         const val MAX_LOCAL_MESSAGES = 500
-        /** Maximum age for messages before they expire */
-        const val MESSAGE_EXPIRY_HOURS = 24L
+        /** Maximum age for messages before they expire (aligned with MeshMessage.MESSAGE_LIFETIME_MS = 72h) */
+        const val MESSAGE_EXPIRY_HOURS = 72L
     }
 
     /** Mutex to prevent concurrent queue processing from periodic + network callback */

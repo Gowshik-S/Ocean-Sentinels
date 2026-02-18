@@ -339,6 +339,7 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
         ) {
             // Notifications Section
             SettingsSection(title = "Notifications") {
@@ -416,7 +417,7 @@ fun SettingsScreen(
                 )
             }
             
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(24.dp))
             
             // App version
             Text(

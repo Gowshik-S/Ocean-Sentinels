@@ -103,7 +103,7 @@ data class MeshMessageEntity(
     val createdAt: LocalDateTime = LocalDateTime.now(),
 
     @ColumnInfo(name = "expires_at")
-    val expiresAt: LocalDateTime = LocalDateTime.now().plusHours(24),
+    val expiresAt: LocalDateTime = LocalDateTime.now().plusHours(72),
 
     /** Whether this message was created by this device (vs received from mesh) */
     @ColumnInfo(name = "is_own_message")
@@ -127,7 +127,7 @@ data class MeshMessageEntity(
             createdAtMillis = createdAtMillis,
             hopCount = hopCount,
             status = MeshMessageStatus.fromValue(status),
-            relayPath = if (relayPath.isBlank()) emptyList() else relayPath.split(","),
+            relayPath = if (relayPath.isBlank()) emptyList() else relayPath.split(",").filter { it.isNotBlank() },
             photoUrl = photoUrl,
             contactInfo = contactInfo,
             reporterUserId = reporterUserId,
