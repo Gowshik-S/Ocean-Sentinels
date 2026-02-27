@@ -39,33 +39,19 @@ Ocean Sentinels provides a unified platform for coastal hazard reporting across 
 
 ## Architecture
 
-```
-                    +------------------+
-                    |  PostgreSQL (RDS) |
-                    +--------+---------+
-                             |
-                    +--------+---------+
-                    |  FastAPI Backend  |
-                    |  (Python 3.11+)  |
-                    +--------+---------+
-                             |
-              +--------------+--------------+
-              |                             |
-    +---------+----------+     +------------+-----------+
-    |  Frontend (Web)    |     |  Android App (Kotlin)  |
-    |  Vanilla JS        |     |  Jetpack Compose       |
-    |  Mapbox GL JS      |     |  Hilt DI / Room DB     |
-    +---------+----------+     +------------+-----------+
-              |                             |
-              |                    +--------+--------+
-              |                    |  BLE Mesh Layer  |
-              |                    |  (Offline Relay) |
-              |                    +-----------------+
-              |
-    +---------+----------+
-    |  Vercel / Netlify  |
-    +--------------------+
-```
+<p align="center">
+  <img src="docs/architecture.svg" alt="Ocean Sentinels System Architecture" width="100%" />
+</p>
+
+The system is organized into five layers:
+
+- **Client Layer** -- Frontend web app (Vanilla JS, Mapbox GL JS) and Android app (Kotlin, Jetpack Compose, Material3) provide role-based interfaces for all user types.
+- **BLE Mesh Network** -- An offline relay layer on Android using Bluetooth Low Energy with TTL flooding, SHA-256 deduplication, and Coded PHY for extended range (~400m). Enables hazard reporting in areas without connectivity.
+- **Backend Server Layer** -- FastAPI (Python 3.11+) with async ASGI, JWT authentication, role-based access control, WebSocket real-time updates, and auto-migration on startup. Exposes REST endpoints for auth, incidents, analytics, users, and WebSocket connections.
+- **Data Layer** -- PostgreSQL (via SQLAlchemy 2.0 + asyncpg) for persistent storage, Redis for optional caching and rate limiting, and AWS S3 for incident photo/media storage.
+- **External Services** -- Mapbox for interactive maps and geocoding, Weather APIs (WeatherAPI.com + India Weather API) for alerts and forecasts, and Firebase Cloud Messaging for Android push notifications.
+
+All components deploy across Render, Railway, Vercel, Netlify, and the Google Play Store.
 
 ---
 

@@ -1,0 +1,333 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 820" width="1100" height="820" font-family="Segoe UI, Arial, sans-serif">
+
+  <defs>
+    <!-- Drop shadow filter -->
+    <filter id="shadow" x="-4%" y="-4%" width="108%" height="108%">
+      <feDropShadow dx="2" dy="2" stdDeviation="3" flood-color="#00000020"/>
+    </filter>
+    <!-- Arrow marker -->
+    <marker id="arrow" viewBox="0 0 10 10" refX="10" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="10" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-green" viewBox="0 0 10 10" refX="10" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#16a34a"/>
+    </marker>
+    <marker id="arrow-orange" viewBox="0 0 10 10" refX="10" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#ea580c"/>
+    </marker>
+    <marker id="arrow-purple" viewBox="0 0 10 10" refX="10" refY="5"
+            markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 Z" fill="#7c3aed"/>
+    </marker>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1100" height="820" rx="12" fill="#f8fafc"/>
+  <rect x="0" y="0" width="1100" height="56" rx="12" fill="#0f172a"/>
+  <rect x="0" y="28" width="1100" height="28" fill="#0f172a"/>
+  <text x="550" y="37" text-anchor="middle" fill="#ffffff" font-size="20" font-weight="700" letter-spacing="1">Ocean Sentinels -- System Architecture</text>
+
+  <!-- ============================== -->
+  <!-- CLIENT LAYER                   -->
+  <!-- ============================== -->
+  <rect x="30" y="76" width="520" height="220" rx="10" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1.5"/>
+  <text x="50" y="100" fill="#1e40af" font-size="13" font-weight="700" letter-spacing="0.5">CLIENT LAYER</text>
+
+  <!-- Frontend Web App -->
+  <rect x="50" y="115" width="220" height="160" rx="8" fill="#ffffff" stroke="#93c5fd" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="50" y="115" width="220" height="32" rx="8" fill="#2563eb"/>
+  <rect x="50" y="135" width="220" height="12" fill="#2563eb"/>
+  <text x="160" y="137" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">Frontend Web App</text>
+  <text x="70" y="170" fill="#334155" font-size="11">Vanilla JS (ES6+)</text>
+  <text x="70" y="188" fill="#334155" font-size="11">Mapbox GL JS</text>
+  <text x="70" y="206" fill="#334155" font-size="11">CSS3 / Responsive</text>
+  <text x="70" y="224" fill="#334155" font-size="11">JWT Auth / WebSocket</text>
+  <text x="70" y="242" fill="#334155" font-size="11">Role-Based Dashboards</text>
+  <rect x="70" y="252" width="180" height="16" rx="4" fill="#dbeafe"/>
+  <text x="160" y="264" text-anchor="middle" fill="#1e40af" font-size="10" font-weight="600">Vercel / Netlify</text>
+
+  <!-- Android App -->
+  <rect x="310" y="115" width="220" height="160" rx="8" fill="#ffffff" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="310" y="115" width="220" height="32" rx="8" fill="#16a34a"/>
+  <rect x="310" y="135" width="220" height="12" fill="#16a34a"/>
+  <text x="420" y="137" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">Android App (Kotlin)</text>
+  <text x="330" y="170" fill="#334155" font-size="11">Jetpack Compose / Material3</text>
+  <text x="330" y="188" fill="#334155" font-size="11">Hilt DI / Room DB</text>
+  <text x="330" y="206" fill="#334155" font-size="11">Retrofit + OkHttp</text>
+  <text x="330" y="224" fill="#334155" font-size="11">Mapbox SDK / GPS</text>
+  <text x="330" y="242" fill="#334155" font-size="11">20+ Compose Screens</text>
+  <rect x="330" y="252" width="180" height="16" rx="4" fill="#dcfce7"/>
+  <text x="420" y="264" text-anchor="middle" fill="#16a34a" font-size="10" font-weight="600">Min SDK 24 / Target SDK 34</text>
+
+  <!-- ============================== -->
+  <!-- BLE MESH LAYER                 -->
+  <!-- ============================== -->
+  <rect x="570" y="76" width="240" height="220" rx="10" fill="#faf5ff" stroke="#d8b4fe" stroke-width="1.5"/>
+  <text x="590" y="100" fill="#7c3aed" font-size="13" font-weight="700" letter-spacing="0.5">BLE MESH NETWORK</text>
+
+  <rect x="590" y="115" width="200" height="160" rx="8" fill="#ffffff" stroke="#c4b5fd" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="590" y="115" width="200" height="32" rx="8" fill="#7c3aed"/>
+  <rect x="590" y="135" width="200" height="12" fill="#7c3aed"/>
+  <text x="690" y="137" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">Offline Relay Layer</text>
+  <text x="610" y="170" fill="#334155" font-size="11">GATT Server + Scanner</text>
+  <text x="610" y="188" fill="#334155" font-size="11">TTL Flooding Protocol</text>
+  <text x="610" y="206" fill="#334155" font-size="11">SHA-256 Dedup (10K)</text>
+  <text x="610" y="224" fill="#334155" font-size="11">Coded PHY (~400m range)</text>
+  <text x="610" y="242" fill="#334155" font-size="11">Fallback: Standard 1M PHY</text>
+  <rect x="610" y="252" width="160" height="16" rx="4" fill="#f3e8ff"/>
+  <text x="690" y="264" text-anchor="middle" fill="#7c3aed" font-size="10" font-weight="600">Max 7 peers / 512B packets</text>
+
+  <!-- ============================== -->
+  <!-- USER ROLES                     -->
+  <!-- ============================== -->
+  <rect x="830" y="76" width="240" height="220" rx="10" fill="#fefce8" stroke="#fde68a" stroke-width="1.5"/>
+  <text x="850" y="100" fill="#a16207" font-size="13" font-weight="700" letter-spacing="0.5">USER ROLES</text>
+
+  <!-- Public -->
+  <rect x="850" y="115" width="200" height="30" rx="6" fill="#ffffff" stroke="#fde68a" stroke-width="1" filter="url(#shadow)"/>
+  <circle cx="868" cy="130" r="8" fill="#fbbf24"/>
+  <text x="885" y="135" fill="#334155" font-size="12" font-weight="500">Public Citizens</text>
+
+  <!-- Authority -->
+  <rect x="850" y="155" width="200" height="30" rx="6" fill="#ffffff" stroke="#fde68a" stroke-width="1" filter="url(#shadow)"/>
+  <circle cx="868" cy="170" r="8" fill="#f97316"/>
+  <text x="885" y="175" fill="#334155" font-size="12" font-weight="500">Authorities</text>
+
+  <!-- Rescue -->
+  <rect x="850" y="195" width="200" height="30" rx="6" fill="#ffffff" stroke="#fde68a" stroke-width="1" filter="url(#shadow)"/>
+  <circle cx="868" cy="210" r="8" fill="#ef4444"/>
+  <text x="885" y="215" fill="#334155" font-size="12" font-weight="500">Rescue Teams</text>
+
+  <!-- Admin -->
+  <rect x="850" y="235" width="200" height="30" rx="6" fill="#ffffff" stroke="#fde68a" stroke-width="1" filter="url(#shadow)"/>
+  <circle cx="868" cy="250" r="8" fill="#8b5cf6"/>
+  <text x="885" y="255" fill="#334155" font-size="12" font-weight="500">Administrators</text>
+
+  <!-- ============================== -->
+  <!-- BACKEND SERVER LAYER           -->
+  <!-- ============================== -->
+  <rect x="30" y="320" width="780" height="200" rx="10" fill="#fff7ed" stroke="#fed7aa" stroke-width="1.5"/>
+  <text x="50" y="345" fill="#c2410c" font-size="13" font-weight="700" letter-spacing="0.5">BACKEND SERVER LAYER</text>
+
+  <!-- FastAPI Core -->
+  <rect x="50" y="360" width="200" height="140" rx="8" fill="#ffffff" stroke="#fdba74" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="50" y="360" width="200" height="32" rx="8" fill="#ea580c"/>
+  <rect x="50" y="380" width="200" height="12" fill="#ea580c"/>
+  <text x="150" y="382" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">FastAPI (Python 3.11+)</text>
+  <text x="70" y="415" fill="#334155" font-size="11">Async / ASGI (Uvicorn)</text>
+  <text x="70" y="433" fill="#334155" font-size="11">JWT Authentication</text>
+  <text x="70" y="451" fill="#334155" font-size="11">Role-Based Access Control</text>
+  <text x="70" y="469" fill="#334155" font-size="11">Auto-Migration on Boot</text>
+  <text x="70" y="487" fill="#334155" font-size="11">OpenAPI / Swagger Docs</text>
+
+  <!-- API Routers -->
+  <rect x="280" y="360" width="200" height="140" rx="8" fill="#ffffff" stroke="#fdba74" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="280" y="360" width="200" height="32" rx="8" fill="#f97316"/>
+  <rect x="280" y="380" width="200" height="12" fill="#f97316"/>
+  <text x="380" y="382" text-anchor="middle" fill="#ffffff" font-size="13" font-weight="600">API Routers</text>
+  <text x="300" y="415" fill="#334155" font-size="11">/api/auth/*</text>
+  <text x="410" y="415" fill="#94a3b8" font-size="10">Login, Register</text>
+  <text x="300" y="433" fill="#334155" font-size="11">/api/incidents/*</text>
+  <text x="410" y="433" fill="#94a3b8" font-size="10">CRUD + Mesh</text>
+  <text x="300" y="451" fill="#334155" font-size="11">/api/analytics/*</text>
+  <text x="410" y="451" fill="#94a3b8" font-size="10">Dashboard</text>
+  <text x="300" y="469" fill="#334155" font-size="11">/api/users/*</text>
+  <text x="410" y="469" fill="#94a3b8" font-size="10">Admin Only</text>
+  <text x="300" y="487" fill="#334155" font-size="11">/api/ws/*</text>
+  <text x="410" y="487" fill="#94a3b8" font-size="10">WebSocket</text>
+
+  <!-- Real-Time -->
+  <rect x="510" y="360" width="140" height="140" rx="8" fill="#ffffff" stroke="#fdba74" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="510" y="360" width="140" height="32" rx="8" fill="#dc2626"/>
+  <rect x="510" y="380" width="140" height="12" fill="#dc2626"/>
+  <text x="580" y="382" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="600">Real-Time</text>
+  <text x="530" y="418" fill="#334155" font-size="11">WebSocket</text>
+  <text x="530" y="436" fill="#334155" font-size="11">Push Notifications</text>
+  <text x="530" y="454" fill="#334155" font-size="11">Live Alerts</text>
+  <text x="530" y="472" fill="#334155" font-size="11">Incident</text>
+  <text x="530" y="487" fill="#334155" font-size="11">Broadcasting</text>
+
+  <!-- Middleware -->
+  <rect x="680" y="360" width="110" height="140" rx="8" fill="#ffffff" stroke="#fdba74" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="680" y="360" width="110" height="32" rx="8" fill="#b45309"/>
+  <rect x="680" y="380" width="110" height="12" fill="#b45309"/>
+  <text x="735" y="382" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="600">Middleware</text>
+  <text x="700" y="418" fill="#334155" font-size="11">CORS</text>
+  <text x="700" y="436" fill="#334155" font-size="11">Rate Limiting</text>
+  <text x="700" y="454" fill="#334155" font-size="11">Error Handler</text>
+  <text x="700" y="472" fill="#334155" font-size="11">Request</text>
+  <text x="700" y="487" fill="#334155" font-size="11">Logging</text>
+
+  <!-- ============================== -->
+  <!-- DATA LAYER                     -->
+  <!-- ============================== -->
+  <rect x="30" y="545" width="520" height="190" rx="10" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1.5"/>
+  <text x="50" y="570" fill="#15803d" font-size="13" font-weight="700" letter-spacing="0.5">DATA LAYER</text>
+
+  <!-- PostgreSQL -->
+  <rect x="50" y="585" width="155" height="130" rx="8" fill="#ffffff" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="50" y="585" width="155" height="32" rx="8" fill="#15803d"/>
+  <rect x="50" y="605" width="155" height="12" fill="#15803d"/>
+  <text x="127" y="607" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="600">PostgreSQL</text>
+  <text x="70" y="640" fill="#334155" font-size="11">SQLAlchemy 2.0</text>
+  <text x="70" y="658" fill="#334155" font-size="11">asyncpg Driver</text>
+  <text x="70" y="676" fill="#334155" font-size="11">User / Incident</text>
+  <text x="70" y="694" fill="#334155" font-size="11">Analytics Models</text>
+  <text x="70" y="710" fill="#94a3b8" font-size="10">SQLite Fallback</text>
+
+  <!-- Redis -->
+  <rect x="225" y="585" width="145" height="130" rx="8" fill="#ffffff" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="225" y="585" width="145" height="32" rx="8" fill="#059669"/>
+  <rect x="225" y="605" width="145" height="12" fill="#059669"/>
+  <text x="297" y="607" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="600">Redis</text>
+  <text x="245" y="640" fill="#334155" font-size="11">Session Cache</text>
+  <text x="245" y="658" fill="#334155" font-size="11">Rate Limiting</text>
+  <text x="245" y="676" fill="#334155" font-size="11">Pub/Sub Events</text>
+  <text x="245" y="710" fill="#94a3b8" font-size="10">(Optional)</text>
+
+  <!-- AWS S3 -->
+  <rect x="390" y="585" width="145" height="130" rx="8" fill="#ffffff" stroke="#86efac" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="390" y="585" width="145" height="32" rx="8" fill="#0d9488"/>
+  <rect x="390" y="605" width="145" height="12" fill="#0d9488"/>
+  <text x="462" y="607" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="600">AWS S3</text>
+  <text x="410" y="640" fill="#334155" font-size="11">Photo Evidence</text>
+  <text x="410" y="658" fill="#334155" font-size="11">Incident Media</text>
+  <text x="410" y="676" fill="#334155" font-size="11">File Storage</text>
+  <text x="410" y="710" fill="#94a3b8" font-size="10">(Optional)</text>
+
+  <!-- ============================== -->
+  <!-- EXTERNAL SERVICES              -->
+  <!-- ============================== -->
+  <rect x="570" y="545" width="500" height="190" rx="10" fill="#fef2f2" stroke="#fecaca" stroke-width="1.5"/>
+  <text x="590" y="570" fill="#b91c1c" font-size="13" font-weight="700" letter-spacing="0.5">EXTERNAL SERVICES</text>
+
+  <!-- Mapbox -->
+  <rect x="590" y="585" width="145" height="130" rx="8" fill="#ffffff" stroke="#fca5a5" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="590" y="585" width="145" height="32" rx="8" fill="#1d4ed8"/>
+  <rect x="590" y="605" width="145" height="12" fill="#1d4ed8"/>
+  <text x="662" y="607" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="600">Mapbox</text>
+  <text x="610" y="640" fill="#334155" font-size="11">GL JS (Web)</text>
+  <text x="610" y="658" fill="#334155" font-size="11">Maps SDK</text>
+  <text x="610" y="676" fill="#334155" font-size="11">(Android)</text>
+  <text x="610" y="694" fill="#334155" font-size="11">Geocoding</text>
+
+  <!-- Weather APIs -->
+  <rect x="755" y="585" width="145" height="130" rx="8" fill="#ffffff" stroke="#fca5a5" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="755" y="585" width="145" height="32" rx="8" fill="#0891b2"/>
+  <rect x="755" y="605" width="145" height="12" fill="#0891b2"/>
+  <text x="827" y="607" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="600">Weather APIs</text>
+  <text x="775" y="640" fill="#334155" font-size="11">WeatherAPI.com</text>
+  <text x="775" y="658" fill="#334155" font-size="11">India Weather API</text>
+  <text x="775" y="676" fill="#334155" font-size="11">Alerts and Forecasts</text>
+  <text x="775" y="694" fill="#334155" font-size="11">Cyclone Tracking</text>
+
+  <!-- Firebase -->
+  <rect x="920" y="585" width="130" height="130" rx="8" fill="#ffffff" stroke="#fca5a5" stroke-width="1.5" filter="url(#shadow)"/>
+  <rect x="920" y="585" width="130" height="32" rx="8" fill="#ea580c"/>
+  <rect x="920" y="605" width="130" height="12" fill="#ea580c"/>
+  <text x="985" y="607" text-anchor="middle" fill="#ffffff" font-size="12" font-weight="600">Firebase</text>
+  <text x="940" y="640" fill="#334155" font-size="11">Cloud Messaging</text>
+  <text x="940" y="658" fill="#334155" font-size="11">Push Notifications</text>
+  <text x="940" y="676" fill="#334155" font-size="11">FCM (Android)</text>
+
+  <!-- ============================== -->
+  <!-- DEPLOYMENT LAYER               -->
+  <!-- ============================== -->
+  <rect x="30" y="760" width="1040" height="45" rx="10" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="1.5"/>
+  <text x="50" y="787" fill="#475569" font-size="13" font-weight="700" letter-spacing="0.5">DEPLOYMENT:</text>
+  <rect x="175" y="770" width="100" height="25" rx="5" fill="#0f172a"/>
+  <text x="225" y="788" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600">Render</text>
+  <rect x="290" y="770" width="100" height="25" rx="5" fill="#0f172a"/>
+  <text x="340" y="788" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600">Railway</text>
+  <rect x="405" y="770" width="100" height="25" rx="5" fill="#0f172a"/>
+  <text x="455" y="788" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600">Vercel</text>
+  <rect x="520" y="770" width="100" height="25" rx="5" fill="#0f172a"/>
+  <text x="570" y="788" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600">Netlify</text>
+  <rect x="635" y="770" width="130" height="25" rx="5" fill="#0f172a"/>
+  <text x="700" y="788" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600">Google Play Store</text>
+  <rect x="780" y="770" width="100" height="25" rx="5" fill="#0f172a"/>
+  <text x="830" y="788" text-anchor="middle" fill="#ffffff" font-size="11" font-weight="600">AWS</text>
+
+  <!-- ============================================ -->
+  <!-- CONNECTION LINES (Data Flow)                 -->
+  <!-- ============================================ -->
+
+  <!-- Frontend -> Backend (HTTPS / REST) -->
+  <line x1="160" y1="275" x2="160" y2="355" stroke="#2563eb" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrow-blue)"/>
+  <rect x="95" y="300" width="130" height="18" rx="4" fill="#eff6ff" stroke="#bfdbfe" stroke-width="1"/>
+  <text x="160" y="313" text-anchor="middle" fill="#2563eb" font-size="10" font-weight="600">HTTPS / REST</text>
+
+  <!-- Android -> Backend (HTTPS / REST) -->
+  <line x1="420" y1="275" x2="380" y2="355" stroke="#16a34a" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrow-green)"/>
+  <rect x="340" y="300" width="130" height="18" rx="4" fill="#f0fdf4" stroke="#bbf7d0" stroke-width="1"/>
+  <text x="405" y="313" text-anchor="middle" fill="#16a34a" font-size="10" font-weight="600">HTTPS / REST</text>
+
+  <!-- Android <-> BLE Mesh (Bidirectional) -->
+  <line x1="530" y1="195" x2="585" y2="195" stroke="#7c3aed" stroke-width="2" marker-end="url(#arrow-purple)" marker-start="url(#arrow-purple)"/>
+  <text x="557" y="188" text-anchor="middle" fill="#7c3aed" font-size="9" font-weight="600">BLE</text>
+
+  <!-- Backend -> PostgreSQL -->
+  <line x1="150" y1="505" x2="127" y2="580" stroke="#15803d" stroke-width="2" marker-end="url(#arrow-green)"/>
+
+  <!-- Backend -> Redis -->
+  <line x1="300" y1="505" x2="297" y2="580" stroke="#059669" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arrow-green)"/>
+
+  <!-- Backend -> S3 -->
+  <line x1="430" y1="505" x2="462" y2="580" stroke="#0d9488" stroke-width="2" stroke-dasharray="4,3" marker-end="url(#arrow-green)"/>
+
+  <!-- Backend -> Mapbox (via clients) -->
+  <line x1="662" y1="505" x2="662" y2="580" stroke="#1d4ed8" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-blue)"/>
+
+  <!-- Backend -> Weather APIs -->
+  <line x1="735" y1="505" x2="800" y2="580" stroke="#0891b2" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-blue)"/>
+
+  <!-- Backend -> Firebase -->
+  <line x1="770" y1="460" x2="920" y2="620" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="4,3" marker-end="url(#arrow-orange)"/>
+
+  <!-- WebSocket line from Frontend -->
+  <line x1="250" y1="235" x2="540" y2="380" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="3,3" marker-end="url(#arrow)"/>
+  <rect x="320" y="290" width="90" height="16" rx="4" fill="#fef2f2" stroke="#fecaca" stroke-width="1"/>
+  <text x="365" y="302" text-anchor="middle" fill="#dc2626" font-size="9" font-weight="600">WebSocket</text>
+
+  <!-- User Roles -> Clients -->
+  <line x1="850" y1="170" x2="535" y2="195" stroke="#a16207" stroke-width="1.5" stroke-dasharray="4,4" marker-end="url(#arrow)"/>
+
+  <!-- ============================================ -->
+  <!-- PROTOCOL / TECHNOLOGY LEGEND                -->
+  <!-- ============================================ -->
+  <rect x="830" y="320" width="240" height="200" rx="10" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="950" y="345" text-anchor="middle" fill="#0f172a" font-size="13" font-weight="700">Legend</text>
+
+  <!-- HTTPS -->
+  <line x1="850" y1="365" x2="900" y2="365" stroke="#2563eb" stroke-width="2" stroke-dasharray="6,3"/>
+  <text x="915" y="369" fill="#334155" font-size="11">HTTPS / REST API</text>
+
+  <!-- WebSocket -->
+  <line x1="850" y1="390" x2="900" y2="390" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="3,3"/>
+  <text x="915" y="394" fill="#334155" font-size="11">WebSocket</text>
+
+  <!-- BLE -->
+  <line x1="850" y1="415" x2="900" y2="415" stroke="#7c3aed" stroke-width="2"/>
+  <text x="915" y="419" fill="#334155" font-size="11">BLE Mesh</text>
+
+  <!-- Database -->
+  <line x1="850" y1="440" x2="900" y2="440" stroke="#15803d" stroke-width="2"/>
+  <text x="915" y="444" fill="#334155" font-size="11">Database / Storage</text>
+
+  <!-- External -->
+  <line x1="850" y1="465" x2="900" y2="465" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="4,3"/>
+  <text x="915" y="469" fill="#334155" font-size="11">External Service</text>
+
+  <!-- Roles reference -->
+  <circle cx="858" cy="490" r="6" fill="#fbbf24"/>
+  <text x="875" y="494" fill="#334155" font-size="11">User Roles</text>
+
+</svg>
