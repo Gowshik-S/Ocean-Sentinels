@@ -42,17 +42,17 @@ Ocean Sentinels provides a unified platform for coastal hazard reporting across 
 ### High-Level System Overview
 
 ```
-  +----------------------+                   +--------------------------+
-  |    WEB FRONTEND      |                   |       ANDROID APP        |
-  |                      |                   |                          |
-  |  Vanilla JS (ES6+)  |                   |  Kotlin, Jetpack Compose |
-  |  Mapbox GL JS        |                   |  Hilt DI, Room Database  |
-  |  WebSocket Client    |                   |  Retrofit, OkHttp        |
-  |  JWT Auth Manager    |                   |  Mapbox Maps SDK         |
-  |  8 Role-Based Pages  |                   |  Firebase Cloud Messaging|
-  |                      |                   |  BLE Mesh Networking     |
-  |                      |                   |  20+ Compose Screens     |
-  +-----------+----------+                   +-----+----------+---------+
+  +----------------------+                   +---------------------------+
+  |    WEB FRONTEND      |                   |       ANDROID APP         |
+  |                      |                   |                           |
+  |  Vanilla JS (ES6+)  |                   |  Kotlin, Jetpack Compose  |
+  |  Mapbox GL JS        |                   |  Hilt DI, Room Database   |
+  |  WebSocket Client    |                   |  Retrofit, OkHttp         |
+  |  JWT Auth Manager    |                   |  Mapbox Maps SDK          |
+  |  8 Role-Based Pages  |                   |  Firebase Cloud Messaging |
+  |                      |                   |  BLE Mesh Networking      |
+  |                      |                   |  20+ Compose Screens      |
+  +-----------+----------+                   +-----+-----------+---------+
               |                                    |          |
        HTTPS + WebSocket                    HTTPS + FCM    BLE Radio
               |                                    |    (Coded PHY / 1M)
@@ -75,9 +75,9 @@ Ocean Sentinels provides a unified platform for coastal hazard reporting across 
   |  |  Stats)   |  |  Token) |  |                           |    |
   |  +-----------+  +---------+  +---------------------------+    |
   |                                                               |
-  +------+--------+--------+---------+---------+------------------+
-         |        |        |         |         |
-         v        v        v         v         v
+  +---------------------------------------------------------------+
+        |          |          |          |              |
+        v          v          v          v              v
   +----------+ +------+ +-------+ +--------+ +---------------+
   |PostgreSQL| |Redis | |AWS S3 | |Mapbox  | |Weather APIs   |
   |          | |      | |       | |        | |               |
@@ -93,26 +93,26 @@ When devices lose internet connectivity, the Android app forms an ad-hoc
 BLE mesh network to relay hazard reports until a connected device is reached.
 
 ```
-  +------------------+      BLE       +------------------+      BLE
-  |  Offline Device  | ------------> |   Relay Peer     | ------------>  ...
-  |                  |               |                  |
-  |  Creates Report  |               |  Receives Msg    |
-  |  Stores in Room  |               |  SHA-256 Dedup   |
-  |  Broadcasts via  |               |  Checks 72h      |
-  |  BLE GATT Server |               |  Expiry Window   |
-  +------------------+               +--------+---------+
-                                              |
-                                  +-----------+-----------+
-                                  |                       |
-                             No Internet             Has Internet
-                                  |                       |
-                                  v                       v
-                         +----------------+    +--------------------+
-                         | Continue Relay |    | Upload to Backend  |
-                         | to Next Peers  |    | (Server Dedup via  |
-                         | (Append to     |    |  mesh_message_id)  |
-                         |  Relay Path)   |    |                    |
-                         +----------------+    +--------------------+
+  +------------------+                +------------------+
+  |  Offline Device  | ----BLE------> |   Relay Peer     | ----BLE----->  ...
+  |                  |                |                  |
+  |  Creates Report  |                |  Receives Msg    |
+  |  Stores in Room  |                |  SHA-256 Dedup   |
+  |  Broadcasts via  |                |  Checks 72h      |
+  |  BLE GATT Server |                |  Expiry Window   |
+  +------------------+                +--------+---------+
+                                               |
+                                   +-----------+-----------+
+                                   |                       |
+                              No Internet             Has Internet
+                                   |                       |
+                                   v                       v
+                          +----------------+    +--------------------+
+                          | Continue Relay |    | Upload to Backend  |
+                          | to Next Peers  |    | (Server Dedup via  |
+                          | (Append to     |    |  mesh_message_id)  |
+                          |  Relay Path)   |    |                    |
+                          +----------------+    +--------------------+
 
   Mesh Specifications:
   +------------------------+--------------------------+
