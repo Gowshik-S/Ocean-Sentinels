@@ -39,32 +39,150 @@ Ocean Sentinels provides a unified platform for coastal hazard reporting across 
 
 ## Architecture
 
+### High-Level System Overview
+
 ```
-                    +------------------+
-                    |  PostgreSQL (RDS) |
-                    +--------+---------+
-                             |
-                    +--------+---------+
-                    |  FastAPI Backend  |
-                    |  (Python 3.11+)  |
-                    +--------+---------+
-                             |
-              +--------------+--------------+
-              |                             |
-    +---------+----------+     +------------+-----------+
-    |  Frontend (Web)    |     |  Android App (Kotlin)  |
-    |  Vanilla JS        |     |  Jetpack Compose       |
-    |  Mapbox GL JS      |     |  Hilt DI / Room DB     |
-    +---------+----------+     +------------+-----------+
-              |                             |
-              |                    +--------+--------+
-              |                    |  BLE Mesh Layer  |
-              |                    |  (Offline Relay) |
-              |                    +-----------------+
-              |
-    +---------+----------+
-    |  Vercel / Netlify  |
-    +--------------------+
+  +----------------------+                   +--------------------------+
+  |    WEB FRONTEND      |                   |       ANDROID APP        |
+  |                      |                   |                          |
+  |  Vanilla JS (ES6+)  |                   |  Kotlin, Jetpack Compose |
+  |  Mapbox GL JS        |                   |  Hilt DI, Room Database  |
+  |  WebSocket Client    |                   |  Retrofit, OkHttp        |
+  |  JWT Auth Manager    |                   |  Mapbox Maps SDK         |
+  |  8 Role-Based Pages  |                   |  Firebase Cloud Messaging|
+  |                      |                   |  BLE Mesh Networking     |
+  |                      |                   |  20+ Compose Screens     |
+  +-----------+----------+                   +-----+----------+---------+
+              |                                    |          |
+       HTTPS + WebSocket                    HTTPS + FCM    BLE Radio
+              |                                    |    (Coded PHY / 1M)
+              +-------------------+----------------+          |
+                                  |                           |
+                                  v                           |
+  +---------------------------------------------------------------+
+  |                  FASTAPI BACKEND SERVER                        |
+  |                  Python 3.11+ / SQLAlchemy 2.0 / Async I/O    |
+  |                                                               |
+  |  +--------+  +-----------+  +---------+  +-----------------+  |
+  |  | Auth   |  | Incidents |  | Users   |  | WebSocket       |  |
+  |  | (JWT,  |  | (CRUD,    |  | (RBAC,  |  | (Role-Filtered  |  |
+  |  | bcrypt)|  |  Mesh     |  |  4      |  |  Real-Time      |  |
+  |  |        |  |  Dedup)   |  |  Roles) |  |  Broadcasts)    |  |
+  |  +--------+  +-----------+  +---------+  +-----------------+  |
+  |  +-----------+  +---------+  +---------------------------+    |
+  |  | Analytics |  | Config  |  | Health Check (/health)    |    |
+  |  | (Metrics, |  | (Mapbox |  |                           |    |
+  |  |  Stats)   |  |  Token) |  |                           |    |
+  |  +-----------+  +---------+  +---------------------------+    |
+  |                                                               |
+  +------+--------+--------+---------+---------+------------------+
+         |        |        |         |         |
+         v        v        v         v         v
+  +----------+ +------+ +-------+ +--------+ +---------------+
+  |PostgreSQL| |Redis | |AWS S3 | |Mapbox  | |Weather APIs   |
+  |          | |      | |       | |        | |               |
+  | Primary  | |Cache | |Photo  | |Map     | |WeatherAPI.com |
+  | Database | |  and | |  and  | |Tiles,  | |India IMD      |
+  |          | |State | |Media  | |Geocode | |               |
+  +----------+ +------+ +-------+ +--------+ +---------------+
+```
+
+### BLE Mesh Relay Network (Offline Mode)
+
+When devices lose internet connectivity, the Android app forms an ad-hoc
+BLE mesh network to relay hazard reports until a connected device is reached.
+
+```
+  +------------------+      BLE       +------------------+      BLE
+  |  Offline Device  | ------------> |   Relay Peer     | ------------>  ...
+  |                  |               |                  |
+  |  Creates Report  |               |  Receives Msg    |
+  |  Stores in Room  |               |  SHA-256 Dedup   |
+  |  Broadcasts via  |               |  Checks 72h      |
+  |  BLE GATT Server |               |  Expiry Window   |
+  +------------------+               +--------+---------+
+                                              |
+                                  +-----------+-----------+
+                                  |                       |
+                             No Internet             Has Internet
+                                  |                       |
+                                  v                       v
+                         +----------------+    +--------------------+
+                         | Continue Relay |    | Upload to Backend  |
+                         | to Next Peers  |    | (Server Dedup via  |
+                         | (Append to     |    |  mesh_message_id)  |
+                         |  Relay Path)   |    |                    |
+                         +----------------+    +--------------------+
+
+  Mesh Specifications:
+  +------------------------+--------------------------+
+  | Parameter              | Value                    |
+  +------------------------+--------------------------+
+  | Max Connections        | 7 simultaneous peers     |
+  | Fragment Size          | 469 bytes                |
+  | Max Packet Size        | 512 bytes                |
+  | Dedup Cache            | 10,000 message IDs (LRU) |
+  | Message Expiry         | 72 hours (time-based)    |
+  | Peer Stale Timeout     | 180 seconds              |
+  | Scan Restart Interval  | 30 seconds               |
+  | PHY Strategy           | Coded PHY (long range),  |
+  |                        | 1M PHY fallback          |
+  +------------------------+--------------------------+
+```
+
+### Data Flow Summary
+
+```
+  REST API:
+    [Client] --HTTPS--> [FastAPI] --async--> [PostgreSQL]
+                             |------async--> [Redis Cache]
+                             |------async--> [AWS S3 Storage]
+
+  Real-Time Updates:
+    [Client] ---WSS---> [WebSocket Manager] --broadcast--> [Clients by Role]
+
+  Push Notifications:
+    [Backend Event] --FCM--> [Firebase] --push--> [Android Device]
+
+  Offline Mesh:
+    [Device] ---BLE---> [Peer] ---BLE---> ... --HTTPS--> [Backend API]
+                                                           |
+                                                    (Dedup by mesh_message_id)
+```
+
+### Authentication and Role-Based Access
+
+```
+  +------------------------------------------------------------------+
+  |                     AUTHENTICATION FLOW                           |
+  |                                                                   |
+  |  [Client]                                                         |
+  |     |                                                             |
+  |     +-- POST /api/auth/login ----> [Auth Router]                  |
+  |                                        |                          |
+  |                                  Verify bcrypt hash               |
+  |                                        |                          |
+  |                                  Generate JWT                     |
+  |                                  (sub, role, exp)                 |
+  |                                        |                          |
+  |     <-- Token + User Object -----------+                          |
+  |     |                                                             |
+  |     +-- Authorization: Bearer <token> --> [Protected Endpoints]   |
+  |                                                                   |
+  +------------------------------------------------------------------+
+
+  Role Permissions:
+  +-------------+-----------------------------------------------------+
+  | Role        | Access                                              |
+  +-------------+-----------------------------------------------------+
+  | Public      | Report incidents, view own reports, public stats    |
+  +-------------+-----------------------------------------------------+
+  | Authority   | All incidents, verify reports, deploy response      |
+  +-------------+-----------------------------------------------------+
+  | Rescue Team | All incidents, deploy response, resolve incidents   |
+  +-------------+-----------------------------------------------------+
+  | Admin       | Full access, user management, all incident actions  |
+  +-------------+-----------------------------------------------------+
 ```
 
 ---
