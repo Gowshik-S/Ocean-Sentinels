@@ -293,7 +293,7 @@ struct WeatherScreen: View {
                 HStack(spacing: 16) {
                     marineStat(icon: "water.waves", label: "Wave Height", value: nearestHour.sigHtMt.map { String(format: "%.1f", $0) + " m" } ?? "N/A")
                     marineStat(icon: "arrow.up.and.down", label: "Swell", value: nearestHour.swellHtMt.map { String(format: "%.1f", $0) + " m" } ?? "N/A")
-                    marineStat(icon: "thermometer.medium", label: "Water Temp", value: nearestHour.waterTempC.map { String(format: "%.1f", $0) + "\u00b0C" } ?? "N/A")
+                    marineStat(icon: "thermometer.medium", label: "Water Temp", value: nearestHour.waterTempC.map { String(format: "%.1f", $0) + "°C" } ?? "N/A")
                 }
                 HStack(spacing: 16) {
                     marineStat(icon: "location.north.fill", label: "Swell Dir", value: nearestHour.swellDir ?? "N/A")
