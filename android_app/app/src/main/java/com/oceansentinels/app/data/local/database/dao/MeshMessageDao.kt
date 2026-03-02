@@ -96,12 +96,13 @@ interface MeshMessageDao {
     /**
      * Get messages that have been relayed but not yet delivered to server.
      * Includes BOTH received-from-others AND own messages that were relayed
-     * via mesh. Previously excluded own relayed messages (is_own_message = 0),
-     * which meant own messages never got uploaded when internet returned.
+     * via mesh. Also picks up 'failed' messages that were previously relayed
+     * (has_been_relayed=1), because a server failure should not permanently
+     * abandon a relayed message — it should be retried when internet stabilizes.
      */
     @Query("""
         SELECT * FROM mesh_messages 
-        WHERE status = 'relayed'
+        WHERE (status = 'relayed' OR (status = 'failed' AND has_been_relayed = 1))
         AND retry_count < max_retries
         ORDER BY 
             CASE urgency 
@@ -206,10 +207,14 @@ interface MeshMessageDao {
     """)
     suspend fun markFailed(messageId: String, attemptedAt: String)
 
-    /** Mark a message as relayed */
+    /** Mark a message as relayed and reset retry count.
+     *  Resetting retry_count is critical: if the initial tryDeliverToServer()
+     *  failed (setting retry_count=1) before falling through to mesh,
+     *  the message would start with fewer retries for the eventual
+     *  server upload when internet returns. */
     @Query("""
         UPDATE mesh_messages 
-        SET status = 'relayed', has_been_relayed = 1 
+        SET status = 'relayed', has_been_relayed = 1, retry_count = 0 
         WHERE message_id = :messageId
     """)
     suspend fun markRelayed(messageId: String)
@@ -221,6 +226,27 @@ interface MeshMessageDao {
         WHERE message_id = :messageId
     """)
     suspend fun updateRelayPath(messageId: String, relayPath: String)
+
+    /**
+     * Reset retry_count for all failed messages that were previously relayed.
+     * Called when internet connectivity changes from offline → online, giving
+     * these messages a fresh set of server upload attempts.
+     *
+     * Without this, a 5-minute server outage exhausts max_retries=5 (at 30s
+     * intervals), and the message is permanently stuck as 'failed' even after
+     * the server recovers.
+     */
+    @Query("""
+        UPDATE mesh_messages 
+        SET retry_count = 0,
+            status = CASE 
+                WHEN has_been_relayed = 1 THEN 'relayed'
+                ELSE 'pending'
+            END
+        WHERE status = 'failed'
+        AND retry_count >= max_retries
+    """)
+    suspend fun resetExhaustedRetries()
 
     // ==================== Deletes ====================
 

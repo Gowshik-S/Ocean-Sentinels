@@ -257,6 +257,25 @@ class BleMeshManager(private val context: Context) {
     /** Maps GATT device address to the messageId currently being written */
     private val activeWriteMessageId = ConcurrentHashMap<String, String>()
 
+    /**
+     * Tracks how many BLE write confirmations are still expected for a
+     * multi-chunk write per peer. Used to prevent onCharacteristicWrite
+     * from draining the write queue mid-chunked-write.
+     *
+     * Without this, each intermediate chunk's onCharacteristicWrite fires,
+     * clears activeWriteMessageId, and starts the NEXT queued message—
+     * causing two simultaneous BLE writes for the same GATT client,
+     * which silently corrupts messages or drops chunks.
+     *
+     * Flow:
+     *   broadcastMessage() sets count = chunks.size
+     *   onCharacteristicWrite:
+     *     if count > 1 → decrement, skip drain
+     *     if count == 1 → remove, normal drain
+     *     if absent   → single-write, normal drain
+     */
+    private val peerChunkedWritePending = ConcurrentHashMap<String, Int>()
+
     // ==================== Reactive State for UI ====================
 
     private val _connectedPeerCount = MutableStateFlow(0)
@@ -377,6 +396,7 @@ class BleMeshManager(private val context: Context) {
         confirmedWrites.clear()
         activeWriteMessageId.clear()
         peerWriteQueue.clear()
+        peerChunkedWritePending.clear()
 
         handler.removeCallbacksAndMessages(null)
 
@@ -1051,6 +1071,8 @@ class BleMeshManager(private val context: Context) {
                     gatt.close() // MUST close to free the GATT client slot
                     peerMtu.remove(address)
                     peerWriteQueue.remove(address)
+                    peerChunkedWritePending.remove(address)
+                    activeWriteMessageId.remove(address)
                     synchronized(bufferLock) {
                         incomingBuffers.remove(address)
                         bufferTimestamps.remove(address)
@@ -1111,6 +1133,8 @@ class BleMeshManager(private val context: Context) {
                         gatt.close()
                         peerMtu.remove(address)
                         peerWriteQueue.remove(address)
+                        peerChunkedWritePending.remove(address)
+                        activeWriteMessageId.remove(address)
                         synchronized(bufferLock) {
                             incomingBuffers.remove(address)
                             bufferTimestamps.remove(address)
@@ -1186,6 +1210,21 @@ class BleMeshManager(private val context: Context) {
             status: Int
         ) {
             val peerAddress = gatt.device.address
+
+            // ── Multi-chunk guard: don't drain queue until all chunks are sent ──
+            // Each chunk triggers a separate onCharacteristicWrite. Without this
+            // guard, the first chunk's callback would clear activeWriteMessageId
+            // and start draining the next queued message, causing two parallel
+            // BLE writes on the same GATT client (undefined behavior / data loss).
+            val chunksLeft = peerChunkedWritePending[peerAddress]
+            if (chunksLeft != null && chunksLeft > 1) {
+                peerChunkedWritePending[peerAddress] = chunksLeft - 1
+                Timber.d("$TAG: Chunk ACK from $peerAddress (${ chunksLeft - 1 } remaining)")
+                return
+            }
+            // Last chunk (or single-packet write) — proceed normally
+            peerChunkedWritePending.remove(peerAddress)
+
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 Timber.d("$TAG: Data written to $peerAddress")
                 // Track confirmed write for this peer
@@ -1401,6 +1440,7 @@ class BleMeshManager(private val context: Context) {
                     // Chunked write -- split into MTU-sized fragments
                     val chunks = data.toList().chunked(maxPayload).map { it.toByteArray() }
                     val peerAddress = gatt.device.address
+                    peerChunkedWritePending[peerAddress] = chunks.size
                     writeChunksSequentially(gatt, characteristic, chunks, 0, peerAddress, message.messageId)
                     sentCount++
                 }
@@ -1563,6 +1603,7 @@ class BleMeshManager(private val context: Context) {
                 }
             } else {
                 val chunks = data.toList().chunked(maxPayload).map { it.toByteArray() }
+                peerChunkedWritePending[peerAddress] = chunks.size
                 writeChunksSequentially(gatt, characteristic, chunks, 0, peerAddress, messageId)
                 Timber.d("$TAG: Drained queued chunked write to $peerAddress (remaining: ${queue.size})")
             }
@@ -1590,6 +1631,8 @@ class BleMeshManager(private val context: Context) {
         }
         if (!connectedGatts.containsKey(peerAddress)) {
             Timber.w("$TAG: Peer $peerAddress disconnected during chunked write")
+            peerChunkedWritePending.remove(peerAddress)
+            activeWriteMessageId.remove(peerAddress)
             return
         }
 
@@ -1605,20 +1648,24 @@ class BleMeshManager(private val context: Context) {
                                 writeChunksSequentially(gatt, characteristic, chunks, index + 1, peerAddress, messageId)
                             } else {
                                 Timber.w("$TAG: Peer $peerAddress disconnected before chunk ${index + 1}")
+                                peerChunkedWritePending.remove(peerAddress)
                                 activeWriteMessageId.remove(peerAddress)
                             }
                         } catch (e: Exception) {
                             Timber.e(e, "$TAG: Error in delayed chunk write to $peerAddress")
+                            peerChunkedWritePending.remove(peerAddress)
                             activeWriteMessageId.remove(peerAddress)
                         }
                     }, 150) // 150ms delay for through-wall reliability (link-layer retry time)
                 }
             } else {
                 Timber.w("$TAG: Chunk $index/${chunks.size} failed for $peerAddress")
+                peerChunkedWritePending.remove(peerAddress)
                 activeWriteMessageId.remove(peerAddress)
             }
         } catch (e: Exception) {
             Timber.e(e, "$TAG: Error writing chunk $index to $peerAddress")
+            peerChunkedWritePending.remove(peerAddress)
             activeWriteMessageId.remove(peerAddress)
         }
     }

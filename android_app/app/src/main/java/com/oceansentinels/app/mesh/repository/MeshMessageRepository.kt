@@ -181,9 +181,17 @@ class MeshMessageRepository @Inject constructor(
         if (bleMeshManager.isRunning() && bleMeshManager.getConnectedPeerCount() > 0) {
             val sentCount = bleMeshManager.broadcastMessage(message)
             if (sentCount > 0) {
+                // Update relay_path to include our device ID so that:
+                // 1. Re-broadcast to new peers (relayPendingMessages) can use Filter 3
+                // 2. Server description includes our device in the relay chain
+                val relayPathWithSelf = listOf(deviceId)
                 meshMessageDao.markRelayed(messageId)
+                meshMessageDao.updateRelayPath(messageId, relayPathWithSelf.joinToString(","))
                 Timber.i("$TAG: Message broadcast to $sentCount peers via BLE mesh: $messageId")
-                return Result.success(message.copy(status = MeshMessageStatus.RELAYED))
+                return Result.success(message.copy(
+                    status = MeshMessageStatus.RELAYED,
+                    relayPath = relayPathWithSelf
+                ))
             }
         }
 
@@ -279,10 +287,14 @@ class MeshMessageRepository @Inject constructor(
         if (bleMeshManager.isRunning() && bleMeshManager.getConnectedPeerCount() > 0) {
             val sentCount = bleMeshManager.broadcastMessage(message)
             if (sentCount > 0) {
+                // Update relay_path to include our device ID (same as createAndSend)
+                val relayPathWithSelf = listOf(deviceId)
                 meshMessageDao.markRelayed(messageId)
+                meshMessageDao.updateRelayPath(messageId, relayPathWithSelf.joinToString(","))
                 Timber.i("$TAG: [MESH-DIRECT] Broadcast to $sentCount peers: $messageId")
                 return Result.success(message.copy(
                     status = MeshMessageStatus.RELAYED,
+                    relayPath = relayPathWithSelf,
                     // Note: bitchat would also set transport here. We track transport
                     // separately in MeshMessageEntity for server upload metadata.
                 ))
@@ -415,6 +427,13 @@ class MeshMessageRepository @Inject constructor(
 
         queueMutex.withLock {
             val now = LocalDateTime.now().toString()
+
+            // ── Step 0: Reset retry counts for exhausted messages ──
+            // When internet just returned after an outage, messages that
+            // hit max_retries during the outage deserve fresh attempts.
+            // Without this, a 5-minute server outage permanently kills
+            // messages (5 retries × 30s = 2.5 min > oops, game over).
+            meshMessageDao.resetExhaustedRetries()
 
             // Clean up expired undelivered messages first
             val expired = meshMessageDao.getExpiredMessages(now)

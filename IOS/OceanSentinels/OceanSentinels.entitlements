@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Bluetooth (BLE Mesh) -->
+    <key>com.apple.security.device.bluetooth</key>
+    <true/>
+
+    <!-- Network (API calls) -->
+    <key>com.apple.security.network.client</key>
+    <true/>
+
+    <!-- Keychain Sharing (Device Identity persistence) -->
+    <key>com.apple.security.keychain-access-groups</key>
+    <array>
+        <string>$(AppIdentifierPrefix)com.oceansentinels.app</string>
+    </array>
+
+    <!-- App Sandbox -->
+    <key>com.apple.security.app-sandbox</key>
+    <true/>
+
+    <!-- Camera -->
+    <key>com.apple.security.device.camera</key>
+    <true/>
+
+    <!-- Location -->
+    <key>com.apple.security.personal-information.location</key>
+    <true/>
+
+    <!-- Photos Read/Write -->
+    <key>com.apple.security.personal-information.photos-library</key>
+    <true/>
+</dict>
+</plist>
