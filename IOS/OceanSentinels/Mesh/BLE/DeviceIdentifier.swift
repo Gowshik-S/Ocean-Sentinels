@@ -2,6 +2,9 @@ import Foundation
 import CryptoKit
 import Security
 import os
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// Generates and persists a unique device identifier for mesh networking.
 ///

@@ -78,14 +78,14 @@ struct HazardTypeBadge: View {
 
     static func hazardInfo(for type: HazardType) -> (color: Color, text: String, icon: String) {
         switch type {
-        case .highWaves: (Color(hex: "1976D2"), "High Waves", "water.waves")
-        case .strongCurrents: (Color(hex: "0288D1"), "Strong Currents", "wind")
-        case .flooding: (Color(hex: "00897B"), "Coastal Flooding", "drop.fill")
-        case .tsunami: (Color(hex: "D32F2F"), "Tsunami Warning", "exclamationmark.triangle.fill")
-        case .debris: (Color(hex: "607D8B"), "Debris/Pollution", "trash.fill")
-        case .erosion: (Color(hex: "795548"), "Coastal Erosion", "mountain.2.fill")
-        case .storm: (Color(hex: "5E35B1"), "Storm Alert", "cloud.bolt.fill")
-        case .other: (Color(hex: "9E9E9E"), "Other Hazard", "ellipsis.circle.fill")
+        case .highWaves: (Color(hex: 0x1976D2), "High Waves", "water.waves")
+        case .strongCurrents: (Color(hex: 0x0288D1), "Strong Currents", "wind")
+        case .flooding: (Color(hex: 0x00897B), "Coastal Flooding", "drop.fill")
+        case .tsunami: (Color(hex: 0xD32F2F), "Tsunami Warning", "exclamationmark.triangle.fill")
+        case .debris: (Color(hex: 0x607D8B), "Debris/Pollution", "trash.fill")
+        case .erosion: (Color(hex: 0x795548), "Coastal Erosion", "mountain.2.fill")
+        case .storm: (Color(hex: 0x5E35B1), "Storm Alert", "cloud.bolt.fill")
+        case .other: (Color(hex: 0x9E9E9E), "Other Hazard", "ellipsis.circle.fill")
         }
     }
 }

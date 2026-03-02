@@ -14,9 +14,9 @@ struct AdminDashboardScreen: View {
             // Stats Overview
             Section("User Management") {
                 HStack(spacing: 12) {
-                    StatsCard(title: "Rescue Teams", value: "\(viewModel.rescueTeams.count)", icon: "cross.circle.fill", color: .oceanPrimary)
-                    StatsCard(title: "Authorities", value: "\(viewModel.authorities.count)", icon: "shield.fill", color: .oceanWarning)
-                    StatsCard(title: "Citizens", value: "\(viewModel.citizens.count)", icon: "person.2.fill", color: .oceanSuccess)
+                    StatsCard(title: "Rescue Teams", value: "\(viewModel.rescueTeams.count)", icon: "cross.circle.fill", iconColor: .oceanPrimary)
+                    StatsCard(title: "Authorities", value: "\(viewModel.authorities.count)", icon: "shield.fill", iconColor: .oceanWarning)
+                    StatsCard(title: "Citizens", value: "\(viewModel.citizens.count)", icon: "person.2.fill", iconColor: .oceanSuccess)
                 }
             }
             .listRowInsets(EdgeInsets())

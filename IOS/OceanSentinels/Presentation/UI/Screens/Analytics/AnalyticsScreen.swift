@@ -10,10 +10,10 @@ struct AnalyticsScreen: View {
             VStack(spacing: 16) {
                 // Summary Stats Grid (2×2)
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
-                    StatsCard(title: "Total Incidents", value: "\(viewModel.dashboardAnalytics?.totalIncidents ?? 0)", icon: "doc.text.fill", color: .oceanPrimary)
-                    StatsCard(title: "Active Incidents", value: "\(viewModel.dashboardAnalytics?.activeIncidents ?? 0)", icon: "exclamationmark.triangle.fill", color: .oceanWarning)
-                    StatsCard(title: "Pending Review", value: "\(viewModel.dashboardAnalytics?.pendingCount ?? 0)", icon: "clock.fill", color: .orange)
-                    StatsCard(title: "Resolved", value: "\(viewModel.dashboardAnalytics?.resolvedIncidents ?? 0)", icon: "checkmark.circle.fill", color: .oceanSuccess)
+                    StatsCard(title: "Total Incidents", value: "\(viewModel.dashboardAnalytics?.totalIncidents ?? 0)", icon: "doc.text.fill", iconColor: .oceanPrimary)
+                    StatsCard(title: "Active Incidents", value: "\(viewModel.dashboardAnalytics?.activeIncidents ?? 0)", icon: "exclamationmark.triangle.fill", iconColor: .oceanWarning)
+                    StatsCard(title: "Pending Review", value: "\(viewModel.dashboardAnalytics?.pendingCount ?? 0)", icon: "clock.fill", iconColor: .orange)
+                    StatsCard(title: "Resolved", value: "\(viewModel.dashboardAnalytics?.resolvedIncidents ?? 0)", icon: "checkmark.circle.fill", iconColor: .oceanSuccess)
                 }
                 .padding(.horizontal)
 

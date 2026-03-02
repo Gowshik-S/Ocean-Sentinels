@@ -119,7 +119,9 @@ struct MeshMessage: Codable, Equatable, Identifiable {
         longitude: Double?,
         description: String
     ) -> String {
-        let payload = "\(deviceId)|\(timestampMillis)|\(hazardType)|\(latitude.map(String.init) ?? "null")|\(longitude.map(String.init) ?? "null")|\(description)"
+        let latStr = latitude.map { String($0) } ?? "null"
+        let lonStr = longitude.map { String($0) } ?? "null"
+        let payload: String = "\(deviceId)|\(timestampMillis)|\(hazardType)|\(latStr)|\(lonStr)|\(description)"
         let data = Data(payload.utf8)
         let hash = SHA256.hash(data: data)
         return hash.prefix(16).map { String(format: "%02x", $0) }.joined()
