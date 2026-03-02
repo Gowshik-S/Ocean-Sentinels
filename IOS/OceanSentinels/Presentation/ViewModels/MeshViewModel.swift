@@ -2,6 +2,15 @@ import Foundation
 import Observation
 import Combine
 
+// MARK: - Task Lifecycle Helper
+
+/// Non-actor-isolated bag that cancels its tasks on deinit.
+/// Avoids @MainActor isolation issues when cleaning up from deinit.
+private final class TaskBag {
+    var tasks: [Task<Void, Never>] = []
+    deinit { tasks.forEach { $0.cancel() } }
+}
+
 // MARK: - MeshViewModel
 
 /// ViewModel for the Mesh Network screen.
@@ -30,8 +39,8 @@ final class MeshViewModel {
     private let meshRepository: MeshMessageRepository
     private let bleMeshManager: BleMeshManager
 
-    // Observation tasks — nonisolated so deinit can cancel them without @MainActor
-    nonisolated(unsafe) private var observationTasks: [Task<Void, Never>] = []
+    // Observation tasks — held in a non-actor-isolated bag so deinit cancels safely
+    private let taskBag = TaskBag()
 
     // MARK: - Init
 
@@ -41,10 +50,6 @@ final class MeshViewModel {
 
         updateMeshCapabilities()
         startObservation()
-    }
-
-    deinit {
-        observationTasks.forEach { $0.cancel() }
     }
 
     // MARK: - Mesh Service Control
@@ -148,7 +153,7 @@ final class MeshViewModel {
                 self.meshStatus.connectedPeerCount = count
             }
         }
-        observationTasks.append(peerTask)
+        taskBag.tasks.append(peerTask)
 
         // Observe discovered peer count
         let discoveredTask = Task { [weak self] in
@@ -157,7 +162,7 @@ final class MeshViewModel {
                 self.meshStatus.discoveredPeerCount = count
             }
         }
-        observationTasks.append(discoveredTask)
+        taskBag.tasks.append(discoveredTask)
 
         // Observe running state
         let runningTask = Task { [weak self] in
@@ -166,7 +171,7 @@ final class MeshViewModel {
                 self.meshStatus.isRunning = running
             }
         }
-        observationTasks.append(runningTask)
+        taskBag.tasks.append(runningTask)
 
         // Observe advertising state
         let advertisingTask = Task { [weak self] in
@@ -175,7 +180,7 @@ final class MeshViewModel {
                 self.meshStatus.isAdvertising = advertising
             }
         }
-        observationTasks.append(advertisingTask)
+        taskBag.tasks.append(advertisingTask)
 
         // Observe scanning state
         let scanningTask = Task { [weak self] in
@@ -184,7 +189,7 @@ final class MeshViewModel {
                 self.meshStatus.isScanning = scanning
             }
         }
-        observationTasks.append(scanningTask)
+        taskBag.tasks.append(scanningTask)
 
         // Periodically refresh message lists
         let messageTask = Task { [weak self] in
@@ -194,7 +199,7 @@ final class MeshViewModel {
                 try? await Task.sleep(for: .seconds(5))
             }
         }
-        observationTasks.append(messageTask)
+        taskBag.tasks.append(messageTask)
     }
 
     private func refreshMessages() async {

@@ -299,7 +299,7 @@ struct MeshNetworkScreen: View {
                 Circle()
                     .fill(statusColor(message.status))
                     .frame(width: 10, height: 10)
-                Text(HazardType.fromValue(message.hazardType)?.displayName ?? message.hazardType)
+                Text(HazardType.fromValue(message.hazardType).displayName)
                     .font(.subheadline.weight(.semibold))
                 Spacer()
                 // Urgency badge

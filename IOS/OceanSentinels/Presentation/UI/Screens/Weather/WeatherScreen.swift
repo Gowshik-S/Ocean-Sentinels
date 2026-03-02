@@ -27,13 +27,13 @@ struct WeatherScreen: View {
                 }
                 
                 // Hourly forecast
-                if let forecast = weatherViewModel.forecast {
-                    hourlyForecastSection(forecast)
+                if let weather = weatherViewModel.currentWeather {
+                    hourlyForecastSection(weather)
                 }
                 
                 // 3-day forecast
-                if let forecastDays = weatherViewModel.forecast?.forecast?.forecastDay {
-                    dailyForecastSection(forecastDays)
+                if !weatherViewModel.forecast.isEmpty {
+                    dailyForecastSection(weatherViewModel.forecast)
                 }
                 
                 // Marine data
@@ -234,19 +234,23 @@ struct WeatherScreen: View {
     // MARK: - IMD Forecast
 
     private func imdForecastSection(_ weather: IndianCityWeatherResponse) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
+        let temperature = weather.weather?.current?.temperature
+        let humidityOpt = weather.weather?.current?.humidity
+        let forecastDays = weather.weather?.forecast ?? []
+        let cityName = weather.city ?? "India"
+        return VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "flag.fill").foregroundStyle(Color.oceanWarning)
-                Text("IMD Forecast — \(weather.city ?? "India")").font(.headline)
+                Text("IMD Forecast — \(cityName)").font(.headline)
             }
             .padding(.horizontal, 20)
 
-            if let temp = weather.weather?.current?.temperature {
+            if let temp = temperature {
                 HStack(spacing: 24) {
                     VStack { Text("Current").font(.caption).foregroundStyle(.secondary); Text("\(Int(temp.max?.value ?? 0))°C").font(.title3.bold()) }
                     VStack { Text("Min").font(.caption).foregroundStyle(.secondary); Text("\(Int(temp.min?.value ?? 0))°C").font(.subheadline.weight(.medium)).foregroundStyle(Color.oceanSecondary) }
                     VStack { Text("Max").font(.caption).foregroundStyle(.secondary); Text("\(Int(temp.max?.value ?? 0))°C").font(.subheadline.weight(.medium)).foregroundStyle(Color.oceanDanger) }
-                    if let humidity = weather.weather?.current?.humidity {
+                    if let humidity = humidityOpt {
                         VStack { Text("Humidity").font(.caption).foregroundStyle(.secondary); Text("\(Int(humidity.morning ?? 0))%").font(.subheadline.weight(.medium)).foregroundStyle(Color.oceanInfo) }
                     }
                 }
@@ -256,7 +260,7 @@ struct WeatherScreen: View {
                 .padding(.horizontal, 20)
             }
 
-            ForEach(weather.weather?.forecast ?? [], id: \.date) { day in
+            ForEach(forecastDays, id: \.date) { day in
                 HStack(alignment: .top, spacing: 10) {
                     Image(systemName: "calendar").font(.caption).foregroundStyle(Color.oceanInfo)
                     VStack(alignment: .leading, spacing: 2) {
@@ -287,13 +291,13 @@ struct WeatherScreen: View {
             Text("Marine Conditions").font(.headline).padding(.horizontal, 20)
             VStack(spacing: 12) {
                 HStack(spacing: 16) {
-                    marineStat(icon: "water.waves", label: "Wave Height", value: "\(nearestHour.sigHtMt ?? "N/A") m")
-                    marineStat(icon: "arrow.up.and.down", label: "Swell", value: "\(nearestHour.swellHtMt ?? "N/A") m")
-                    marineStat(icon: "thermometer.medium", label: "Water Temp", value: "\(nearestHour.waterTempC ?? "N/A")°C")
+                    marineStat(icon: "water.waves", label: "Wave Height", value: nearestHour.sigHtMt.map { String(format: "%.1f", $0) + " m" } ?? "N/A")
+                    marineStat(icon: "arrow.up.and.down", label: "Swell", value: nearestHour.swellHtMt.map { String(format: "%.1f", $0) + " m" } ?? "N/A")
+                    marineStat(icon: "thermometer.medium", label: "Water Temp", value: nearestHour.waterTempC.map { String(format: "%.1f", $0) + "\u00b0C" } ?? "N/A")
                 }
                 HStack(spacing: 16) {
                     marineStat(icon: "location.north.fill", label: "Swell Dir", value: nearestHour.swellDir ?? "N/A")
-                    marineStat(icon: "timer", label: "Swell Period", value: "\(nearestHour.swellPeriodSecs ?? "N/A") s")
+                    marineStat(icon: "timer", label: "Swell Period", value: nearestHour.swellPeriodSecs.map { String(format: "%.1f", $0) + " s" } ?? "N/A")
                     marineStat(icon: "wind", label: "Wind", value: "\(nearestHour.windKph) km/h")
                 }
             }

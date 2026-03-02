@@ -30,38 +30,8 @@ struct RescueConsoleScreen: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Stats row
-            HStack(spacing: 8) {
-                RescueStatChip(label: "Active", count: activeCount, color: .oceanDanger)
-                RescueStatChip(label: "Pending", count: pendingCount, color: .oceanWarning)
-                RescueStatChip(label: "Done", count: completedCount, color: .oceanSuccess)
-            }
-            .padding(.horizontal)
-            .padding(.vertical, 8)
-
-            // Filter chips
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 6) {
-                    ForEach([
-                        ("all", "All (\(assignedIncidents.count))"),
-                        ("active", "Active (\(activeCount))"),
-                        ("pending", "Pending (\(pendingCount))"),
-                        ("completed", "Done (\(completedCount))")
-                    ], id: \.0) { key, label in
-                        Button {
-                            selectedFilter = key
-                        } label: {
-                            Text(label)
-                                .font(.caption)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 6)
-                                .background(selectedFilter == key ? Color.oceanPrimary : Color(.secondarySystemBackground), in: Capsule())
-                                .foregroundStyle(selectedFilter == key ? .white : .primary)
-                        }
-                    }
-                }
-                .padding(.horizontal)
-            }
+            rescueStatsRow
+            rescueFilterChips
 
             // Error
             if let error = incidentVM.error {
@@ -110,6 +80,41 @@ struct RescueConsoleScreen: View {
             }
         }
         .task { incidentVM.loadAssignedIncidents() }
+    }
+
+    private var rescueStatsRow: some View {
+        HStack(spacing: 8) {
+            RescueStatChip(label: "Active", count: activeCount, color: .oceanDanger)
+            RescueStatChip(label: "Pending", count: pendingCount, color: .oceanWarning)
+            RescueStatChip(label: "Done", count: completedCount, color: .oceanSuccess)
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 8)
+    }
+
+    private var rescueFilterChips: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach([
+                    ("all", "All (\(assignedIncidents.count))"),
+                    ("active", "Active (\(activeCount))"),
+                    ("pending", "Pending (\(pendingCount))"),
+                    ("completed", "Done (\(completedCount))")
+                ], id: \.0) { key, label in
+                    Button {
+                        selectedFilter = key
+                    } label: {
+                        Text(label)
+                            .font(.caption)
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(selectedFilter == key ? Color.oceanPrimary : Color(.secondarySystemBackground), in: Capsule())
+                            .foregroundStyle(selectedFilter == key ? .white : .primary)
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
     }
 }
 

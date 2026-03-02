@@ -78,36 +78,39 @@ struct MapScreen: View {
                 Text("Map View").font(.headline).foregroundStyle(Color.oceanInfo)
                 Text("Integrate MapboxMaps SDK").font(.caption).foregroundStyle(.secondary)
 
-                // Show incident markers as simple list fallback
                 if !viewModel.incidents.isEmpty {
                     Divider().padding(.vertical, 8)
-                    ScrollView {
-                        VStack(spacing: 8) {
-                            ForEach(viewModel.incidents.filter { $0.latitude != nil && $0.longitude != nil }, id: \.id) { incident in
-                                Button {
-                                    selectedIncident = incident
-                                    showSheet = true
-                                } label: {
-                                    HStack(spacing: 8) {
-                                        Circle()
-                                            .fill(statusColor(incident.status))
-                                            .frame(width: 12, height: 12)
-                                        VStack(alignment: .leading) {
-                                            Text(incident.hazardType.displayName).font(.caption.weight(.medium))
-                                            Text(incident.location).font(.caption2).foregroundStyle(.secondary)
-                                        }
-                                        Spacer()
-                                    }
-                                    .padding(8)
-                                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
-                                }
-                                .buttonStyle(.plain)
-                            }
-                        }
-                        .padding(.horizontal)
-                    }
+                    mapIncidentList
                 }
             }
+        }
+    }
+
+    private var mapIncidentList: some View {
+        ScrollView {
+            VStack(spacing: 8) {
+                ForEach(viewModel.incidents.filter { $0.latitude != nil && $0.longitude != nil }, id: \.id) { incident in
+                    Button {
+                        selectedIncident = incident
+                        showSheet = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Circle()
+                                .fill(statusColor(incident.status))
+                                .frame(width: 12, height: 12)
+                            VStack(alignment: .leading) {
+                                Text(incident.hazardType.displayName).font(.caption.weight(.medium))
+                                Text(incident.location).font(.caption2).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                        }
+                        .padding(8)
+                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal)
         }
     }
 
