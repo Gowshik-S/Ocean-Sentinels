@@ -51,12 +51,7 @@ jobs:
           xcode-version: "latest-stable"
 
       - name: Show available simulators
-        run: xcrun simctl list devices available --json | python3 -c "
-import json,sys; d=json.load(sys.stdin)
-for runtime,devs in d['devices'].items():
-    iphones=[x['name'] for x in devs if 'iPhone' in x['name']]
-    if iphones: print(runtime, ':', iphones[0])
-" 2>/dev/null || true
+        run: xcrun simctl list devices available 2>/dev/null | grep iPhone | head -10 || true
 
       # ── Thorough Pass: build against iOS Simulator SDK ──────────────────────
       # Catches iOS-only API differences and framework availability.
