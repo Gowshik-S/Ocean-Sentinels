@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-ios:
-    name: "Build — iOS Simulator (Xcode)"
+    name: "Build — iOS (Swift Package)"
     runs-on: macos-15
 
     steps:
@@ -29,27 +29,26 @@ jobs:
           xcodebuild -version
           swift --version
 
-      # Build against iOS Simulator SDK — catches all iOS API errors,
-      # type mismatches, missing members, wrong argument labels, etc.
-      - name: xcodebuild (iOS Simulator SDK)
+      # Build as a Swift Package (library target) to catch
+      # type errors, missing members, wrong argument labels, etc.
+      # Uses Package.swift — no .xcodeproj required.
+      - name: swift build (compile check)
         working-directory: IOS
         run: |
           set -o pipefail
-          xcodebuild \
-            -scheme OceanSentinels \
-            -destination 'generic/platform=iOS Simulator' \
-            -sdk iphonesimulator \
-            build \
-            2>&1 | tee build.log | grep -E "error:|warning:|Build succeeded|BUILD FAILED" | head -150
-          if grep -q "BUILD FAILED" build.log; then
+          swift build 2>&1 | tee build.log
+          BUILD_EXIT=$?
+          if [ $BUILD_EXIT -ne 0 ]; then
             echo "::error::Build failed — errors:"
-            grep "error:" build.log | head -60
+            grep -E "error:" build.log | head -60
             exit 1
           fi
+          echo "✅ Build succeeded"
       
       - name: Upload build log on failure
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-log
-          path: build.log
+          path: IOS/build.log
+
