@@ -46,3 +46,10 @@ jobs:
             grep "error:" build.log | head -60
             exit 1
           fi
+      
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-log
+          path: build.log
