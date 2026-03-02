@@ -1,3 +1,4 @@
+import Foundation
 import os.log
 
 /// Centralized logger — replaces Timber (Android)
@@ -31,7 +32,7 @@ enum AppLogger {
         logger.warning("[\(tag)] \(message)")
     }
     
-    static func e(_ message: String, error: Error? = nil, tag: String = "") {
+    static func e(_ message: String, error: (any Error)? = nil, tag: String = "") {
         logger.error("[\(tag)] \(message) \(error?.localizedDescription ?? "")")
     }
 

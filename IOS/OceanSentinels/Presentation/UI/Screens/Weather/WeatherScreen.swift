@@ -322,8 +322,8 @@ struct WeatherScreen: View {
             }
             .padding(.horizontal, 20)
 
-            ForEach(weatherViewModel.weatherAlerts, id: \.message) { alert in
-                Text(alert.message)
+            ForEach(weatherViewModel.weatherAlerts) { alert in
+                Text(alert.description)
                     .font(.caption)
                     .padding(12)
                     .frame(maxWidth: .infinity, alignment: .leading)

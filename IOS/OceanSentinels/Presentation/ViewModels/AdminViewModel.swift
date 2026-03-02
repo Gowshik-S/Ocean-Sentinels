@@ -27,11 +27,11 @@ final class AdminViewModel {
 
     // MARK: - Dependencies
 
-    private let userRepository: UserRepository
+    private let userRepository: any UserRepository
 
     // MARK: - Init
 
-    init(userRepository: UserRepository) {
+    init(userRepository: any UserRepository) {
         self.userRepository = userRepository
     }
 

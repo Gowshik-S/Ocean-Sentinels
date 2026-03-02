@@ -30,8 +30,8 @@ final class MeshViewModel {
     private let meshRepository: MeshMessageRepository
     private let bleMeshManager: BleMeshManager
 
-    // Observation tasks
-    private var observationTasks: [Task<Void, Never>] = []
+    // Observation tasks — nonisolated so deinit can cancel them without @MainActor
+    nonisolated(unsafe) private var observationTasks: [Task<Void, Never>] = []
 
     // MARK: - Init
 

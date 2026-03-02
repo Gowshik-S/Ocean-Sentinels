@@ -17,11 +17,11 @@ final class AuthViewModel {
 
     // MARK: - Dependencies
 
-    private let authRepository: AuthRepository
+    private let authRepository: any AuthRepository
 
     // MARK: - Init
 
-    init(authRepository: AuthRepository) {
+    init(authRepository: any AuthRepository) {
         self.authRepository = authRepository
         self.currentUser = nil
 

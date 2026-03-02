@@ -41,14 +41,14 @@ final class IncidentViewModel {
 
     // MARK: - Dependencies
 
-    private let incidentRepository: IncidentRepository
+    private let incidentRepository: any IncidentRepository
     private let meshMessageRepository: MeshMessageRepository
     private let networkConnectivityManager: NetworkConnectivityManager
 
     // MARK: - Init
 
     init(
-        incidentRepository: IncidentRepository,
+        incidentRepository: any IncidentRepository,
         meshMessageRepository: MeshMessageRepository,
         networkConnectivityManager: NetworkConnectivityManager
     ) {
@@ -178,7 +178,7 @@ final class IncidentViewModel {
     /// Called when:
     /// 1. Internet is unavailable (pre-check failed) → `originalError = nil`
     /// 2. Internet available but API call failed → `originalError = the exception`
-    private func autoForwardToMesh(request: CreateIncidentRequest, originalError: Error?) async {
+    private func autoForwardToMesh(request: CreateIncidentRequest, originalError: (any Error)?) async {
         let result = await meshMessageRepository.forwardToMesh(
             hazardType: request.hazardType,
             location: request.location,

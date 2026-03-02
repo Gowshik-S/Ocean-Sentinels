@@ -20,11 +20,11 @@ final class AnalyticsViewModel {
 
     // MARK: - Dependencies
 
-    private let analyticsRepository: AnalyticsRepository
+    private let analyticsRepository: any AnalyticsRepository
 
     // MARK: - Init
 
-    init(analyticsRepository: AnalyticsRepository) {
+    init(analyticsRepository: any AnalyticsRepository) {
         self.analyticsRepository = analyticsRepository
         loadAllAnalytics()
     }
