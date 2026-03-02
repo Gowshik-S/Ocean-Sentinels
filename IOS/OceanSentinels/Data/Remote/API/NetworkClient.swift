@@ -9,9 +9,9 @@ enum NetworkError: LocalizedError {
     case forbidden
     case notFound
     case serverError(statusCode: Int, message: String?)
-    case decodingError(Error)
+    case decodingError(any Error)
     case networkUnavailable
-    case unknown(Error)
+    case unknown(any Error)
     
     var errorDescription: String? {
         switch self {

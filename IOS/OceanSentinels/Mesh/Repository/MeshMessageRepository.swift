@@ -68,7 +68,7 @@ actor MeshMessageRepository {
         contactInfo: String?,
         photoUrl: String?,
         reporterUserId: Int?
-    ) async -> Result<MeshMessage, Error> {
+    ) async -> Result<MeshMessage, any Error> {
         let deviceId = deviceIdentifier.getDeviceId()
         let fingerprint = deviceIdentifier.getDeviceFingerprint()
         let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
@@ -137,8 +137,8 @@ actor MeshMessageRepository {
         }
 
         // Internet failed → try BLE mesh
-        if await bleMeshManager.isRunning, await bleMeshManager.getConnectedPeerCount() > 0 {
-            let sentCount = await bleMeshManager.broadcastMessage(message)
+        if bleMeshManager.isRunning, bleMeshManager.getConnectedPeerCount() > 0 {
+            let sentCount = bleMeshManager.broadcastMessage(message)
             if sentCount > 0 {
                 let relayPathWithSelf = [deviceId]
                 try? await databaseManager.markMeshMessageRelayed(messageId: messageId)
@@ -181,7 +181,7 @@ actor MeshMessageRepository {
         contactInfo: String?,
         photoUrl: String?,
         reporterUserId: Int?
-    ) async -> Result<MeshMessage, Error> {
+    ) async -> Result<MeshMessage, any Error> {
         let deviceId = deviceIdentifier.getDeviceId()
         let fingerprint = deviceIdentifier.getDeviceFingerprint()
         let timestamp = Int64(Date().timeIntervalSince1970 * 1000)
@@ -226,8 +226,8 @@ actor MeshMessageRepository {
         logger.info("[MESH-DIRECT] Message stored in local DB: \(messageId)")
 
         // Broadcast to BLE peers
-        if await bleMeshManager.isRunning, await bleMeshManager.getConnectedPeerCount() > 0 {
-            let sentCount = await bleMeshManager.broadcastMessage(message)
+        if bleMeshManager.isRunning, bleMeshManager.getConnectedPeerCount() > 0 {
+            let sentCount = bleMeshManager.broadcastMessage(message)
             if sentCount > 0 {
                 let relayPathWithSelf = [deviceId]
                 try? await databaseManager.markMeshMessageRelayed(messageId: messageId)

@@ -6,7 +6,7 @@ struct IndianCityWeatherResponse: Codable {
     let city: String
     let weather: IndianWeatherData?
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         city = (try? container.decode(String.self, forKey: .city)) ?? ""
         weather = try? container.decode(IndianWeatherData.self, forKey: .weather)
@@ -87,7 +87,7 @@ struct IndianGlobalCurrentResponse: Codable {
         case uvIndex = "uv_index"
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         temperature = (try? container.decode(Double.self, forKey: .temperature)) ?? 0
         feelsLike = (try? container.decode(Double.self, forKey: .feelsLike)) ?? 0
@@ -126,7 +126,7 @@ struct IndianGlobalCurrent: Codable {
         case uvIndex = "uv_index"
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         temperature = (try? container.decode(Double.self, forKey: .temperature)) ?? 0
         feelsLike = (try? container.decode(Double.self, forKey: .feelsLike)) ?? 0
@@ -159,7 +159,7 @@ struct IndianGlobalForecastDay: Codable, Identifiable {
         case hourly
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         date = try? container.decode(String.self, forKey: .date)
         maxTemp = (try? container.decode(Double.self, forKey: .maxTemp)) ?? 0
@@ -194,7 +194,7 @@ struct IndianGlobalHourly: Codable, Identifiable {
         case chanceOfRain = "chance_of_rain"
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         time = try? container.decode(String.self, forKey: .time)
         temperature = (try? container.decode(Double.self, forKey: .temperature)) ?? 0

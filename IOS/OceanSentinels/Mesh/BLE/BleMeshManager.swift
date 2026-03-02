@@ -908,7 +908,7 @@ extension BleMeshManager: CBCentralManagerDelegate {
         logger.info("Connected to \(uuid)")
     }
 
-    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
+    func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: (any Error)?) {
         let uuid = peripheral.identifier.uuidString
         pendingConnections.remove(uuid)
         pendingConnectionTimestamps.removeValue(forKey: uuid)
@@ -917,7 +917,7 @@ extension BleMeshManager: CBCentralManagerDelegate {
         cleanupPeerState(uuid)
     }
 
-    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: (any Error)?) {
         let uuid = peripheral.identifier.uuidString
         pendingConnections.remove(uuid)
         pendingConnectionTimestamps.removeValue(forKey: uuid)
@@ -961,7 +961,7 @@ extension BleMeshManager: CBCentralManagerDelegate {
 
 extension BleMeshManager: CBPeripheralDelegate {
 
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: (any Error)?) {
         guard error == nil else {
             logger.warning("Service discovery failed for \(peripheral.identifier.uuidString): \(error!.localizedDescription)")
             return
@@ -988,7 +988,7 @@ extension BleMeshManager: CBPeripheralDelegate {
         }
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: (any Error)?) {
         guard error == nil else { return }
 
         if let characteristic = service.characteristics?.first(where: { $0.uuid == Self.meshCharacteristicUUID }) {
@@ -998,7 +998,7 @@ extension BleMeshManager: CBPeripheralDelegate {
         }
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didWriteValueFor characteristic: CBCharacteristic, error: (any Error)?) {
         let uuid = peripheral.identifier.uuidString
 
         // Multi-chunk guard
@@ -1022,7 +1022,7 @@ extension BleMeshManager: CBPeripheralDelegate {
         drainPeerWriteQueue(uuid)
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: (any Error)?) {
         guard error == nil,
               characteristic.uuid == Self.meshCharacteristicUUID,
               let value = characteristic.value else { return }
@@ -1031,7 +1031,7 @@ extension BleMeshManager: CBPeripheralDelegate {
         accumulateAndReassemble(data: value, fromAddress: uuid)
     }
 
-    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: Error?) {
+    func peripheral(_ peripheral: CBPeripheral, didUpdateNotificationStateFor characteristic: CBCharacteristic, error: (any Error)?) {
         if let error {
             logger.warning("Notification state update failed for \(peripheral.identifier.uuidString): \(error.localizedDescription)")
         }
@@ -1072,7 +1072,7 @@ extension BleMeshManager: CBPeripheralManagerDelegate {
         }
     }
 
-    func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: Error?) {
+    func peripheralManager(_ peripheral: CBPeripheralManager, didAdd service: CBService, error: (any Error)?) {
         if let error {
             logger.error("Failed to add GATT service: \(error.localizedDescription)")
         } else {
@@ -1080,7 +1080,7 @@ extension BleMeshManager: CBPeripheralManagerDelegate {
         }
     }
 
-    func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: Error?) {
+    func peripheralManagerDidStartAdvertising(_ peripheral: CBPeripheralManager, error: (any Error)?) {
         if let error {
             logger.error("Advertising failed: \(error.localizedDescription)")
             isAdvertising = false

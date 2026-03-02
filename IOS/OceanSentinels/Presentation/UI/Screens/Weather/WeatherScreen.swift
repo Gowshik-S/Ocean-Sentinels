@@ -237,7 +237,7 @@ struct WeatherScreen: View {
         let temperature = weather.weather?.current?.temperature
         let humidityOpt = weather.weather?.current?.humidity
         let forecastDays = weather.weather?.forecast ?? []
-        let cityName = weather.city ?? "India"
+        let cityName = weather.city.isEmpty ? "India" : weather.city
         return VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 8) {
                 Image(systemName: "flag.fill").foregroundStyle(Color.oceanWarning)

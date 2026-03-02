@@ -23,7 +23,7 @@ struct DashboardAnalyticsDTO: Codable {
         case lastUpdated = "last_updated"
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         totalIncidents = (try? container.decode(Int.self, forKey: .totalIncidents)) ?? 0
         activeIncidents = (try? container.decode(Int.self, forKey: .activeIncidents)) ?? 0
@@ -61,7 +61,7 @@ struct TimelineDataPointDTO: Codable {
     let date: String?
     let count: Int
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         date = try? container.decode(String.self, forKey: .date)
         count = (try? container.decode(Int.self, forKey: .count)) ?? 0
@@ -85,7 +85,7 @@ struct IncidentsTimelineDTO: Codable {
         case endDate = "end_date"
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         timeline = try? container.decode([TimelineDataPointDTO].self, forKey: .timeline)
         periodDays = (try? container.decode(Int.self, forKey: .periodDays)) ?? 30
@@ -141,7 +141,7 @@ struct GeographicIncidentDTO: Codable {
     let type: String?
     let status: String?
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         lat = (try? container.decode(Double.self, forKey: .lat)) ?? 0
         lng = (try? container.decode(Double.self, forKey: .lng)) ?? 0
@@ -159,7 +159,7 @@ struct GeographicAnalyticsDTO: Codable {
         case totalLocatedIncidents = "total_located_incidents"
     }
     
-    init(from decoder: Decoder) throws {
+    init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         incidents = try? container.decode([GeographicIncidentDTO].self, forKey: .incidents)
         totalLocatedIncidents = (try? container.decode(Int.self, forKey: .totalLocatedIncidents)) ?? 0

@@ -208,7 +208,7 @@ struct ReportIncidentScreen: View {
 
 final class SimpleLocationManager: NSObject, ObservableObject, CLLocationManagerDelegate {
     private let manager = CLLocationManager()
-    private var completion: ((Result<CLLocation, Error>) -> Void)?
+    private var completion: ((Result<CLLocation, any Error>) -> Void)?
 
     override init() {
         super.init()
@@ -216,7 +216,7 @@ final class SimpleLocationManager: NSObject, ObservableObject, CLLocationManager
         manager.desiredAccuracy = kCLLocationAccuracyBest
     }
 
-    func requestLocation(completion: @escaping (Result<CLLocation, Error>) -> Void) {
+    func requestLocation(completion: @escaping (Result<CLLocation, any Error>) -> Void) {
         self.completion = completion
         if manager.authorizationStatus == .notDetermined {
             manager.requestWhenInUseAuthorization()
@@ -231,7 +231,7 @@ final class SimpleLocationManager: NSObject, ObservableObject, CLLocationManager
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: any Error) {
         completion?(.failure(error))
         completion = nil
     }

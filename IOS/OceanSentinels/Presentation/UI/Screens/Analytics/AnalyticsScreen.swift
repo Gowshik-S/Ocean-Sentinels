@@ -54,7 +54,7 @@ struct AnalyticsScreen: View {
                                     Circle()
                                         .fill(hazardColor(item.label))
                                         .frame(width: 10, height: 10)
-                                    Text(HazardType.fromValue(item.label)?.displayName ?? item.label)
+                                    Text(HazardType.fromValue(item.label).displayName)
                                         .font(.subheadline)
                                     Spacer()
                                     Text("\(item.value)")
