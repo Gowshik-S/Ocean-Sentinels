@@ -1,6 +1,7 @@
 // swift-tools-version: 6.0
 // Package.swift — used for CI compilation checks (GitHub Actions)
-// Allows `swift build` without an .xcodeproj file.
+// Provides an SPM manifest so `xcodebuild` can resolve a scheme
+// without a checked-in .xcodeproj file.
 //
 // NOTE: This builds the code as a *library* for compile-checking only.
 // The actual app is built via Xcode with the .xcodeproj (or xcodegen).
@@ -12,8 +13,7 @@ import PackageDescription
 let package = Package(
     name: "OceanSentinels",
     platforms: [
-        .iOS(.v17),
-        .macOS(.v14)   // macOS target lets `swift build` run on CI without a simulator
+        .iOS(.v17)
     ],
     products: [
         .library(

@@ -12,7 +12,7 @@ on:
 
 jobs:
   build-ios:
-    name: "Build — iOS (Swift Package)"
+    name: "Build — iOS Simulator (xcodebuild)"
     runs-on: macos-15
 
     steps:
@@ -29,20 +29,25 @@ jobs:
           xcodebuild -version
           swift --version
 
-      # Build as a Swift Package (library target) to catch
-      # type errors, missing members, wrong argument labels, etc.
-      # Uses Package.swift — no .xcodeproj required.
-      - name: swift build (compile check)
+      # Resolve SPM dependencies up front so the build step is cleaner
+      - name: Resolve Swift Package dependencies
+        working-directory: IOS
+        run: swift package resolve
+
+      # xcodebuild auto-generates a scheme from Package.swift.
+      # Build against iOS Simulator SDK to catch all iOS API usage,
+      # type mismatches, missing members, wrong argument labels, etc.
+      - name: xcodebuild (iOS Simulator SDK)
         working-directory: IOS
         run: |
           set -o pipefail
-          swift build 2>&1 | tee build.log
-          BUILD_EXIT=$?
-          if [ $BUILD_EXIT -ne 0 ]; then
-            echo "::error::Build failed — errors:"
-            grep -E "error:" build.log | head -60
-            exit 1
-          fi
+          xcodebuild build \
+            -scheme OceanSentinels \
+            -destination 'generic/platform=iOS Simulator' \
+            -sdk iphonesimulator \
+            -skipMacroValidation \
+            -skipPackagePluginValidation \
+            2>&1 | tee build.log | tail -80
           echo "✅ Build succeeded"
       
       - name: Upload build log on failure
@@ -51,4 +56,3 @@ jobs:
         with:
           name: build-log
           path: IOS/build.log
-
