@@ -1,4 +1,4 @@
-# Ocean Sentinels -- India's Coastal Safety Network
+# Ocean Sentinels - A Coastal Safety Network
 
 A full-stack coastal safety and hazard reporting platform built for coastal communities worldwide. The system enables real-time maritime incident reporting, response coordination, and offline BLE mesh networking for areas with limited or no connectivity — keeping communities connected when disasters take down 
 the infrastructure.
