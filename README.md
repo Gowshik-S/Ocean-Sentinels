@@ -1,6 +1,7 @@
 # Ocean Sentinels -- India's Coastal Safety Network
 
-A full-stack coastal safety and hazard reporting platform built for India's Ministry of Earth Sciences. The system enables real-time maritime incident reporting, response coordination, and offline mesh networking for areas with limited connectivity.
+A full-stack coastal safety and hazard reporting platform built for coastal communities worldwide. The system enables real-time maritime incident reporting, response coordination, and offline BLE mesh networking for areas with limited or no connectivity — keeping communities connected when disasters take down 
+the infrastructure.
 
 ---
 
@@ -23,7 +24,7 @@ A full-stack coastal safety and hazard reporting platform built for India's Mini
 
 ## Overview
 
-Ocean Sentinels provides a unified platform for coastal hazard reporting across India. It supports four user roles -- Public citizens, Authorities, Rescue Teams, and Administrators -- each with dedicated consoles and workflows.
+Ocean Sentinels provides a unified platform for coastal hazard reporting across worldwide. It supports four user roles -- Public citizens, Authorities, Rescue Teams, and Administrators -- each with dedicated consoles and workflows.
 
 **Core capabilities:**
 
