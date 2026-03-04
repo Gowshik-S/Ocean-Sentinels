@@ -159,6 +159,5 @@ struct LoginScreen: View {
                 .padding(.horizontal, 30)
             }
         }
-        .navigationBarHidden(true)
     }
 }

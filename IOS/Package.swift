@@ -1,12 +1,19 @@
 // swift-tools-version: 6.0
-// Package.swift — used for CI compilation checks (GitHub Actions)
-// Provides an SPM manifest so `xcodebuild` can resolve a scheme
-// without a checked-in .xcodeproj file.
+// Package.swift — CI compilation check for OceanSentinels iOS
 //
-// NOTE: This builds the code as a *library* for compile-checking only.
-// The actual app is built via Xcode with the .xcodeproj (or xcodegen).
-// OceanSentinelsApp.swift (@main) must be excluded here because
-// @main is invalid in a library target.
+// PURPOSE: Compile-check all Swift sources on macOS (GitHub Actions).
+//          This is NOT the runnable app — @main requires an Xcode .xcodeproj.
+//
+// TO RUN ON iOS SIMULATOR:
+//   1. On Mac, open Xcode → File → New → Project → iOS → App
+//   2. Name it "OceanSentinels", bundle ID "com.oceansentinels.app"
+//   3. Delete the generated ContentView.swift & Assets.xcassets stubs
+//   4. File → Add Files → Add every file from the OceanSentinels/ folder
+//   5. In Build Settings → INFOPLIST_FILE → set to OceanSentinels/Info.plist
+//   6. Set Minimum Deployments → iOS 17.0
+//   7. Select an iPhone simulator → ⌘R
+//
+// CI: swift build -c release (builds library target, catches compile errors)
 
 import PackageDescription
 
@@ -14,32 +21,22 @@ let package = Package(
     name: "OceanSentinels",
     platforms: [
         .iOS(.v17),
-        .macOS(.v14)
+        .macOS(.v14)   // needed for CI macOS runners (SwiftData + Logger)
     ],
     products: [
-        .library(
-            name: "OceanSentinels",
-            targets: ["OceanSentinels"]
-        )
+        .library(name: "OceanSentinels", targets: ["OceanSentinels"])
     ],
     targets: [
         .target(
             name: "OceanSentinels",
             path: "OceanSentinels",
             exclude: [
-                // Xcode-only files — not valid Swift sources
                 "Info.plist",
                 "OceanSentinels.entitlements",
-                // @main entry point — invalid in a library target.
-                // Only used when Xcode builds the actual .app bundle.
-                "OceanSentinelsApp.swift"
+                "OceanSentinelsApp.swift"    // @main is invalid in a library target
             ],
             swiftSettings: [
                 .enableUpcomingFeature("ExistentialAny"),
-                // Swift 6 strict concurrency produces errors for patterns
-                // that are safe in our codebase (e.g. @Published in non-Sendable
-                // ObservableObject classes, NSObject subclass delegates).
-                // Keep minimal until full Swift 6 migration is complete.
                 .swiftLanguageMode(.v5)
             ]
         )

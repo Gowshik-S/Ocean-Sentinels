@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- App Display Name -->
+    <key>CFBundleDisplayName</key>
+    <string>Ocean Sentinels</string>
+    <key>CFBundleName</key>
+    <string>OceanSentinels</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.oceansentinels.app</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+
+    <!-- Required Background Modes for BLE Mesh -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>bluetooth-central</string>
+        <string>bluetooth-peripheral</string>
+        <string>location</string>
+        <string>remote-notification</string>
+    </array>
+
+    <!-- Bluetooth Usage Descriptions -->
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>Ocean Sentinels uses Bluetooth to create a mesh network for relaying hazard reports when internet is unavailable.</string>
+    <key>NSBluetoothPeripheralUsageDescription</key>
+    <string>Ocean Sentinels uses Bluetooth to broadcast hazard reports to nearby devices via mesh networking.</string>
+
+    <!-- Location Usage Descriptions -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Ocean Sentinels needs your location to accurately report incident locations and show nearby alerts.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Ocean Sentinels uses your location in the background to relay nearby mesh hazard reports.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Ocean Sentinels uses your location in the background to relay nearby mesh hazard reports.</string>
+
+    <!-- Camera Usage (for incident photo capture) -->
+    <key>NSCameraUsageDescription</key>
+    <string>Ocean Sentinels needs camera access to capture photos of hazard incidents.</string>
+
+    <!-- Photo Library Usage -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Ocean Sentinels needs photo library access to attach photos to your hazard reports.</string>
+
+    <!-- App Transport Security -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+    </dict>
+
+    <!-- Supported Interface Orientations -->
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+    </array>
+
+    <!-- Launch Screen -->
+    <key>UILaunchScreen</key>
+    <dict/>
+
+    <!-- Status Bar -->
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <true/>
+</dict>
+</plist>
