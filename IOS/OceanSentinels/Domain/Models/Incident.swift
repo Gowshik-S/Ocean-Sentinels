@@ -7,9 +7,11 @@ enum HazardType: String, Codable, CaseIterable, Identifiable {
     case strongCurrents = "STRONG_CURRENTS"
     case flooding = "FLOODING"
     case tsunami = "TSUNAMI"
+    case lostVessel = "LOST_VESSEL"
     case debris = "DEBRIS"
     case erosion = "EROSION"
     case storm = "STORM"
+    case oilSpill = "OIL_SPILL"
     case other = "OTHER"
 
     var id: String { rawValue }
@@ -20,9 +22,11 @@ enum HazardType: String, Codable, CaseIterable, Identifiable {
         case .strongCurrents: return "Strong Currents"
         case .flooding: return "Flooding"
         case .tsunami: return "Tsunami"
+        case .lostVessel: return "Lost Vessel"
         case .debris: return "Debris"
         case .erosion: return "Erosion"
         case .storm: return "Storm"
+        case .oilSpill: return "Oil Spill"
         case .other: return "Other"
         }
     }
@@ -33,17 +37,22 @@ enum HazardType: String, Codable, CaseIterable, Identifiable {
         case .strongCurrents: return "wind"
         case .flooding: return "cloud.heavyrain.fill"
         case .tsunami: return "tropicalstorm"
+        case .lostVessel: return "figure.open.water.swim"
         case .debris: return "leaf.fill"
         case .erosion: return "mountain.2.fill"
         case .storm: return "cloud.bolt.rain.fill"
+        case .oilSpill: return "drop.triangle.fill"
         case .other: return "exclamationmark.triangle.fill"
         }
     }
 
     var value: String { rawValue }
 
+    /// Decodes backend values which may be lowercase-hyphenated (e.g. "high-waves", "storm").
     static func fromValue(_ value: String) -> HazardType {
-        return HazardType(rawValue: value) ?? .other
+        // Normalize: "high-waves" → "HIGH_WAVES", "storm" → "STORM"
+        let normalized = value.uppercased().replacingOccurrences(of: "-", with: "_")
+        return HazardType(rawValue: normalized) ?? .other
     }
 }
 
@@ -81,8 +90,9 @@ enum UrgencyLevel: String, Codable, CaseIterable, Identifiable, Comparable {
 
     var value: String { rawValue }
 
+    /// Decodes backend values which may be lowercase (e.g. "high", "critical").
     static func fromValue(_ value: String) -> UrgencyLevel {
-        return UrgencyLevel(rawValue: value) ?? .low
+        return UrgencyLevel(rawValue: value.uppercased()) ?? .low
     }
 }
 
@@ -109,8 +119,10 @@ enum IncidentStatus: String, Codable, CaseIterable, Identifiable {
 
     var value: String { rawValue }
 
+    /// Decodes backend values which may be lowercase (e.g. "pending", "in-progress").
     static func fromValue(_ value: String) -> IncidentStatus {
-        return IncidentStatus(rawValue: value) ?? .pending
+        let normalized = value.uppercased().replacingOccurrences(of: "-", with: "_")
+        return IncidentStatus(rawValue: normalized) ?? .pending
     }
 }
 
