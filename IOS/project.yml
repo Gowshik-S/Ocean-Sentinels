@@ -1,0 +1,87 @@
+name: OceanSentinels
+options:
+  bundleIdPrefix: com.oceansentinels
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "5"
+    ENABLE_PREVIEWS: YES
+    DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+    SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+    GCC_OPTIMIZATION_LEVEL: "0"
+
+targets:
+  OceanSentinels:
+    type: application
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: OceanSentinels
+        excludes:
+          - "**/*.plist"
+          - "**/*.entitlements"
+    info:
+      path: OceanSentinels/Info.plist
+      properties:
+        CFBundleDisplayName: Ocean Sentinels
+        CFBundleName: OceanSentinels
+        CFBundleIdentifier: com.oceansentinels.app
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0.0"
+        CFBundlePackageType: APPL
+        UIBackgroundModes:
+          - bluetooth-central
+          - bluetooth-peripheral
+          - location
+          - remote-notification
+        NSBluetoothAlwaysUsageDescription: "Ocean Sentinels uses Bluetooth for mesh networking."
+        NSBluetoothPeripheralUsageDescription: "Ocean Sentinels uses Bluetooth to broadcast hazard reports."
+        NSLocationWhenInUseUsageDescription: "Ocean Sentinels needs your location to report incidents."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Ocean Sentinels uses background location for mesh relay."
+        NSLocationAlwaysUsageDescription: "Ocean Sentinels uses background location for mesh relay."
+        NSCameraUsageDescription: "Ocean Sentinels needs camera access to capture incident photos."
+        NSPhotoLibraryUsageDescription: "Ocean Sentinels needs photo library access for incident reports."
+        NSAppTransportSecurity:
+          NSAllowsArbitraryLoads: false
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIViewControllerBasedStatusBarAppearance: true
+        UILaunchScreen: {}
+    entitlements:
+      path: OceanSentinels/OceanSentinels.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.oceansentinels.app
+        TARGETED_DEVICE_FAMILY: "1,2"
+        IPHONEOS_DEPLOYMENT_TARGET: "17.0"
+        SWIFT_VERSION: "5"
+        ENABLE_PREVIEWS: YES
+        SWIFT_UPCOMING_FEATURE_EXISTENTIAL_ANY: YES
+      debug:
+        DEBUG_INFORMATION_FORMAT: dwarf
+        SWIFT_OPTIMIZATION_LEVEL: "-Onone"
+      release:
+        SWIFT_OPTIMIZATION_LEVEL: "-O"
+        DEBUG_INFORMATION_FORMAT: dwarf-with-dsym
+    scheme:
+      testTargets:
+        - OceanSentinelsTests
+
+  OceanSentinelsTests:
+    type: bundle.unit-test
+    platform: iOS
+    deploymentTarget: "17.0"
+    sources:
+      - path: OceanSentinelsTests
+        optional: true
+    dependencies:
+      - target: OceanSentinels
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.oceansentinels.tests
+        SWIFT_VERSION: "5"
