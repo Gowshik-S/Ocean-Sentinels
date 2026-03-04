@@ -13,7 +13,8 @@ import PackageDescription
 let package = Package(
     name: "OceanSentinels",
     platforms: [
-        .iOS(.v17)
+        .iOS(.v17),
+        .macOS(.v14)
     ],
     products: [
         .library(

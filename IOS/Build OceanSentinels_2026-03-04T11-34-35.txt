@@ -1,0 +1,1044 @@
+
+Showing Recent Issues
+
+Build target OceanSentinels with configuration Debug
+
+SwiftCompile normal arm64 Compiling\ UserRepositoryImpl.swift,\ WeatherRepositoryImpl.swift,\ Analytics.swift,\ Incident.swift,\ User.swift,\ AnalyticsRepository.swift,\ AuthRepository.swift,\ IncidentRepository.swift,\ UserRepository.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Models/Analytics.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Models/Incident.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Models/User.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/AnalyticsRepository.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/AuthRepository.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/IncidentRepository.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/UserRepository.swift (in target 'OceanSentinels' from project 'OceanSentinels')
+
+Failed frontend command:
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Config/AppConfig.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/DI/DependencyContainer.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/IncidentEntity.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/MeshMessageEntity.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/OceanSentinelsStore.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Preferences/PreferencesManager.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Remote/API/IndianWeatherAPI.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Remote/API/NetworkClient.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Remote/API/OceanSentinelsAPI.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Remote/API/WeatherAPI.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Remote/DTO/AnalyticsDTO.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Remote/DTO/IncidentDTO.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Remote/DTO/IndianWeatherDTO.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Remote/DTO/UserDTO.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Remote/DTO/WeatherDTO.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/AnalyticsRepositoryImpl.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/AuthRepositoryImpl.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/IncidentRepositoryImpl.swift -primary-file /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift -primary-file /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift -primary-file /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Models/Analytics.swift -primary-file /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Models/Incident.swift -primary-file /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Models/User.swift -primary-file /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/AnalyticsRepository.swift -primary-file /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/AuthRepository.swift -primary-file /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/IncidentRepository.swift -primary-file /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/UserRepository.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Mesh/BLE/BleMeshManager.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Mesh/BLE/DeviceIdentifier.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Mesh/Model/MeshMessage.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Mesh/Model/MeshPeer.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Mesh/Network/NetworkConnectivityManager.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Mesh/Repository/MeshMessageRepository.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Mesh/Service/MeshBackgroundService.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/Navigation/AppRoute.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/Navigation/ContentView.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Components/Badges.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Components/Buttons.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Components/Cards.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Components/TextFields.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Admin/AdminConsoleScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Admin/AdminDashboardScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Admin/CreateUserScreens.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Admin/UserManagementScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Analytics/AnalyticsScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Auth/LoginScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Auth/RegisterScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Auth/SplashScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Authority/AuthorityConsoleScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Home/HomeScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Incidents/AlertsScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Incidents/IncidentDetailScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Incidents/IncidentsDashboardScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Incidents/MyReportsScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Incidents/ReportIncidentScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Map/MapScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Mesh/MeshNetworkScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Profile/ProfileScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Profile/SettingsScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Profile/TermsConditionsScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Rescue/RescueConsoleScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/UI/Screens/Weather/WeatherScreen.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/ViewModels/AdminViewModel.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/ViewModels/AnalyticsViewModel.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/ViewModels/AuthViewModel.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/ViewModels/IncidentViewModel.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/ViewModels/MeshViewModel.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/ViewModels/ThemeViewModel.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Presentation/ViewModels/WeatherViewModel.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Utils/AppLogger.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Views/Theme/OceanColors.swift /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Views/Theme/OceanTypography.swift -supplementary-output-file-map /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/supplementaryOutputs-3 -target arm64-apple-macos10.13 -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libFoundationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#FoundationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libObservationMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#ObservationMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libPreviewsMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#PreviewsMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libSwiftDataMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#SwiftDataMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libSwiftMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#SwiftMacros -load-resolved-plugin /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/swift/host/plugins/libSwiftUIMacros.dylib\#/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/bin/swift-plugin-server\#SwiftUIMacros -disable-implicit-swift-modules -Xcc -fno-implicit-modules -Xcc -fno-implicit-module-maps -explicit-swift-module-map-file /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/OceanSentinels-dependencies-1.json -Xllvm -aarch64-use-tbi -enable-objc-interop -sdk /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX26.2.sdk -I /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Products/Debug -Isystem /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib -F /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Products/Debug -F /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks -no-color-diagnostics -Xcc -fno-color-diagnostics -enable-testing -g -debug-info-format\=dwarf -dwarf-version\=4 -module-cache-path /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules -swift-version 5 -enforce-exclusivity\=checked -Onone -D SWIFT_PACKAGE -D DEBUG -D SWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE -D Xcode -serialize-debugging-options -const-gather-protocols-file /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/OceanSentinels_const_extract_protocols.json -enable-upcoming-feature ExistentialAny -enable-experimental-feature DebugDescriptionMacro -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /Users/aakaashd/Library/Developer/Xcode/DerivedData/ModuleCache.noindex/Session.modulevalidation -Xcc -working-directory -Xcc /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode -enable-anonymous-context-mangled-names -file-compilation-dir /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode -Xcc -D_LIBCPP_HARDENING_MODE\=_LIBCPP_HARDENING_MODE_DEBUG -Xcc -ivfsstatcache -Xcc /Users/aakaashd/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx26.2-25C58-00fa09913b459cbbc988d1f6730289ae.sdkstatcache -Xcc -I/Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/swift-overrides.hmap -Xcc -I/Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Products/Debug/include -Xcc -I/Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/DerivedSources-normal/arm64 -Xcc -I/Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/DerivedSources/arm64 -Xcc -I/Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/DerivedSources -Xcc -DSWIFT_PACKAGE -Xcc -DDEBUG\=1 -no-auto-bridging-header-chaining -module-name OceanSentinels -package-name ios -frontend-parseable-output -disable-clang-spi -target-sdk-version 26.2 -target-sdk-name macosx26.2 -clang-target arm64-apple-macos26.2 -in-process-plugin-server-path /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -o /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/UserRepositoryImpl.o -o /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/WeatherRepositoryImpl.o -o /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/Analytics.o -o /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/Incident.o -o /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/User.o -o /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/AnalyticsRepository.o -o /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/AuthRepository.o -o /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/IncidentRepository.o -o /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Build/Intermediates.noindex/OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/UserRepository.o -index-unit-output-path /OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/UserRepositoryImpl.o -index-unit-output-path /OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/WeatherRepositoryImpl.o -index-unit-output-path /OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/Analytics.o -index-unit-output-path /OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/Incident.o -index-unit-output-path /OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/User.o -index-unit-output-path /OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/AnalyticsRepository.o -index-unit-output-path /OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/AuthRepository.o -index-unit-output-path /OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/IncidentRepository.o -index-unit-output-path /OceanSentinels.build/Debug/OceanSentinels.build/Objects-normal/arm64/UserRepository.o -index-store-path /Users/aakaashd/Library/Developer/Xcode/DerivedData/IOS-bqzgniriyfwcyvexkaswuzgqsqjz/Index.noindex/DataStore -index-system-modules
+
+SwiftCompile normal arm64 /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift (in target 'OceanSentinels' from project 'OceanSentinels')
+    cd /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode
+    
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/OceanSentinelsStore.swift:33:2: error: 'ModelActor()' is only available in macOS 14 or newer
+@ModelActor
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:10:26: error: 'Logger' is only available in macOS 11.0 or newer
+    private let logger = Logger(subsystem: "com.oceansentinels.app", category: "UserRepo")
+                         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:18:22: error: 'OSLogMessage' is only available in macOS 11.0 or newer
+        logger.debug("Fetching all users")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:18:22: note: add 'if #available' version check
+        logger.debug("Fetching all users")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:17:10: note: add '@available' attribute to enclosing instance method
+    func getAllUsers() async throws -> [User] {
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:2: error: 'Model()' is only available in macOS 14 or newer
+@Model
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:28:26: error: 'OSLogMessage' is only available in macOS 11.0 or newer
+            logger.debug("Fetched \(users.count) users")
+                         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:28:26: note: add 'if #available' version check
+            logger.debug("Fetched \(users.count) users")
+                         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:17:10: note: add '@available' attribute to enclosing instance method
+    func getAllUsers() async throws -> [User] {
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:28:36: error: 'appendInterpolation(_:format:align:privacy:)' is only available in macOS 11.0 or newer
+            logger.debug("Fetched \(users.count) users")
+                                   ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:28:36: note: add 'if #available' version check
+            logger.debug("Fetched \(users.count) users")
+                                   ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:17:10: note: add '@available' attribute to enclosing instance method
+    func getAllUsers() async throws -> [User] {
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:69:22: error: 'OSLogMessage' is only available in macOS 11.0 or newer
+        logger.debug("Creating user: \(username) with role: \(role.value)")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:69:22: note: add 'if #available' version check
+        logger.debug("Creating user: \(username) with role: \(role.value)")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:59:10: note: add '@available' attribute to enclosing instance method
+    func createUser(
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:69:39: error: 'appendInterpolation(_:align:privacy:)' is only available in macOS 11.0 or newer
+        logger.debug("Creating user: \(username) with role: \(role.value)")
+                                      ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:69:39: note: add 'if #available' version check
+        logger.debug("Creating user: \(username) with role: \(role.value)")
+                                      ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:59:10: note: add '@available' attribute to enclosing instance method
+    func createUser(
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:69:62: error: 'appendInterpolation(_:align:privacy:)' is only available in macOS 11.0 or newer
+        logger.debug("Creating user: \(username) with role: \(role.value)")
+                                                             ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:69:62: note: add 'if #available' version check
+        logger.debug("Creating user: \(username) with role: \(role.value)")
+                                                             ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:59:10: note: add '@available' attribute to enclosing instance method
+    func createUser(
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:86:22: error: 'OSLogMessage' is only available in macOS 11.0 or newer
+        logger.debug("User created successfully: \(user.username)")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:86:22: note: add 'if #available' version check
+        logger.debug("User created successfully: \(user.username)")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:59:10: note: add '@available' attribute to enclosing instance method
+    func createUser(
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:86:51: error: 'appendInterpolation(_:align:privacy:)' is only available in macOS 11.0 or newer
+        logger.debug("User created successfully: \(user.username)")
+                                                  ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:86:51: note: add 'if #available' version check
+        logger.debug("User created successfully: \(user.username)")
+                                                  ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:59:10: note: add '@available' attribute to enclosing instance method
+    func createUser(
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:98:22: error: 'OSLogMessage' is only available in macOS 11.0 or newer
+        logger.debug("Updating user: \(id)")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:98:22: note: add 'if #available' version check
+        logger.debug("Updating user: \(id)")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:90:10: note: add '@available' attribute to enclosing instance method
+    func updateUser(
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:98:39: error: 'appendInterpolation(_:format:align:privacy:)' is only available in macOS 11.0 or newer
+        logger.debug("Updating user: \(id)")
+                                      ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:98:39: note: add 'if #available' version check
+        logger.debug("Updating user: \(id)")
+                                      ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:90:10: note: add '@available' attribute to enclosing instance method
+    func updateUser(
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:2: error: 'Model()' is only available in macOS 14 or newer
+@Model
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:116:22: error: 'OSLogMessage' is only available in macOS 11.0 or newer
+        logger.debug("Deleting user: \(id)")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:116:22: note: add 'if #available' version check
+        logger.debug("Deleting user: \(id)")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:115:10: note: add '@available' attribute to enclosing instance method
+    func deleteUser(id: Int) async throws {
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:116:39: error: 'appendInterpolation(_:format:align:privacy:)' is only available in macOS 11.0 or newer
+        logger.debug("Deleting user: \(id)")
+                                      ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:116:39: note: add 'if #available' version check
+        logger.debug("Deleting user: \(id)")
+                                      ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:115:10: note: add '@available' attribute to enclosing instance method
+    func deleteUser(id: Int) async throws {
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:6:13: note: add '@available' attribute to enclosing class
+final class UserRepositoryImpl: UserRepository {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/OceanSentinelsStore.swift:33:2: 'ModelActor()' is only available in macOS 14 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:10:26: 'Logger' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:18:22: 'OSLogMessage' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:2: 'Model()' is only available in macOS 14 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:28:26: 'OSLogMessage' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:28:36: 'appendInterpolation(_:format:align:privacy:)' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:69:22: 'OSLogMessage' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:69:39: 'appendInterpolation(_:align:privacy:)' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:69:62: 'appendInterpolation(_:align:privacy:)' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:86:22: 'OSLogMessage' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:86:51: 'appendInterpolation(_:align:privacy:)' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:98:22: 'OSLogMessage' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:98:39: 'appendInterpolation(_:format:align:privacy:)' is only available in macOS 11.0 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:2: 'Model()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:116:22: 'OSLogMessage' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/UserRepositoryImpl.swift:116:39: 'appendInterpolation(_:format:align:privacy:)' is only available in macOS 11.0 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+SwiftCompile normal arm64 /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift (in target 'OceanSentinels' from project 'OceanSentinels')
+    cd /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode
+    
+
+@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:12:26: error: 'Logger' is only available in macOS 11.0 or newer
+    private let logger = Logger(subsystem: "com.oceansentinels.app", category: "WeatherRepo")
+                         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:8:13: note: add '@available' attribute to enclosing class
+final class WeatherRepositoryImpl {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:26:22: error: 'OSLogMessage' is only available in macOS 11.0 or newer
+        logger.debug("Fetching Indian city weather for: \(city)")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:26:22: note: add 'if #available' version check
+        logger.debug("Fetching Indian city weather for: \(city)")
+                     ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:25:10: note: add '@available' attribute to enclosing instance method
+    func getIndianCityWeather(city: String) async throws -> IndianCityWeatherResponse {
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:8:13: note: add '@available' attribute to enclosing class
+final class WeatherRepositoryImpl {
+            ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:26:58: error: 'appendInterpolation(_:align:privacy:)' is only available in macOS 11.0 or newer
+        logger.debug("Fetching Indian city weather for: \(city)")
+                                                         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:26:58: note: add 'if #available' version check
+        logger.debug("Fetching Indian city weather for: \(city)")
+                                                         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:25:10: note: add '@available' attribute to enclosing instance method
+    func getIndianCityWeather(city: String) async throws -> IndianCityWeatherResponse {
+         ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:8:13: note: add '@available' attribute to enclosing class
+final class WeatherRepositoryImpl {
+            ^
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:12:26: 'Logger' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:26:22: 'OSLogMessage' is only available in macOS 11.0 or newer
+
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Repository/WeatherRepositoryImpl.swift:26:58: 'appendInterpolation(_:align:privacy:)' is only available in macOS 11.0 or newer
+
+SwiftCompile normal arm64 /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Models/Analytics.swift (in target 'OceanSentinels' from project 'OceanSentinels')
+    cd /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode
+    
+
+@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+SwiftCompile normal arm64 /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Models/Incident.swift (in target 'OceanSentinels' from project 'OceanSentinels')
+    cd /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode
+    
+
+@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+SwiftCompile normal arm64 /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Models/User.swift (in target 'OceanSentinels' from project 'OceanSentinels')
+    cd /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode
+    
+
+@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+SwiftCompile normal arm64 /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/AnalyticsRepository.swift (in target 'OceanSentinels' from project 'OceanSentinels')
+    cd /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode
+    
+
+@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+SwiftCompile normal arm64 /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/AuthRepository.swift (in target 'OceanSentinels' from project 'OceanSentinels')
+    cd /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode
+    
+
+@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+SwiftCompile normal arm64 /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/IncidentRepository.swift (in target 'OceanSentinels' from project 'OceanSentinels')
+    cd /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode
+    
+
+@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+SwiftCompile normal arm64 /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Domain/Repositories/UserRepository.swift (in target 'OceanSentinels' from project 'OceanSentinels')
+    cd /Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/.swiftpm/xcode
+    
+
+@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'firstName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'lastName' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'phone' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'location' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'isActive' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: error: '_PersistedProperty()' is only available in macOS 14 or newer
+@_PersistedProperty
+ ^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:6:1: note: in expansion of macro 'Model' on property 'role' here
+@Model
+^
+/Users/aakaashd/Downloads/Gowshik/Ocean-Sentinels/IOS/OceanSentinels/Data/Local/Database/UserEntity.swift:7:13: note: add '@available' attribute to enclosing class
+final class UserEntity {
+            ^
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC9firstName5ModelfMr2_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8lastName5ModelfMr3_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC5phone5ModelfMr4_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8location5ModelfMr5_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC8isActive5ModelfMr7_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+/var/folders/ct/80pl478s7gn4ylf1b3n563ph0000gn/T/swift-generated-sources/@__swiftmacro_14OceanSentinels10UserEntityC4role5ModelfMr6_.swift:1:2: '_PersistedProperty()' is only available in macOS 14 or newer
+
+
+
+Build failed    3/4/26, 11:34 AM    4.9 seconds

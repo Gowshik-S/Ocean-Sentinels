@@ -289,6 +289,7 @@ NSPhotoLibraryUsageDescription
 
 ### Phase 6: Config & Build
 32. ✅ Package.swift / Xcode project config
+    - **BUGFIX (2026-03-04):** Added `.macOS(.v14)` to platforms — resolved ~100+ build errors when Xcode targets macOS
 33. ✅ Info.plist (permissions, BLE background modes)
 34. ✅ Build configuration (API keys, environments)
 
