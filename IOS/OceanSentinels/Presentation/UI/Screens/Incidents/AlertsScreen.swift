@@ -76,10 +76,10 @@ struct AlertsScreen: View {
                 Section { ProgressView().frame(maxWidth: .infinity) }
             }
         }
-        .listStyle(.insetGrouped)
+        .compatInsetGroupedListStyle()
         .navigationTitle("Alerts")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .compatTopBarTrailing) {
                 Button { viewModel.loadIncidents(filters: nil) } label: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -120,7 +120,7 @@ private struct AlertStatCard: View {
             Text(value).font(.title3.bold())
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
-                    RoundedRectangle(cornerRadius: 3).fill(Color(.systemBackground)).frame(height: 6)
+                    RoundedRectangle(cornerRadius: 3).fill(Color.compatSystemBackground).frame(height: 6)
                     RoundedRectangle(cornerRadius: 3).fill(color)
                         .frame(width: geo.size.width * min(max(fraction, 0), 1), height: 6)
                 }

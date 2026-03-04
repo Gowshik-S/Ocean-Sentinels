@@ -55,7 +55,7 @@ struct ReportIncidentScreen: View {
                     .pickerStyle(.menu)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
-                    .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 8))
+                    .background(Color.compatSystemGray6, in: RoundedRectangle(cornerRadius: 8))
                 }
 
                 // Urgency
@@ -159,7 +159,7 @@ struct ReportIncidentScreen: View {
             .padding(16)
         }
         .navigationTitle("Report Hazard")
-        .navigationBarTitleDisplayMode(.inline)
+        .compatInlineNavigationTitle()
         .onAppear { requestLocation() }
         .onChange(of: viewModel.createIncidentState) { _, newState in
             if case .success = newState {

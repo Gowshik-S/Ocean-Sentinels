@@ -81,7 +81,7 @@ struct SettingsScreen: View {
                     .listRowBackground(Color.clear)
             }
         }
-        .listStyle(.insetGrouped)
+        .compatInsetGroupedListStyle()
         .navigationTitle("Settings")
     }
 }

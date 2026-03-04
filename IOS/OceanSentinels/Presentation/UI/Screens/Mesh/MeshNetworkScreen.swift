@@ -69,10 +69,10 @@ struct MeshNetworkScreen: View {
                 }
             }
         }
-        .listStyle(.insetGrouped)
+        .compatInsetGroupedListStyle()
         .navigationTitle("Mesh Network")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .compatTopBarTrailing) {
                 Toggle("", isOn: Binding(
                     get: { viewModel.meshStatus.isRunning },
                     set: { _ in viewModel.toggleMeshService() }
@@ -151,7 +151,7 @@ struct MeshNetworkScreen: View {
         }
         .padding(16)
         .background(
-            (viewModel.meshStatus.isRunning ? Color.oceanPrimary.opacity(0.1) : Color(.secondarySystemBackground)),
+            (viewModel.meshStatus.isRunning ? Color.oceanPrimary.opacity(0.1) : Color.compatSecondarySystemBackground),
             in: RoundedRectangle(cornerRadius: 16)
         )
     }
@@ -249,7 +249,7 @@ struct MeshNetworkScreen: View {
             .padding(12)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(!latitude.isEmpty ? Color.oceanSuccess.opacity(0.08) : Color(.secondarySystemBackground))
+                    .fill(!latitude.isEmpty ? Color.oceanSuccess.opacity(0.08) : Color.compatSecondarySystemBackground)
             )
 
             if let locationError {

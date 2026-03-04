@@ -118,10 +118,10 @@ struct HomeScreen: View {
                 statusIndicator(icon: "icloud.fill", label: "Sync", isActive: true)
             }
             .padding(12)
-            .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 8))
+            .background(Color.compatSystemGray6, in: RoundedRectangle(cornerRadius: 8))
         }
         .padding(20)
-        .background(Color(.systemBackground))
+        .background(Color.compatSystemBackground)
         .clipShape(RoundedRectangle(cornerRadius: 8))
         .shadow(color: .black.opacity(0.06), radius: 4, y: 2)
     }
@@ -298,7 +298,7 @@ struct HomeScreen: View {
             Image(systemName: icon).font(.title3).foregroundStyle(color)
         }
         .padding(16)
-        .background(Color(.secondarySystemBackground).opacity(0.5), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color.compatSecondarySystemBackground.opacity(0.5), in: RoundedRectangle(cornerRadius: 12))
     }
 
     private var livePulseBadge: some View {
@@ -315,7 +315,7 @@ struct HomeScreen: View {
         ZStack(alignment: .topTrailing) {
             Image(systemName: icon)
                 .font(.body)
-                .foregroundStyle(Color(.systemGray))
+                .foregroundStyle(Color.compatSystemGray)
             Circle()
                 .fill(isActive ? Color.oceanSuccess : Color.gray)
                 .frame(width: 8, height: 8)

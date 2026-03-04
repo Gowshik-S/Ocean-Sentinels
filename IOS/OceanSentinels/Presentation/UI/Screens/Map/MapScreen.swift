@@ -45,9 +45,9 @@ struct MapScreen: View {
             }
         }
         .navigationTitle("Live Incident Map")
-        .navigationBarTitleDisplayMode(.inline)
+        .compatInlineNavigationTitle()
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .compatTopBarTrailing) {
                 HStack(spacing: 8) {
                     Button { viewModel.loadIncidents(filters: nil) } label: {
                         Image(systemName: "arrow.clockwise")
@@ -105,7 +105,7 @@ struct MapScreen: View {
                             Spacer()
                         }
                         .padding(8)
-                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 8))
+                        .background(Color.compatSecondarySystemBackground, in: RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(.plain)
                 }

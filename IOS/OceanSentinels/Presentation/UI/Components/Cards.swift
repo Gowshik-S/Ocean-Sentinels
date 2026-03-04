@@ -254,10 +254,10 @@ struct EmptyStateCard<ActionContent: View>: View {
         .frame(maxWidth: .infinity)
         .background(
             RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemGray6).opacity(0.5))
+                .fill(Color.compatSystemGray6.opacity(0.5))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color(.systemGray4).opacity(0.3), lineWidth: 1)
+                        .stroke(Color.compatSystemGray4.opacity(0.3), lineWidth: 1)
                 )
         )
     }

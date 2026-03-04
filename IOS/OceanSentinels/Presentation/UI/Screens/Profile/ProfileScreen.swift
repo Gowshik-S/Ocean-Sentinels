@@ -75,7 +75,7 @@ struct ProfileScreen: View {
         }
         .navigationTitle("Profile")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .compatTopBarTrailing) {
                 Button { router.navigate(to: .settings) } label: {
                     Image(systemName: "gearshape")
                 }

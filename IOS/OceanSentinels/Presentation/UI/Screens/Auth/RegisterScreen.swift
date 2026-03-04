@@ -110,7 +110,7 @@ struct RegisterScreen: View {
                         .pickerStyle(.menu)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding()
-                        .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 6))
+                        .background(Color.compatSystemGray6, in: RoundedRectangle(cornerRadius: 6))
                     }
 
                     // Password fields
@@ -189,7 +189,7 @@ struct RegisterScreen: View {
             .padding(.horizontal, 26)
             .padding(.vertical, 12)
         }
-        .navigationBarTitleDisplayMode(.inline)
+        .compatInlineNavigationTitle()
         .onChange(of: authVM.registerState) { _, newState in
             if case .success = newState {
                 dismiss()
@@ -226,7 +226,7 @@ struct RegisterScreen: View {
                     .fill(isSelected ? color.opacity(0.05) : .clear)
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
-                            .stroke(isSelected ? color : Color(.systemGray4), lineWidth: isSelected ? 2 : 1)
+                            .stroke(isSelected ? color : Color.compatSystemGray4, lineWidth: isSelected ? 2 : 1)
                     )
             )
         }

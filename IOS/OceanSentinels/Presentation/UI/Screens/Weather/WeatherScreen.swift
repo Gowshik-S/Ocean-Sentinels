@@ -46,7 +46,7 @@ struct WeatherScreen: View {
         }
         .navigationTitle("Weather")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .compatTopBarTrailing) {
                 Button { weatherViewModel.refresh() } label: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -270,7 +270,7 @@ struct WeatherScreen: View {
                 }
                 .padding(12)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.secondarySystemBackground).opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+                .background(Color.compatSecondarySystemBackground.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
                 .padding(.horizontal, 20)
             }
         }

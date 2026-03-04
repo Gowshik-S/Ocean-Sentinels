@@ -35,7 +35,7 @@ struct IncidentDetailScreen: View {
             }
         }
         .navigationTitle("Incident Details")
-        .navigationBarTitleDisplayMode(.inline)
+        .compatInlineNavigationTitle()
         .task { viewModel.getIncident(id: incidentId) }
     }
 
@@ -67,7 +67,7 @@ struct IncidentDetailScreen: View {
                     Text(inc.description).font(.body).foregroundStyle(.secondary)
                 }
                 .padding(16)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                .background(Color.compatSecondarySystemBackground, in: RoundedRectangle(cornerRadius: 12))
 
                 // Location
                 VStack(alignment: .leading, spacing: 12) {
@@ -87,7 +87,7 @@ struct IncidentDetailScreen: View {
                     }
                 }
                 .padding(16)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                .background(Color.compatSecondarySystemBackground, in: RoundedRectangle(cornerRadius: 12))
 
                 // Photo
                 if let photoUrl = inc.photoUrl, let url = URL(string: photoUrl) {
@@ -107,7 +107,7 @@ struct IncidentDetailScreen: View {
                         }
                     }
                     .padding(16)
-                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                    .background(Color.compatSecondarySystemBackground, in: RoundedRectangle(cornerRadius: 12))
                 }
 
                 // Timeline
@@ -121,7 +121,7 @@ struct IncidentDetailScreen: View {
                     timelineItem(title: "Resolved", date: inc.resolvedAt, isCompleted: inc.status == .resolved, isLast: true)
                 }
                 .padding(16)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                .background(Color.compatSecondarySystemBackground, in: RoundedRectangle(cornerRadius: 12))
 
                 // Actions
                 if canTakeAction && inc.status != .resolved {
@@ -149,11 +149,11 @@ struct IncidentDetailScreen: View {
         HStack(alignment: .top, spacing: 12) {
             VStack(spacing: 4) {
                 Circle()
-                    .fill(isCompleted ? Color.oceanSuccess : Color(.systemGray4))
+                    .fill(isCompleted ? Color.oceanSuccess : Color.compatSystemGray4)
                     .frame(width: 12, height: 12)
                 if !isLast {
                     Rectangle()
-                        .fill(isCompleted ? Color.oceanSuccess : Color(.systemGray4))
+                        .fill(isCompleted ? Color.oceanSuccess : Color.compatSystemGray4)
                         .frame(width: 2, height: 24)
                 }
             }

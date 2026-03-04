@@ -49,7 +49,7 @@ struct IncidentsDashboardScreen: View {
         }
         .navigationTitle(isCitizen ? "My Incidents" : "Incidents Dashboard")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .compatTopBarTrailing) {
                 HStack(spacing: 8) {
                     Button { showFilterSheet = true } label: {
                         Image(systemName: "line.3.horizontal.decrease")
@@ -264,7 +264,7 @@ private struct FilterSheet: View {
                 }
             }
             .navigationTitle("Filter Incidents")
-            .navigationBarTitleDisplayMode(.inline)
+            .compatInlineNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Clear") { onClear() }

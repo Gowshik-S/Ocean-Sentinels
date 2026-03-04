@@ -88,7 +88,7 @@ struct UserManagementScreen: View {
         }
         .navigationTitle("User Management")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .compatTopBarTrailing) {
                 Button { viewModel.loadAllUsers() } label: {
                     Image(systemName: "arrow.clockwise")
                 }

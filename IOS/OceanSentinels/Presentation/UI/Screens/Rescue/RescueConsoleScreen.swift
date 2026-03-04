@@ -73,7 +73,7 @@ struct RescueConsoleScreen: View {
         }
         .navigationTitle("Rescue Console")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .compatTopBarTrailing) {
                 Button { incidentVM.loadAssignedIncidents() } label: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -108,7 +108,7 @@ struct RescueConsoleScreen: View {
                             .font(.caption)
                             .padding(.horizontal, 10)
                             .padding(.vertical, 6)
-                            .background(selectedFilter == key ? Color.oceanPrimary : Color(.secondarySystemBackground), in: Capsule())
+                            .background(selectedFilter == key ? Color.oceanPrimary : Color.compatSecondarySystemBackground, in: Capsule())
                             .foregroundStyle(selectedFilter == key ? .white : .primary)
                     }
                 }

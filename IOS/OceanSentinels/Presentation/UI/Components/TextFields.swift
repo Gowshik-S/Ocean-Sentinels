@@ -28,7 +28,7 @@ struct OceanTextField: View {
             .background(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
-                        isError ? Color.oceanDanger : Color(.systemGray4),
+                        isError ? Color.oceanDanger : Color.compatSystemGray4,
                         lineWidth: 1
                     )
             )
@@ -76,7 +76,7 @@ struct OceanPasswordField: View {
             .background(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(
-                        isError ? Color.oceanDanger : Color(.systemGray4),
+                        isError ? Color.oceanDanger : Color.compatSystemGray4,
                         lineWidth: 1
                     )
             )
@@ -110,7 +110,7 @@ struct OceanSearchField: View {
             }
         }
         .padding(12)
-        .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color.compatSystemGray6, in: RoundedRectangle(cornerRadius: 12))
     }
 }
 
@@ -131,10 +131,8 @@ struct OceanEmailField: View {
             isError: isError,
             errorMessage: errorMessage
         )
-        .keyboardType(.emailAddress)
-        .textContentType(.emailAddress)
+        .compatEmailInputModifiers()
         .autocorrectionDisabled()
-        .textInputAutocapitalization(.never)
     }
 }
 
@@ -155,8 +153,7 @@ struct OceanPhoneField: View {
             isError: isError,
             errorMessage: errorMessage
         )
-        .keyboardType(.phonePad)
-        .textContentType(.telephoneNumber)
+        .compatPhoneInputModifiers()
     }
 }
 
@@ -208,7 +205,7 @@ struct OceanLocationField: View {
         .padding()
         .background(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(.systemGray4), lineWidth: 1)
+                .stroke(Color.compatSystemGray4, lineWidth: 1)
         )
     }
 }

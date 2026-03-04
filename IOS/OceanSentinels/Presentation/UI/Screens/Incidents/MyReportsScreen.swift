@@ -43,7 +43,7 @@ struct MyReportsScreen: View {
         }
         .navigationTitle("My Reports")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .compatTopBarTrailing) {
                 Button { viewModel.loadMyReports() } label: {
                     Image(systemName: "arrow.clockwise")
                 }

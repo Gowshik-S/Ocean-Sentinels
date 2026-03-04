@@ -121,10 +121,10 @@ struct AdminDashboardScreen: View {
                 }
             }
         }
-        .listStyle(.insetGrouped)
+        .compatInsetGroupedListStyle()
         .navigationTitle("Admin Dashboard")
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .compatTopBarTrailing) {
                 Button { viewModel.loadAllUsers() } label: {
                     Image(systemName: "arrow.clockwise")
                 }
@@ -180,6 +180,6 @@ private struct UserCardCompact: View {
         }
         .padding()
         .frame(width: 200)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+        .background(Color.compatSecondarySystemBackground, in: RoundedRectangle(cornerRadius: 12))
     }
 }

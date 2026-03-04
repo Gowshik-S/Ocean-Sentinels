@@ -43,11 +43,13 @@ struct LoginScreen: View {
                             .foregroundStyle(.secondary)
 
                         TextField("Enter your username or email", text: $username)
+                            #if os(iOS)
                             .textContentType(.username)
-                            .autocorrectionDisabled()
                             .textInputAutocapitalization(.never)
+                            #endif
+                            .autocorrectionDisabled()
                             .padding()
-                            .background(Color(.systemGray6), in: RoundedRectangle(cornerRadius: 6))
+                            .background(Color.compatSystemGray6, in: RoundedRectangle(cornerRadius: 6))
                     }
                     .padding(.top, 40)
 
@@ -137,7 +139,7 @@ struct LoginScreen: View {
                             }
                         }
                         .padding(16)
-                        .background(Color(.systemGray6).opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
+                        .background(Color.compatSystemGray6.opacity(0.5), in: RoundedRectangle(cornerRadius: 8))
                         .padding(.top, 8)
                     }
 
