@@ -25,10 +25,13 @@ SET row_security = off;
 
 CREATE TYPE public.hazardtype AS ENUM (
     'HIGH_WAVES',
+    'STRONG_CURRENTS',
     'FLOODING',
     'TSUNAMI',
     'LOST_VESSEL',
     'DEBRIS',
+    'EROSION',
+    'STORM',
     'OIL_SPILL',
     'OTHER'
 );

@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
         # Auto-migrate: add missing columns to existing tables
         async with engine.begin() as conn:
             try:
-                migrations = [
+                column_migrations = [
                     "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS mesh_message_id VARCHAR(128) UNIQUE",
                     "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS verified_by_id INTEGER REFERENCES users(id)",
                     "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS assigned_to_id INTEGER REFERENCES users(id)",
@@ -47,20 +47,31 @@ async def lifespan(app: FastAPI):
                     "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS resolved_at TIMESTAMPTZ",
                     "ALTER TABLE incidents ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ",
                     "CREATE INDEX IF NOT EXISTS ix_incidents_mesh_message_id ON incidents (mesh_message_id)",
-                    # Add new hazard type enum values to PostgreSQL enum
-                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'STRONG_CURRENTS' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'STRONG_CURRENTS'; END IF; END $$;",
-                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'EROSION' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'EROSION'; END IF; END $$;",
-                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'STORM' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'STORM'; END IF; END $$;",
-                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'OIL_SPILL' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'OIL_SPILL'; END IF; END $$;",
-                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'LOST_VESSEL' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'LOST_VESSEL'; END IF; END $$;",
-                    # Add missing incident status enum values
-                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'FALSE_ALARM' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'incidentstatus')) THEN ALTER TYPE incidentstatus ADD VALUE 'FALSE_ALARM'; END IF; END $$;",
                 ]
-                for migration in migrations:
+                for migration in column_migrations:
                     await conn.execute(text(migration))
                 print("Migration check complete: all columns ensured")
             except Exception as migrate_err:
                 print(f"Migration note (non-fatal): {migrate_err}")
+
+        # Add missing enum values — must run outside a transaction
+        # (ALTER TYPE ADD VALUE cannot execute inside a PL/pgSQL DO block)
+        try:
+            enum_migrations = [
+                "ALTER TYPE hazardtype ADD VALUE IF NOT EXISTS 'STRONG_CURRENTS'",
+                "ALTER TYPE hazardtype ADD VALUE IF NOT EXISTS 'EROSION'",
+                "ALTER TYPE hazardtype ADD VALUE IF NOT EXISTS 'STORM'",
+                "ALTER TYPE hazardtype ADD VALUE IF NOT EXISTS 'OIL_SPILL'",
+                "ALTER TYPE hazardtype ADD VALUE IF NOT EXISTS 'LOST_VESSEL'",
+                "ALTER TYPE incidentstatus ADD VALUE IF NOT EXISTS 'FALSE_ALARM'",
+            ]
+            async with engine.connect() as conn:
+                conn = conn.execution_options(isolation_level="AUTOCOMMIT")
+                for stmt in enum_migrations:
+                    await conn.execute(text(stmt))
+            print("Enum migration complete: all enum values ensured")
+        except Exception as enum_err:
+            print(f"Enum migration note (non-fatal): {enum_err}")
         
         print("Ocean Hazard Backend is ready!")
     except Exception as e:
