@@ -8,9 +8,9 @@ enum AppConfig {
     
     static let apiBaseURL: String = {
         #if DEBUG
-        return "https://ocean-hazard-1-6j5g.onrender.com/api"
+        return "https://mesh.gowshik.in/"
         #else
-        return "https://ocean-hazard-1-6j5g.onrender.com/api"
+        return "https://mesh.gowshik.in/"
         #endif
     }()
     
