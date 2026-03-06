@@ -104,6 +104,29 @@ struct DayWeather: Codable {
         case dailyChanceOfRain = "daily_chance_of_rain"
         case condition, uv
     }
+    
+    // weatherapi.com returns daily_chance_of_rain as a String ("56"), not Int.
+    // Swift's JSONDecoder is strict — Gson auto-coerces but we must handle both.
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        maxtempC = try container.decode(Double.self, forKey: .maxtempC)
+        mintempC = try container.decode(Double.self, forKey: .mintempC)
+        avgtempC = try container.decode(Double.self, forKey: .avgtempC)
+        maxwindKph = try container.decode(Double.self, forKey: .maxwindKph)
+        totalprecipMm = try container.decode(Double.self, forKey: .totalprecipMm)
+        avghumidity = try container.decode(Double.self, forKey: .avghumidity)
+        condition = try container.decode(WeatherCondition.self, forKey: .condition)
+        uv = try container.decode(Double.self, forKey: .uv)
+        
+        // daily_chance_of_rain: try Int first, then String → Int fallback
+        if let intVal = try? container.decode(Int.self, forKey: .dailyChanceOfRain) {
+            dailyChanceOfRain = intVal
+        } else if let strVal = try? container.decode(String.self, forKey: .dailyChanceOfRain) {
+            dailyChanceOfRain = Int(strVal) ?? 0
+        } else {
+            dailyChanceOfRain = 0
+        }
+    }
 }
 
 struct Astro: Codable {
@@ -139,6 +162,27 @@ struct HourWeather: Codable, Identifiable {
         case feelslikeC = "feelslike_c"
         case chanceOfRain = "chance_of_rain"
         case isDay = "is_day"
+    }
+    
+    // weatherapi.com returns chance_of_rain as a String ("56"), not Int.
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        time = try container.decode(String.self, forKey: .time)
+        tempC = try container.decode(Double.self, forKey: .tempC)
+        condition = try container.decode(WeatherCondition.self, forKey: .condition)
+        windKph = try container.decode(Double.self, forKey: .windKph)
+        humidity = try container.decode(Int.self, forKey: .humidity)
+        feelslikeC = try container.decode(Double.self, forKey: .feelslikeC)
+        isDay = try container.decode(Int.self, forKey: .isDay)
+        
+        // chance_of_rain: try Int first, then String → Int fallback
+        if let intVal = try? container.decode(Int.self, forKey: .chanceOfRain) {
+            chanceOfRain = intVal
+        } else if let strVal = try? container.decode(String.self, forKey: .chanceOfRain) {
+            chanceOfRain = Int(strVal) ?? 0
+        } else {
+            chanceOfRain = 0
+        }
     }
 }
 

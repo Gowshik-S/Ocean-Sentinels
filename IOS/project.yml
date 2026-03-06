@@ -15,6 +15,11 @@ settings:
     SWIFT_OPTIMIZATION_LEVEL: "-Onone"
     GCC_OPTIMIZATION_LEVEL: "0"
 
+packages:
+  MapboxMaps:
+    url: https://github.com/mapbox/mapbox-maps-ios.git
+    from: "11.0.0"
+
 targets:
   OceanSentinels:
     type: application
@@ -46,6 +51,7 @@ targets:
         NSLocationAlwaysUsageDescription: "Ocean Sentinels uses background location for mesh relay."
         NSCameraUsageDescription: "Ocean Sentinels needs camera access to capture incident photos."
         NSPhotoLibraryUsageDescription: "Ocean Sentinels needs photo library access for incident reports."
+        MBXAccessToken: "pk.eyJ1IjoiZ293c2hpayIsImEiOiJjbWdqcWh6b2kwbWlyMmtvbWN2bzd0NjFkIn0.wMmUOMSKTWV4gROT4CvlIQ"
         NSAppTransportSecurity:
           NSAllowsArbitraryLoads: false
         UISupportedInterfaceOrientations:
@@ -54,6 +60,8 @@ targets:
         UILaunchScreen: {}
     entitlements:
       path: OceanSentinels/OceanSentinels.entitlements
+    dependencies:
+      - package: MapboxMaps
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.oceansentinels.app

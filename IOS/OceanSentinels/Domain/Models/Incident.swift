@@ -104,6 +104,7 @@ enum IncidentStatus: String, Codable, CaseIterable, Identifiable {
     case inProgress = "IN_PROGRESS"
     case resolved = "RESOLVED"
     case closed = "CLOSED"
+    case falseAlarm = "FALSE_ALARM"
 
     var id: String { rawValue }
 
@@ -114,6 +115,7 @@ enum IncidentStatus: String, Codable, CaseIterable, Identifiable {
         case .inProgress: return "In Progress"
         case .resolved: return "Resolved"
         case .closed: return "Closed"
+        case .falseAlarm: return "False Alarm"
         }
     }
 

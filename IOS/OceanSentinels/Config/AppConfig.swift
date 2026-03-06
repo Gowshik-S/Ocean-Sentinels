@@ -15,18 +15,22 @@ enum AppConfig {
     }()
     
     // MARK: - API Keys
-    // These should be stored in a Config.xcconfig file or environment for production
+    // Production: store in Config.xcconfig or Xcode build settings.
+    // These defaults match the Android local.properties for development.
     
     static var mapboxAccessToken: String {
-        Bundle.main.infoDictionary?["MBXAccessToken"] as? String ?? ""
+        Bundle.main.infoDictionary?["MBXAccessToken"] as? String
+            ?? "pk.eyJ1IjoiZ293c2hpayIsImEiOiJjbWdqcWh6b2kwbWlyMmtvbWN2bzd0NjFkIn0.wMmUOMSKTWV4gROT4CvlIQ"
     }
     
     static var weatherAPIKey: String {
-        Bundle.main.infoDictionary?["WEATHERAPI_KEY"] as? String ?? ""
+        Bundle.main.infoDictionary?["WEATHERAPI_KEY"] as? String
+            ?? "f65978b7b4d24271a6364713261402"
     }
     
     static var indianAPIKey: String {
-        Bundle.main.infoDictionary?["INDIAN_API_KEY"] as? String ?? ""
+        Bundle.main.infoDictionary?["INDIAN_API_KEY"] as? String
+            ?? "sk-live-mLpjO5IlL34DIXcaD0RGKm3Gm49GMaVAs0b9w3Vi"
     }
     
     // MARK: - App Constants

@@ -57,6 +57,7 @@ enum AuthRoute: Hashable {
 final class NavigationRouter {
     var authPath = NavigationPath()
     var mainPath = NavigationPath()
+    var profilePath = NavigationPath()
     var selectedTab: AppTab = .home
 
     func navigateToLogin() {
@@ -65,6 +66,10 @@ final class NavigationRouter {
 
     func navigate(to route: AppRoute) {
         mainPath.append(route)
+    }
+
+    func navigateInProfile(to route: AppRoute) {
+        profilePath.append(route)
     }
 
     func popToRoot() {
@@ -183,7 +188,7 @@ struct MainTabView: View {
             }
             .tag(AppTab.mesh)
 
-            NavigationStack {
+            NavigationStack(path: $router.profilePath) {
                 ProfileScreen()
                     .navigationDestination(for: AppRoute.self) { route in
                         destinationView(for: route)

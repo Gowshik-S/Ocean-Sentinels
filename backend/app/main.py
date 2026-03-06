@@ -51,6 +51,10 @@ async def lifespan(app: FastAPI):
                     "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'STRONG_CURRENTS' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'STRONG_CURRENTS'; END IF; END $$;",
                     "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'EROSION' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'EROSION'; END IF; END $$;",
                     "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'STORM' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'STORM'; END IF; END $$;",
+                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'OIL_SPILL' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'OIL_SPILL'; END IF; END $$;",
+                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'LOST_VESSEL' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'hazardtype')) THEN ALTER TYPE hazardtype ADD VALUE 'LOST_VESSEL'; END IF; END $$;",
+                    # Add missing incident status enum values
+                    "DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_enum WHERE enumlabel = 'FALSE_ALARM' AND enumtypid = (SELECT oid FROM pg_type WHERE typname = 'incidentstatus')) THEN ALTER TYPE incidentstatus ADD VALUE 'FALSE_ALARM'; END IF; END $$;",
                 ]
                 for migration in migrations:
                     await conn.execute(text(migration))

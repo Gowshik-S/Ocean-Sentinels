@@ -1,4 +1,5 @@
 import SwiftUI
+import MapboxMaps
 
 /// Ocean Sentinels iOS App — Entry Point
 /// Converted from: OceanSentinelsApp.kt + MainActivity.kt
@@ -16,9 +17,8 @@ struct OceanSentinelsApp: App {
         AppLogger.configure(level: .info)
         #endif
         
-        // Initialize Mapbox
-        // ⚠️ PLATFORM NOTE: Mapbox iOS SDK initialization differs from Android
-        // MapboxOptions.accessToken is set in Info.plist or via MapboxMaps SDK
+        // Initialize Mapbox access token
+        MapboxOptions.accessToken = AppConfig.mapboxAccessToken
     }
     
     var body: some Scene {

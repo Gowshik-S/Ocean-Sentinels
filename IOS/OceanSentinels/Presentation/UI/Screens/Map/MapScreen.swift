@@ -1,9 +1,11 @@
 import SwiftUI
-// ⚠️ ANDROID ONLY — Mapbox Maps iOS SDK needed: https://docs.mapbox.com/ios/maps/guides/install/
-// TODO: Add MapboxMaps via SPM and replace placeholder
+import CoreLocation
+import MapboxMaps
 
 // MARK: - MapScreen
 
+/// Live incident map powered by Mapbox Maps SDK.
+/// Converted from: Android MapScreen.kt (AndroidView + CircleAnnotationManager)
 struct MapScreen: View {
     @Environment(IncidentViewModel.self) private var viewModel
 
@@ -12,16 +14,18 @@ struct MapScreen: View {
 
     private var defaultLat: Double { initialLat ?? 19.0760 }
     private var defaultLng: Double { initialLng ?? 72.8777 }
+    private var defaultZoom: Double { initialLat != nil ? 12.0 : 5.0 }
 
     @State private var selectedIncident: Incident?
     @State private var showSheet = false
+    @State private var viewport: Viewport = .idle
 
     var body: some View {
         ZStack {
-            // Placeholder map — replace with MapboxMaps MapView integration
-            mapPlaceholder
+            // Mapbox Map with incident annotations
+            mapView
 
-            // Legend
+            // Overlays
             VStack {
                 HStack {
                     Spacer()
@@ -49,7 +53,9 @@ struct MapScreen: View {
         .toolbar {
             ToolbarItem(placement: .compatTopBarTrailing) {
                 HStack(spacing: 8) {
-                    Button { viewModel.loadIncidents(filters: nil) } label: {
+                    Button {
+                        viewModel.loadIncidents(filters: nil)
+                    } label: {
                         Image(systemName: "arrow.clockwise")
                     }
                     NavigationLink(value: AppRoute.reportIncident) {
@@ -66,52 +72,64 @@ struct MapScreen: View {
         .task {
             viewModel.loadIncidents(filters: IncidentFilters(size: 100))
         }
-    }
-
-    // MARK: - Placeholder Map
-
-    private var mapPlaceholder: some View {
-        ZStack {
-            Color.oceanInfo.opacity(0.1).ignoresSafeArea()
-            VStack(spacing: 12) {
-                Image(systemName: "map.fill").font(.system(size: 48)).foregroundStyle(Color.oceanInfo.opacity(0.4))
-                Text("Map View").font(.headline).foregroundStyle(Color.oceanInfo)
-                Text("Integrate MapboxMaps SDK").font(.caption).foregroundStyle(.secondary)
-
-                if !viewModel.incidents.isEmpty {
-                    Divider().padding(.vertical, 8)
-                    mapIncidentList
-                }
-            }
+        .onAppear {
+            viewport = .camera(center: CLLocationCoordinate2D(latitude: defaultLat, longitude: defaultLng), zoom: defaultZoom)
         }
     }
 
-    private var mapIncidentList: some View {
-        ScrollView {
-            VStack(spacing: 8) {
-                ForEach(viewModel.incidents.filter { $0.latitude != nil && $0.longitude != nil }, id: \.id) { incident in
-                    Button {
-                        selectedIncident = incident
-                        showSheet = true
-                    } label: {
-                        HStack(spacing: 8) {
-                            Circle()
-                                .fill(statusColor(incident.status))
-                                .frame(width: 12, height: 12)
-                            VStack(alignment: .leading) {
-                                Text(incident.hazardType.displayName).font(.caption.weight(.medium))
-                                Text(incident.location).font(.caption2).foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                        }
-                        .padding(8)
-                        .background(Color.compatSecondarySystemBackground, in: RoundedRectangle(cornerRadius: 8))
+    // MARK: - Map View
+
+    private var mapView: some View {
+        MapReader { proxy in
+            Map(viewport: $viewport) {
+                // Incident annotation markers
+                ForEvery(locatedIncidents) { incident in
+                    MapViewAnnotation(
+                        coordinate: CLLocationCoordinate2D(
+                            latitude: incident.latitude ?? 0,
+                            longitude: incident.longitude ?? 0
+                        )
+                    ) {
+                        incidentMarker(incident)
                     }
-                    .buttonStyle(.plain)
+                    .allowOverlap(false)
+                    .allowOverlapWithPuck(false)
                 }
             }
-            .padding(.horizontal)
+            .mapStyle(.streets)
+            .ornamentOptions(OrnamentOptions(
+                scaleBar: ScaleBarViewOptions(visibility: .hidden),
+                compass: CompassViewOptions(visibility: .visible),
+                logo: LogoViewOptions(margins: CGPoint(x: 8, y: 52)),
+                attributionButton: AttributionButtonOptions(margins: CGPoint(x: 8, y: 52))
+            ))
+            .ignoresSafeArea(edges: .bottom)
         }
+    }
+
+    // MARK: - Incident Marker
+
+    private func incidentMarker(_ incident: Incident) -> some View {
+        Button {
+            selectedIncident = incident
+            showSheet = true
+        } label: {
+            Circle()
+                .fill(statusColor(incident.status))
+                .frame(width: 24, height: 24)
+                .overlay(
+                    Circle()
+                        .strokeBorder(.white, lineWidth: 2)
+                )
+                .shadow(color: statusColor(incident.status).opacity(0.4), radius: 4, y: 2)
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: - Helpers
+
+    private var locatedIncidents: [Incident] {
+        viewModel.incidents.filter { $0.latitude != nil && $0.longitude != nil }
     }
 
     private func statusColor(_ status: IncidentStatus) -> Color {
@@ -120,7 +138,7 @@ struct MapScreen: View {
         case .verified: return .oceanInfo
         case .inProgress: return .oceanPrimary
         case .resolved: return .oceanSuccess
-        default: return .gray
+        case .closed, .falseAlarm: return .gray
         }
     }
 

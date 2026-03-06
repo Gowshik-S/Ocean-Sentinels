@@ -47,6 +47,10 @@
     <key>NSPhotoLibraryUsageDescription</key>
     <string>Ocean Sentinels needs photo library access to attach photos to your hazard reports.</string>
 
+    <!-- Mapbox Access Token -->
+    <key>MBXAccessToken</key>
+    <string>pk.eyJ1IjoiZ293c2hpayIsImEiOiJjbWdqcWh6b2kwbWlyMmtvbWN2bzd0NjFkIn0.wMmUOMSKTWV4gROT4CvlIQ</string>
+
     <!-- App Transport Security -->
     <key>NSAppTransportSecurity</key>
     <dict>

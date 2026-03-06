@@ -66,6 +66,7 @@ final class WeatherViewModel {
         Task {
             isLoading = true
             error = nil
+            var lastError: (any Error)?
 
             // Load from both APIs concurrently using do/try/catch
             // (repo methods throw, not return Result)
@@ -74,6 +75,7 @@ final class WeatherViewModel {
             do {
                 currentWeather = try await weatherRepository.getCurrentWeather(location: currentLocation)
             } catch {
+                lastError = error
                 AppLogger.weather.warning("Failed to load current weather: \(error.localizedDescription)")
             }
 
@@ -81,6 +83,7 @@ final class WeatherViewModel {
                 let response = try await weatherRepository.getForecast(location: currentLocation, days: 7)
                 forecast = response.forecast?.forecastDay ?? []
             } catch {
+                lastError = error
                 AppLogger.weather.warning("Failed to load forecast: \(error.localizedDescription)")
             }
 
@@ -88,6 +91,7 @@ final class WeatherViewModel {
                 let coordString = "\(currentLatitude),\(currentLongitude)"
                 marineWeather = try await weatherRepository.getMarineWeather(location: coordString, days: 3)
             } catch {
+                lastError = error
                 AppLogger.weather.warning("Failed to load marine weather: \(error.localizedDescription)")
             }
 
@@ -95,6 +99,7 @@ final class WeatherViewModel {
             do {
                 indianCityWeather = try await weatherRepository.getIndianCityWeather(city: currentLocation)
             } catch {
+                lastError = error
                 AppLogger.weather.warning("Failed to load Indian city weather: \(error.localizedDescription)")
             }
 
@@ -104,7 +109,13 @@ final class WeatherViewModel {
                 indianGlobalWeather = globalWeather
                 extractAlerts(from: globalWeather)
             } catch {
+                lastError = error
                 AppLogger.weather.warning("Failed to load Indian global weather: \(error.localizedDescription)")
+            }
+
+            // If no weather data loaded at all, surface the error to the user
+            if currentWeather == nil, indianCityWeather == nil, let lastError {
+                self.error = lastError.localizedDescription
             }
 
             isLoading = false

@@ -13,6 +13,7 @@ struct StatusBadge: View {
         case .inProgress: (Color.oceanPrimary, "In Progress", "shippingbox.fill")
         case .resolved: (Color.oceanSuccess, "Resolved", "checkmark.circle.fill")
         case .closed: (Color.gray, "Closed", "xmark.circle.fill")
+        case .falseAlarm: (Color.oceanDanger, "False Alarm", "exclamationmark.triangle.fill")
         }
     }
 

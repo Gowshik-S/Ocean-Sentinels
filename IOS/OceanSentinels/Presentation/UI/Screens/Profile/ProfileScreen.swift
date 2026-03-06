@@ -54,7 +54,7 @@ struct ProfileScreen: View {
                         Text("Account").font(.headline)
 
                         ProfileActionItem(icon: "gearshape.fill", title: "Settings", subtitle: "App preferences and notifications") {
-                            router.navigate(to: .settings)
+                            router.navigateInProfile(to: .settings)
                         }
                         ProfileActionItem(icon: "questionmark.circle.fill", title: "Help & Support", subtitle: "FAQs and contact support") {}
                         ProfileActionItem(icon: "info.circle.fill", title: "About", subtitle: "App version and legal info") {}
@@ -76,7 +76,7 @@ struct ProfileScreen: View {
         .navigationTitle("Profile")
         .toolbar {
             ToolbarItem(placement: .compatTopBarTrailing) {
-                Button { router.navigate(to: .settings) } label: {
+                Button { router.navigateInProfile(to: .settings) } label: {
                     Image(systemName: "gearshape")
                 }
             }

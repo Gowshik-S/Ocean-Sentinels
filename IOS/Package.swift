@@ -13,6 +13,13 @@
 //   6. Set Minimum Deployments → iOS 17.0
 //   7. Select an iPhone simulator → ⌘R
 //
+// MAPBOX SETUP (required before building):
+//   1. Create ~/.netrc with your Mapbox secret token:
+//      machine api.mapbox.com
+//      login mapbox
+//      password <your-secret-token-with-Downloads:Read-scope>
+//   2. The public access token is in Info.plist as MBXAccessToken
+//
 // CI: swift build -c release (builds library target, catches compile errors)
 
 import PackageDescription
@@ -26,9 +33,15 @@ let package = Package(
     products: [
         .library(name: "OceanSentinels", targets: ["OceanSentinels"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/mapbox/mapbox-maps-ios.git", from: "11.0.0"),
+    ],
     targets: [
         .target(
             name: "OceanSentinels",
+            dependencies: [
+                .product(name: "MapboxMaps", package: "mapbox-maps-ios"),
+            ],
             path: "OceanSentinels",
             exclude: [
                 "Info.plist",

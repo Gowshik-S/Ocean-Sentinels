@@ -54,6 +54,10 @@
         <integer>7</integer>
     </dict>
 
+    <!-- Mapbox Access Token -->
+    <key>MBXAccessToken</key>
+    <string>pk.eyJ1IjoiZ293c2hpayIsImEiOiJjbWdqcWh6b2kwbWlyMmtvbWN2bzd0NjFkIn0.wMmUOMSKTWV4gROT4CvlIQ</string>
+
     <!-- App Transport Security (API uses HTTPS) -->
     <key>NSAppTransportSecurity</key>
     <dict>

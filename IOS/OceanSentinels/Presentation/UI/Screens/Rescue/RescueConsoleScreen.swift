@@ -150,7 +150,7 @@ private struct RescueJobCardView: View {
         case .verified: return .oceanInfo
         case .inProgress: return .oceanPrimary
         case .resolved: return .oceanSuccess
-        case .closed: return .gray
+        case .closed, .falseAlarm: return .gray
         }
     }
 

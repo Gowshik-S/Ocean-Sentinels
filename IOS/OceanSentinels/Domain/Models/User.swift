@@ -22,7 +22,8 @@ enum UserRole: String, Codable, CaseIterable, Identifiable {
     var value: String { rawValue }
 
     static func fromValue(_ value: String) -> UserRole {
-        return UserRole(rawValue: value) ?? .public
+        let normalized = value.uppercased().replacingOccurrences(of: "-", with: "_")
+        return UserRole(rawValue: normalized) ?? .public
     }
 }
 
