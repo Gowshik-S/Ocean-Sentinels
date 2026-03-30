@@ -1,0 +1,794 @@
+================================================================================
+OCEAN SENTINELS - PROJECT CONTEXT & REPOSITORY MEMORY
+================================================================================
+Location: E:\Drive - F\Project\Mesh+Ocean\Ocean-Hazard
+Project Version: 1.0.0
+Last Updated: March 19, 2026
+Status: Active Multi-Platform Development
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+Ocean Sentinels is a comprehensive coastal safety and hazard reporting platform
+designed for coastal communities worldwide. It provides real-time maritime
+incident reporting, response coordination, and offline mesh networking
+capabilities for areas with limited connectivity.
+
+MISSION: Keep coastal communities connected when internet infrastructure
+         fails during maritime disasters.
+
+PLATFORMS:
+  • Web (Vanilla JavaScript ES6+) - COMPLETE
+  • Android (Kotlin/Compose) - IN PROGRESS
+  • iOS (Swift/SwiftUI) - IN PROGRESS
+
+CORE PURPOSE:
+  Real-time incident reporting with GPS/photos, live mapping, role-based
+  dashboards, offline BLE mesh networking, weather integration, and
+  multi-platform support.
+
+================================================================================
+2. REPOSITORY STRUCTURE AT A GLANCE
+================================================================================
+
+Ocean-Hazard/
+├── Documentation & Config
+│   ├── README.md (original)
+│   ├── COMPREHENSIVE_README.md (new)
+│   ├── context.txt (this file)
+│   ├── imp.md (implementation guide + Android plan)
+│   ├── requirements.txt (Python deps)
+│   ├── railway.json (deployment config)
+│   └── LICENSE
+│
+├── /docs - Documentation (9 files)
+│   ├── QUICK_START.md (5-min frontend deploy)
+│   ├── DEPLOYMENT.md (full deploy guide)
+│   ├── ROLE_BASED_NAVIGATION.md
+│   ├── STRUCTURE.md
+│   ├── COMPLETE_TESTING_CHECKLIST.md
+│   ├── ADMIN_NAVIGATION_TEST.md
+│   └── ADMIN_DELETE_DEPLOYMENT_GUIDE.md
+│
+├── /backend - FastAPI Python Backend
+│   ├── app/
+│   │   ├── main.py (FastAPI entry point)
+│   │   ├── main_simple.py (test server)
+│   │   ├── core/ (config, security)
+│   │   ├── models/ (User, Incident, Analytics ORM)
+│   │   ├── routers/ (auth, incidents, users, analytics, websocket)
+│   │   ├── schemas/ (Pydantic validation)
+│   │   └── database/ (SQLAlchemy init)
+│   ├── scripts/ (database migration utilities)
+│   └── requirements.txt
+│
+├── /frontend - Vanilla JavaScript Web App
+│   ├── pages/ (11 HTML pages - role-based)
+│   │   ├── index.html (login)
+│   │   ├── my-reports.html
+│   │   ├── reports.html
+│   │   ├── incident-reports.html (authority)
+│   │   ├── authority-console.html
+│   │   ├── rescue-console.html
+│   │   ├── admin-dashboard.html
+│   │   ├── authority-analytics.html
+│   │   ├── public-analytics.html
+│   │   ├── analytics.html
+│   │   └── visitor_details.html
+│   ├── scripts/ (8+ JS modules)
+│   │   ├── api-client.js (HTTP + JWT)
+│   │   ├── auth.js (login/logout)
+│   │   ├── navigation-manager.js (role routing)
+│   │   ├── reports-dashboard.js
+│   │   ├── my-reports.js
+│   │   ├── admin-dashboard.js
+│   │   ├── analytics.js
+│   │   └── authority-analytics.js
+│   ├── styles/ (CSS3)
+│   ├── assets/ (images, icons)
+│   └── vercel.json
+│
+├── /android_app - Kotlin/Jetpack Compose Android App
+│   ├── app/ (main module)
+│   │   └── src/main/
+│   │       ├── kotlin/ (Kotlin source - not detailed here)
+│   │       └── res/ (Android resources)
+│   ├── build.gradle.kts
+│   ├── gradle/
+│   └── Documentation:
+│       ├── README.md
+│       ├── BLE_MESH_INTEGRATION.md (offline networking)
+│       ├── MESH_ANALYSIS_UPGRADE.md
+│       ├── AUDIT_REPORT.md
+│       └── ALL_UI_SOURCE.txt (full UI listing)
+│
+├── /IOS - Swift/SwiftUI iOS App (In Progress)
+│   ├── OceanSentinels/ (main app target)
+│   │   ├── Sources/ (Swift files)
+│   │   ├── Resources/
+│   │   └── Tests/
+│   ├── Package.swift
+│   ├── project.yml
+│   ├── README.md
+│   ├── CONVERSION_PLAN.md
+│   └── tasks/ (todo.md, lessons.md)
+│
+├── /backup - Database backups
+│
+├── /Exports - Data exports & reports
+│
+└── Startup Scripts
+    ├── start.sh (Unix/Linux/Mac)
+    ├── start_server.py (backend only)
+    ├── start_server_with_db.py (backend + DB setup)
+    ├── start_frontend.py (frontend only)
+    └── start_ocean_hazard.py (all-in-one orchestration)
+
+================================================================================
+3. TECHNOLOGY STACK
+================================================================================
+
+BACKEND:
+  Language: Python 3.11+
+  Framework: FastAPI (async/await)
+  ORM: SQLAlchemy 2.0
+  Database: PostgreSQL (primary), SQLite (local dev)
+  Cache: Redis
+  Auth: JWT (PyJWT), bcrypt password hashing
+  Storage: AWS S3
+  Real-time: WebSockets (async)
+  Server: Uvicorn ASGI
+  Deployment: Railway.app
+
+FRONTEND (WEB):
+  Language: Vanilla JavaScript (ES6+)
+  Mapping: Mapbox GL JS
+  Styling: CSS3 (responsive)
+  Charts: Trend analysis (in-house)
+  Architecture: MVC-inspired, role-based modules
+  Deployment: Vercel or Netlify
+
+ANDROID:
+  Language: Kotlin 1.9+
+  UI: Jetpack Compose
+  Architecture: Clean Architecture + MVVM
+  DI: Hilt
+  Database: Room
+  Networking: Retrofit + OkHttp
+  Maps: Mapbox Maps SDK for Android
+  Messaging: Firebase Cloud Messaging (FCM)
+  Bluetooth: Custom BLE mesh (Coded PHY / 1M)
+  Build: Gradle 8.0+
+
+iOS:
+  Language: Swift (in progress)
+  UI: SwiftUI
+  Architecture: MVVM
+  Networking: URLSession/Combine
+  Maps: MapKit
+  Messaging: Apple Push Notification service (APNs)
+  Bluetooth: CoreBluetooth
+  Build: Xcode build system
+
+================================================================================
+4. KEY FEATURES
+================================================================================
+
+✓ INCIDENT REPORTING:
+  - 10+ hazard types (waves, currents, floods, tsunamis, vessels, debris, erosion, 
+    storms, oil spills, other)
+  - GPS-based location capture
+  - Photo upload & evidence attachment
+  - Urgency levels: Low, Medium, High, Critical
+  - Status tracking: Pending, Verified, In Progress, Resolved, False Alarm
+
+✓ REAL-TIME MAPPING:
+  - Mapbox GL JS interactive map
+  - Live incident markers
+  - Filtering by type, urgency, status
+  - Role-based visibility
+  - Monitoring zone bookmarks
+
+✓ ROLE-BASED ACCESS (4 Roles):
+  - PUBLIC: Report, view analytics, check status
+  - AUTHORITY: Verify incidents, deploy resources, view authority analytics
+  - RESCUE_TEAM: View assigned incidents, update status, coordinate response
+  - ADMIN: Manage users, monitor system, analytics, configuration
+
+✓ OFFLINE RESILIENCE (BLE MESH):
+  - Ad-hoc mesh network between Android devices
+  - Automatic hazard report relay through peers
+  - Deduplication via mesh_message_id
+  - Backend sync when internet restored
+
+✓ REAL-TIME NOTIFICATIONS:
+  - WebSocket for live dashboard updates
+  - Firebase Cloud Messaging for mobile
+  - Status change alerts
+  - Assignment & deployment notifications
+
+✓ WEATHER INTEGRATION:
+  - WeatherAPI.com (global)
+  - Indian Meteorological Department (India coast)
+  - Real-time alerts
+  - Severity assessment integration
+
+✓ ANALYTICS & REPORTING:
+  - Statistics by type, status, urgency
+  - Time-series trends
+  - Heatmaps
+  - Response time metrics
+  - Visitor analytics & engagement
+
+✓ MULTI-PLATFORM:
+  - Web: 11 responsive pages
+  - Android: Full native app with mesh networking
+  - iOS: Swift conversion in progress
+
+================================================================================
+5. DATABASE SCHEMA (SIMPLIFIED)
+================================================================================
+
+USERS TABLE:
+  - id (primary key)
+  - username (unique)
+  - email (unique)
+  - hashed_password
+  - first_name, last_name
+  - phone, location
+  - role (ENUM: public, admin, authority, rescue_team)
+  - is_active, is_verified
+  - created_at, updated_at, last_login (timestamps)
+
+INCIDENTS TABLE:
+  - id (primary key)
+  - reference_id (unique)
+  - hazard_type (ENUM: HIGH_WAVES, STRONG_CURRENTS, FLOODING, TSUNAMI, 
+                       LOST_VESSEL, DEBRIS, EROSION, STORM, OIL_SPILL, OTHER)
+  - location
+  - latitude, longitude
+  - description
+  - urgency (ENUM: LOW, MEDIUM, HIGH, CRITICAL)
+  - status (ENUM: PENDING, VERIFIED, IN_PROGRESS, RESOLVED, FALSE_ALARM)
+  - contact_info, photo_url
+  - mesh_message_id (for BLE mesh deduplication, unique)
+  - reporter_id (FK to users)
+  - verified_by_id (FK to users)
+  - assigned_to_id (FK to users)
+  - created_at, updated_at, verified_at, resolved_at, assigned_at (timestamps)
+
+ANALYTICS TABLE:
+  - Aggregated metrics for dashboard performance
+
+================================================================================
+6. API ENDPOINTS (ABBREVIATED)
+================================================================================
+
+BASE URL: http://localhost:8000 (dev) or https://your-backend.com (prod)
+
+AUTHENTICATION:
+  POST /auth/register → Create new user
+  POST /auth/login → Get JWT token
+
+INCIDENTS:
+  POST /incidents/ → Create incident
+  GET /incidents/ → List incidents (with filters)
+  GET /incidents/{id} → Get incident details
+  PUT /incidents/{id} → Update incident
+  DELETE /incidents/{id} → Delete incident
+  POST /incidents/{id}/verify → Mark as verified
+  POST /incidents/{id}/assign → Assign to rescue team
+
+USERS:
+  GET /users/ → List users
+  GET /users/{id} → Get user details
+  PUT /users/{id} → Update user
+  DELETE /users/{id} → Delete user
+
+ANALYTICS:
+  GET /analytics/dashboard → Dashboard statistics
+  GET /analytics/incidents-by-type → Type breakdown
+  GET /analytics/incidents-by-status → Status breakdown
+  GET /analytics/response-times → Response time metrics
+
+WEBSOCKET:
+  WS ws://localhost:8000/ws/{user_id}?token={jwt_token}
+  → Real-time incident updates (role-filtered)
+
+HEALTH:
+  GET /health → Server health check
+  GET /api/docs → Swagger UI documentation
+  GET /api/redoc → ReDoc documentation
+
+================================================================================
+7. SETUP & RUNNING
+================================================================================
+
+PREREQUISITES:
+  ✓ Python 3.11+
+  ✓ PostgreSQL (or SQLite for dev)
+  ✓ Redis (optional)
+  ✓ Git
+
+QUICK START (ALL-IN-ONE):
+  1. cd Ocean-Hazard
+  2. python start_ocean_hazard.py
+  3. Open http://localhost:3000 (frontend)
+  4. API docs: http://localhost:8000/api/docs
+
+INDIVIDUAL COMPONENT START:
+  Backend:   python start_server_with_db.py → http://localhost:8000
+  Frontend:  python start_frontend.py → http://localhost:3000
+
+TEST CREDENTIALS:
+  Username: admin
+  Password: admin123
+  Role: admin
+
+DEPLOYMENT:
+  Frontend: Vercel (recommended) or Netlify
+  Backend: Railway.app (configured) or Heroku
+  See /docs/QUICK_START.md for 5-minute deployment
+
+================================================================================
+8. IMPORTANT FILES & THEIR PURPOSE
+================================================================================
+
+BACKEND ENTRY POINTS:
+  main.py → FastAPI app initialization, routes, lifespan events
+  main_simple.py → Simplified test server (no database)
+
+CONFIGURATION:
+  core/config.py → All environment settings (DB, JWT, AWS, Redis, etc.)
+  core/security.py → JWT & password hashing utilities
+
+MODELS (ORM):
+  models/user.py → User entity (4 roles)
+  models/incident.py → Incident entity (10+ hazard types, status tracking)
+  models/analytics.py → Analytics aggregations
+
+API ROUTERS:
+  routers/auth.py → login, register, token refresh
+  routers/incidents.py → incident CRUD, status updates, assignments
+  routers/users.py → user management
+  routers/analytics.py → statistics, trends, metrics
+  routers/websocket.py → real-time updates
+
+FRONTEND INITIALIZATION:
+  pages/index.html → Landing/login page
+  scripts/script.js → Main app initialization
+  scripts/auth.js → Login/logout/token management
+  scripts/navigation-manager.js → Role-based page routing
+
+STARTUP ORCHESTRATION:
+  start_ocean_hazard.py → Main entry point (orchestrates backend + frontend)
+  start_server_with_db.py → Backend with database setup
+  start_frontend.py → Frontend HTTP server
+  start_server.py → Backend only (no DB setup)
+
+ANDROID:
+  app/src/main/kotlin/ → Kotlin source (not detailed in this txt, see Android docs)
+  build.gradle.kts → Gradle configuration
+  BLE_MESH_INTEGRATION.md → Offline mesh networking design
+
+iOS:
+  OceanSentinels/ → Swift source (conversion in progress)
+  CONVERSION_PLAN.md → Roadmap from Kotlin to Swift
+
+DOCUMENTATION:
+  QUICK_START.md → 5-minute frontend deployment
+  DEPLOYMENT.md → Full production deployment guide
+  ROLE_BASED_NAVIGATION.md → UI navigation per role
+  STRUCTURE.md → High-level project structure
+  COMPLETE_TESTING_CHECKLIST.md → QA testing guide
+
+================================================================================
+9. AUTHENTICATION & SECURITY
+================================================================================
+
+JWT TOKENS:
+  - Issued on login/register
+  - Stored in localStorage (frontend)
+  - Sent in Authorization header: "Bearer {token}"
+  - Expiration: 30 minutes (configurable)
+  - Auto-refresh on API requests
+
+PASSWORD SECURITY:
+  - Bcrypt hashing (backend)
+  - No plaintext storage
+  - Minimum requirements: TBD
+
+CORS CONFIGURATION:
+  Allowed origins (dev):
+    • http://localhost:3000
+    • http://localhost:5500
+    • http://localhost:8080
+    • http://127.0.0.1:*
+    • * (for development only)
+
+ENVIRONMENT SECURITY:
+  - SECRET_KEY must be set for production
+  - Database credentials in .env
+  - AWS keys in .env
+  - Mapbox tokens in .env
+  - All sensitive config via environment variables
+
+ROLE-BASED ACCESS:
+  - PUBLIC: Can report incidents, view public analytics
+  - AUTHORITY: Can verify incidents, manage resources
+  - RESCUE_TEAM: Can view assigned incidents, update status
+  - ADMIN: Full system access
+
+================================================================================
+10. DEPLOYMENT ARCHITECTURE
+================================================================================
+
+FRONTEND DEPLOYMENT:
+  Option 1: Vercel (Recommended)
+    - CLI: `vercel` command
+    - Auto-deploy on GitHub push
+    - CDN globally distributed
+    - Environment: production
+
+  Option 2: Netlify
+    - Drag & drop deployment
+    - Git integration
+    - Easy rollbacks
+    - Free tier available
+
+BACKEND DEPLOYMENT:
+  Option 1: Railway.app (Configured)
+    - Configuration in railway.json
+    - Auto-deploy on GitHub push
+    - Database: PostgreSQL provided
+    - Redis: Available add-on
+    - health check at /health
+
+  Option 2: Heroku
+    - `heroku create` + `git push heroku main`
+    - Procfile: `web: uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+    - PostgreSQL add-on available
+
+  Option 3: Docker
+    - Dockerfile can be created
+    - docker-compose.yml for local dev
+    - Image: FROM python:3.11-slim
+
+DATABASE DEPLOYMENT:
+  - Managed PostgreSQL (Railway, Heroku, AWS RDS)
+  - Connection string in DATABASE_URL env var
+  - Automatic migrations on startup (main.py handles it)
+
+CDN/STATIC:
+  - Mapbox CDN (tiles, GL JS library)
+  - AWS S3 (photo uploads)
+  - Frontend served from Vercel/Netlify edge
+
+================================================================================
+11. BROWSER SUPPORT & RESPONSIVENESS
+================================================================================
+
+WEB FRONTEND:
+  ✓ Chrome/Chromium (latest)
+  ✓ Firefox (latest)
+  ✓ Safari (latest)
+  ✓ Edge (latest)
+  ✓ Mobile browsers (iOS Safari, Chrome Mobile)
+
+RESPONSIVE BREAKPOINTS:
+  • Mobile: < 600px
+  • Tablet: 600px - 1024px
+  • Desktop: > 1024px
+
+MAPBOX GL JS SUPPORT:
+  - Requires WebGL support
+  - Vector tile rendering
+  - Graceful degradation for older browsers
+
+================================================================================
+12. PERFORMANCE CONSIDERATIONS
+================================================================================
+
+BACKEND OPTIMIZATION:
+  - Redis caching for analytics
+  - Connection pooling (SQLAlchemy)
+  - Async/await for I/O operations
+  - Index on frequently queried columns (incident status, hazard type)
+
+FRONTEND OPTIMIZATION:
+  - Lazy loading of Mapbox GL JS
+  - Pagination for incident lists
+  - LocalStorage for JWT (avoid session storage)
+  - Minified CSS/JS for production
+
+MOBILE OPTIMIZATION (Android/iOS):
+  - Room database for local caching
+  - BLE mesh for offline operation
+  - Image compression for uploads
+  - Battery-conscious mesh networking
+
+DATABASE OPTIMIZATION:
+  - Index on incidents.mesh_message_id (mesh deduplication)
+  - Index on incidents.status, incidents.urgency
+  - Timestamp indexes for range queries
+  - Foreign key relationships for referential integrity
+
+================================================================================
+13. TESTING
+================================================================================
+
+BACKEND TESTING:
+  Location: backend/tests/ (or app.tests)
+  Command: pytest backend/tests/
+  Coverage: Unit + integration tests
+  Framework: pytest with asyncio
+
+FRONTEND TESTING (Manual):
+  • Load pages via browser
+  • Test role-based navigation
+  • Verify API connectivity
+  • Check Mapbox rendering
+  • Test mobile responsiveness
+
+ANDROID TESTING:
+  Unit: ./gradlew test
+  Integration: ./gradlew connectedAndroidTest
+  Manual: Deploy to emulator/device
+
+iOS TESTING:
+  Xcode Test Navigator
+  XCUITest for UI tests
+  Manual device testing
+
+TESTING CHECKLIST:
+  See docs/COMPLETE_TESTING_CHECKLIST.md for comprehensive QA guide
+
+================================================================================
+14. ENVIRONMENT VARIABLES (.env)
+================================================================================
+
+DATABASE:
+  DATABASE_URL=postgresql://user:pass@host/ocean_hazard
+  DATABASE_URL_LOCAL=sqlite+aiosqlite:///./database/ocean_hazard.db
+
+SECURITY:
+  SECRET_KEY=<random-32+-char-string>
+  ALGORITHM=HS256
+  ACCESS_TOKEN_EXPIRE_MINUTES=30
+
+AWS (S3 for photos):
+  AWS_ACCESS_KEY_ID=<your-key>
+  AWS_SECRET_ACCESS_KEY=<your-secret>
+  AWS_REGION=us-east-1
+  AWS_S3_BUCKET=ocean-hazard-storage
+
+REDIS:
+  REDIS_URL=redis://localhost:6379
+  REDIS_URL_CLOUD=redis://<endpoint>:6379
+
+MAPBOX:
+  MAPBOX_TOKEN=<public-token>
+  MAPBOX_ACCESS_TOKEN=<secret-token>
+
+SERVER:
+  DEBUG=True or False
+  HOST=0.0.0.0
+  PORT=8000
+  WEBSOCKET_PORT=8000
+
+EMAIL (SMTP):
+  SMTP_HOST=smtp.gmail.com
+  SMTP_PORT=587
+  SMTP_USERNAME=<email@gmail.com>
+  SMTP_PASSWORD=<app-password>
+
+ANALYTICS:
+  ENABLE_ANALYTICS=True or False
+
+================================================================================
+15. COMMON ISSUES & TROUBLESHOOTING
+================================================================================
+
+BACKEND WON'T START:
+  ✓ Check DATABASE_URL set correctly
+  ✓ Verify PostgreSQL running (psql -U user -h localhost)
+  ✓ Check SECRET_KEY not empty
+  ✓ View error logs: check terminal output
+
+FRONTEND NOT LOADING:
+  ✓ Check frontend server running (python start_frontend.py)
+  ✓ Verify http://localhost:3000 accessible
+  ✓ Clear browser cache (Ctrl+Shift+Delete)
+  ✓ Check browser console for errors (F12)
+
+MAPBOX NOT RENDERING:
+  ✓ Verify MAPBOX_TOKEN set in .env
+  ✓ Check token is public token (not secret)
+  ✓ Verify browser supports WebGL
+  ✓ Check network tab for CSS/JS loading
+
+API RETURNS 401 UNAUTHORIZED:
+  ✓ Check JWT token in localStorage (DevTools > Storage)
+  ✓ Verify token not expired (exp field in JWT)
+  ✓ Check Authorization header format: "Bearer {token}"
+  ✓ Try logging out and back in
+
+DATABASE MIGRATIONS FAIL:
+  ✓ Run backend/scripts/migrate_mesh_column.py manually
+  ✓ Check database user has ALTER TABLE permissions
+  ✓ Clear old connections: `SELECT pg_terminate_backend(...)`
+
+================================================================================
+16. DEVELOPMENT WORKFLOW
+================================================================================
+
+LOCAL DEVELOPMENT:
+  1. Clone repo: git clone ...
+  2. Create venv: python -m venv venv
+  3. Activate: source venv/bin/activate (or venv\Scripts\activate on Windows)
+  4. Install: pip install -r backend/requirements.txt
+  5. Create .env with local settings
+  6. Start all: python start_ocean_hazard.py
+  7. Access: http://localhost:3000
+
+GIT WORKFLOW:
+  1. Create feature branch: git checkout -b feature/description
+  2. Make changes
+  3. Test locally
+  4. Commit: git commit -m "descriptive message"
+  5. Push: git push origin feature/description
+  6. Create Pull Request
+
+CODE STANDARDS:
+  - Python: PEP 8 (use black formatter)
+  - JavaScript: ES6+ standards
+  - Kotlin: Kotlin Style Guide (ktlint)
+  - Swift: SwiftLint standards
+
+DEPLOYMENT WORKFLOW:
+  1. Merge to main branch on GitHub
+  2. Vercel auto-deploys frontend
+  3. Railway auto-deploys backend
+  4. Verify health: /health endpoint
+  5. Test in production: API docs at /api/docs
+
+================================================================================
+17. CURRENT STATUS (AS OF MARCH 2026)
+================================================================================
+
+✅ COMPLETE:
+  - Web frontend (11 pages, all roles)
+  - Backend API (full CRUD, WebSocket, analytics)
+  - Database schema & migrations
+  - Authentication & JWT
+  - Role-based access control
+  - Incident reporting & tracking
+  - Real-time WebSocket (partial)
+  - Analytics dashboard
+  - Deployment configuration (Vercel + Railway)
+  - Documentation (comprehensive)
+
+🟡 IN PROGRESS:
+  - Android app (UI complete, BLE mesh networking implemented)
+  - iOS app (Swift conversion from Android codebase)
+  - Weather API integration (partial)
+  - Push notifications (Firebase ready)
+
+❌ TODO/FUTURE:
+  - End-to-end encryption for messages
+  - Offline offline-first database sync
+  - Advanced analytics (heatmaps, predictions)
+  - Mobile app store releases (Play Store, App Store)
+  - Multi-language support (i18n)
+  - Advanced user management (teams, permissions)
+  - SMS alerts for critical incidents
+
+================================================================================
+18. KEY CONTACTS & RESOURCES
+================================================================================
+
+GITHUB REPOSITORY:
+  https://github.com/your-org/Ocean-Hazard
+
+FIGMA DESIGN:
+  https://www.figma.com/design/DEwUbt4grKJtDaB0OBRp1v/Ocean-Sentinels
+
+DOCUMENTATION:
+  - /docs folder (deployment, testing, navigation guides)
+  - /android_app/README.md (Android-specific)
+  - /IOS/README.md (iOS-specific)
+
+EXTERNAL SERVICES:
+  - Railway.app (backend hosting)
+  - Vercel (frontend hosting)
+  - Mapbox (mapping)
+  - AWS S3 (file storage)
+  - Redis Cloud (caching)
+  - PostgreSQL (database)
+
+================================================================================
+19. QUICK REFERENCE COMMANDS
+================================================================================
+
+BACKEND:
+  Start:        python start_server_with_db.py
+  Tests:        pytest backend/tests/
+  Linting:      black backend/app/
+  Format:       black backend/app/ && isort backend/app/
+  Migrate DB:   python backend/scripts/migrate_mesh_column.py
+  API Docs:     http://localhost:8000/api/docs
+
+FRONTEND:
+  Start:        python start_frontend.py
+  Deploy:       vercel (or drag to netlify.com/drop)
+  Build:        (no build step needed for vanilla JS)
+
+ANDROID:
+  Build:        cd android_app && ./gradlew build
+  Run:          ./gradlew installDebug
+  Tests:        ./gradlew test && ./gradlew connectedAndroidTest
+
+iOS:
+  Build:        xcodebuild -scheme OceanSentinels -configuration Debug
+  Run:          Open .xcworkspace in Xcode, press Run button
+
+GIT:
+  Clone:        git clone https://github.com/your-org/Ocean-Hazard.git
+  Branch:       git checkout -b feature/name
+  Commit:       git commit -m "message"
+  Push:         git push origin feature/name
+  Pull Request: Create on GitHub
+
+================================================================================
+20. PROJECT MEMORY SUMMARY
+================================================================================
+
+WHO WE ARE:
+  - Multi-platform coastal safety network
+  - Serves 4 user roles with different capabilities
+  - Emphasizes offline resilience via BLE mesh
+
+WHAT WE DELIVER:
+  - Real-time incident reporting with location & photos
+  - Live interactive map of hazards
+  - Role-based dashboards for different user types
+  - Offline connectivity through BLE mesh (Android)
+  - Weather integration for contextual alerts
+  - Analytics & reporting
+
+HOW WE WORK:
+  - FastAPI backend with PostgreSQL database
+  - Vanilla JS frontend with Mapbox
+  - Kotlin Android app with BLE mesh networking
+  - Swift iOS app (in conversion)
+  - WebbSocket for real-time updates
+  - JWT authentication with role-based access
+
+WHERE WE DEPLOY:
+  - Frontend: Vercel or Netlify (CDN)
+  - Backend: Railway.app or Heroku (managed servers)
+  - Database: PostgreSQL (managed)
+  - Files: AWS S3
+  - Cache: Redis
+
+WHY WE BUILD IT:
+  - Coastal communities need hazard reporting during disasters
+  - Internet infrastructure often fails in emergencies
+  - Offline mesh networking provides resilience
+  - Multi-platform ensures accessibility
+  - Real-time coordination saves lives
+
+================================================================================
+END OF CONTEXT DOCUMENT
+================================================================================
+
+This document summarizes the Ocean Sentinels project repository structure,
+technology stack, architecture, and current status. Use this as a reference
+for onboarding new team members or refreshing project knowledge.
+
+For detailed information, see the specific documentation files in /docs/ 
+and specialized READMEs in each platform folder.
+
+Updated: March 19, 2026
+Version: 1.0.0
